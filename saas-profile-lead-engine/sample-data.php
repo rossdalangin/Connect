@@ -59,8 +59,8 @@ class Saas_Sample_Data {
             }
         }
 
-        // 3. Add Sample Leads
-        for ($i=1; $i<=3; $i++) {
+        // 3. Add Sample Leads (10+ Records as requested)
+        for ($i=1; $i<=12; $i++) {
             $lead_id = wp_insert_post([
                 'post_type'   => 'saas_lead',
                 'post_title'  => "Sample Lead $i",
@@ -72,10 +72,10 @@ class Saas_Sample_Data {
             update_post_meta($lead_id, '_saas_lead_source_id', $profile_id);
         }
 
-        // 4. Add Sample Analytics
+        // 4. Add Sample Analytics (50+ records for better visualization)
         global $wpdb;
         $table = $wpdb->prefix . 'saas_analytics';
-        for ($i=0; $i<10; $i++) {
+        for ($i=0; $i<50; $i++) {
             $wpdb->insert($table, [
                 'user_id'    => $user_id,
                 'event_type' => ($i % 2 == 0) ? 'view' : 'click',

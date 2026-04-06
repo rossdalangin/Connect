@@ -10,6 +10,31 @@ class Saas_Admin_Settings {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
         add_action( 'admin_init', [ $this, 'settings_init' ] );
         add_action( 'admin_post_saas_load_samples', [ $this, 'handle_load_samples' ] );
+        add_action( 'admin_post_saas_generate_pages', [ $this, 'handle_generate_pages' ] );
+    }
+
+    public function handle_generate_pages() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die('Unauthorized');
+
+        $pages = [
+            'Dashboard' => '[saas_dashboard]',
+            'Login'     => '[saas_login_form]',
+            'Register'  => '[saas_register_form]',
+        ];
+
+        foreach ( $pages as $title => $content ) {
+            if ( ! get_page_by_title($title) ) {
+                wp_insert_post([
+                    'post_title'   => $title,
+                    'post_content' => $content,
+                    'post_status'  => 'publish',
+                    'post_type'    => 'page',
+                ]);
+            }
+        }
+
+        wp_redirect( admin_url('admin.php?page=saas_settings&pages_generated=1') );
+        exit;
     }
 
     public function handle_load_samples() {
@@ -103,7 +128,24 @@ class Saas_Admin_Settings {
             <hr>
             <h2>Sample Data Generator</h2>
             <p>Click below to populate your site with elite sample profiles, links, leads, and analytics for testing.</p>
-            <a href="<?php echo admin_url('admin-post.php?action=saas_load_samples'); ?>" class="button button-secondary">Generate Sample Data</a>
+            <a href="<?php echo admin_url('admin-post.php?action=saas_load_samples'); ?>" class="button button-secondary">Generate Sample Data (10+ Records)</a>
+
+            <hr>
+            <h2>System Page Generator</h2>
+            <p>Automatically create Login, Register, and Dashboard pages with correct shortcodes.</p>
+            <a href="<?php echo admin_url('admin-post.php?action=saas_generate_pages'); ?>" class="button button-primary">Generate System Pages</a>
+
+            <hr>
+            <h2>User Level Setup Guide</h2>
+            <div style="background:#f9f9f9; padding:20px; border-radius:8px; border-left:4px solid #0073aa;">
+                <ol>
+                    <li><strong>Admin:</strong> Generate system pages using the button above.</li>
+                    <li><strong>User:</strong> Register an account on the /register page.</li>
+                    <li><strong>User:</strong> Login and navigate to /dashboard.</li>
+                    <li><strong>User:</strong> Set up your profile (username, bio, links).</li>
+                    <li><strong>User:</strong> Share your unique link (domain.com/username).</li>
+                </ol>
+            </div>
         </div>
         <?php
     }

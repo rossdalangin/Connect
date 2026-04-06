@@ -1,0 +1,65 @@
+<?php
+/**
+ * Authentication Shortcodes & Logic
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+class Saas_Auth {
+    public function __construct() {
+        add_shortcode( 'saas_login_form', [ $this, 'login_form' ] );
+        add_shortcode( 'saas_register_form', [ $this, 'register_form' ] );
+    }
+
+    public function login_form() {
+        if ( is_user_logged_in() ) return '<p>You are already logged in. <a href="'.wp_logout_url().'">Logout</a></p>';
+
+        ob_start();
+        wp_login_form([
+            'redirect' => home_url( '/dashboard' ),
+            'form_id'  => 'saas-login-form',
+        ]);
+        return ob_get_clean();
+    }
+
+    public function register_form() {
+        if ( is_user_logged_in() ) return '<p>You already have an account.</p>';
+
+        // Simple registration form
+        ob_start();
+        ?>
+        <form id="saas-registration-form" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
+            <input type="hidden" name="action" value="saas_register_user">
+            <p><input type="text" name="user_login" placeholder="Username" required></p>
+            <p><input type="email" name="user_email" placeholder="Email" required></p>
+            <p><input type="password" name="user_pass" placeholder="Password" required></p>
+            <p><button type="submit" class="button button-primary">Create Account</button></p>
+        </form>
+        <?php
+        return ob_get_clean();
+    }
+
+    public static function handle_registration() {
+        if ( $_POST['action'] !== 'saas_register_user' ) return;
+
+        $user_login = sanitize_user( $_POST['user_login'] );
+        $user_email = sanitize_email( $_POST['user_email'] );
+        $user_pass  = $_POST['user_pass'];
+
+        if ( username_exists($user_login) || email_exists($user_email) ) {
+            wp_die('User already exists');
+        }
+
+        $user_id = wp_create_user( $user_login, $user_pass, $user_email );
+
+        if ( ! is_wp_error($user_id) ) {
+            wp_set_current_user( $user_id );
+            wp_set_auth_cookie( $user_id );
+            wp_redirect( home_url('/dashboard') );
+            exit;
+        }
+    }
+}
+add_action( 'admin_post_saas_register_user', [ 'Saas_Auth', 'handle_registration' ] );
+add_action( 'admin_post_nopriv_saas_register_user', [ 'Saas_Auth', 'handle_registration' ] );
+new Saas_Auth();

@@ -29,6 +29,20 @@ class Saas_Analytics {
     }
 
     /**
+     * Get User-Specific Analytics Summary
+     */
+    public function get_user_summary( $user_id ) {
+        global $wpdb;
+        $views  = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'view'", $user_id ) );
+        $clicks = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'click'", $user_id ) );
+
+        return [
+            'views'  => $views ?: 0,
+            'clicks' => $clicks ?: 0,
+        ];
+    }
+
+    /**
      * Get Global Analytics Summary (for Admin Dashboard)
      */
     public function get_global_summary() {

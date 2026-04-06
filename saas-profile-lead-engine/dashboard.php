@@ -172,7 +172,24 @@ class Saas_Dashboard {
             </div>
             <div id="tab-analytics" class="saas-tab-content">
                 <h3>Profile Insights</h3>
-                <p>Detailed breakdown of views and link clicks.</p>
+                <?php
+                $user_analytics = new Saas_Analytics();
+                $stats = $user_analytics->get_user_summary($user_id);
+                ?>
+                <div class="saas-stats-grid">
+                    <div class="stat-card">
+                        <label>Total Views</label>
+                        <div class="value"><?php echo number_format($stats['views']); ?></div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Total Clicks</label>
+                        <div class="value"><?php echo number_format($stats['clicks']); ?></div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Click-Through Rate</label>
+                        <div class="value"><?php echo ($stats['views'] > 0) ? round(($stats['clicks'] / $stats['views']) * 100, 1) : 0; ?>%</div>
+                    </div>
+                </div>
             </div>
             <div id="tab-billing" class="saas-tab-content">
                 <h3>Plan & Billing</h3>

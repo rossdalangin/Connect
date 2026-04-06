@@ -17,8 +17,9 @@ define( 'SAAS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // 1. Core Data Structures & Routing
 require_once SAAS_PLUGIN_DIR . 'post-types.php';
 
-// 2. Dashboard Logic
+// 2. Dashboard & Auth Logic
 require_once SAAS_PLUGIN_DIR . 'dashboard.php';
+require_once SAAS_PLUGIN_DIR . 'auth.php';
 require_once SAAS_PLUGIN_DIR . 'ajax-handlers.php';
 
 // 3. System Engines
