@@ -16,6 +16,12 @@ function saas_theme_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'saas_theme_scripts' );
 
+// Add support for background customization
+add_theme_support( 'custom-background' );
+
+// Add support for theme logo
+add_theme_support( 'custom-logo' );
+
 // Custom query to find profile by slug
 function saas_get_profile_by_slug( $slug ) {
     $posts = get_posts([

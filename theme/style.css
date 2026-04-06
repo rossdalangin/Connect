@@ -6,37 +6,51 @@ Version: 1.0
 */
 
 :root {
-    --primary-color: #0073aa;
-    --text-color: #333;
-    --bg-color: #f4f7f6;
+    --primary-color: #39e09b; /* Linktree Green */
+    --text-color: #1e2329;
+    --bg-color: #f3f3f1;
     --link-bg: #fff;
+    --glass-bg: rgba(255, 255, 255, 0.7);
 }
 
 body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--bg-color);
+    background-attachment: fixed;
     color: var(--text-color);
     display: flex;
     justify-content: center;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
 }
 
 #profile-container {
     width: 100%;
-    max-width: 480px;
-    padding: 40px 20px;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 60px 20px;
     text-align: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-header {
+    margin-bottom: 32px;
 }
 
 .profile-header img {
-    width: 96px;
-    height: 96px;
+    width: 112px;
+    height: 112px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 16px;
-    border: 3px solid var(--primary-color);
+    margin-bottom: 20px;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .profile-header h1 {
@@ -59,20 +73,34 @@ body {
     margin-bottom: 16px;
 }
 
+.links-list {
+    width: 100%;
+    max-width: 100%;
+}
+
 .saas-link-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: var(--link-bg);
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    padding: 16px;
+    color: #1e2329;
+    padding: 20px 24px;
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: bold;
-    transition: all 0.2s ease;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.25s cubic-bezier(0.075, 0.82, 0.165, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+    border: 2px solid transparent;
 }
 
 .saas-link-btn:hover {
-    background-color: var(--primary-color);
+    transform: scale(1.02);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+}
+
+.saas-link-btn:hover {
+    background-color: #1e2329;
     color: #fff;
 }
 
@@ -81,11 +109,13 @@ body {
     animation: pulse 2s infinite;
     background-color: var(--primary-color);
     color: #fff;
+    border-color: var(--primary-color);
 }
 
 .block-button.style-outline .saas-link-btn {
     background-color: transparent;
-    border: 2px solid var(--primary-color);
+    border: 2px solid #1e2329;
+    color: #1e2329;
 }
 
 .block-button.style-glow .saas-link-btn {
@@ -195,11 +225,13 @@ body {
 }
 
 .lead-form-section {
+    width: 100%;
     margin-top: 40px;
-    background: #fff;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 32px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 .lead-form-section input {

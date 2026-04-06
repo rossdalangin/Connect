@@ -18,6 +18,9 @@ if ( ! $profile ) {
 $profile_id = $profile->ID;
 $user_id = $profile->post_author;
 $meta = saas_get_profile_meta( $profile_id );
+$bg_type = get_post_meta( $profile_id, '_saas_bg_type', true ) ?: 'flat';
+$bg_color = get_post_meta( $profile_id, '_saas_bg_color', true ) ?: '#f3f3f1';
+$gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
 
 // Fetch Links (Modular Blocks)
 $blocks = get_posts([
@@ -34,7 +37,17 @@ get_header();
 ?>
 
 <style>
-    :root { --primary-color: <?php echo esc_attr( $meta['theme_color'] ); ?>; }
+    :root {
+        --primary-color: <?php echo esc_attr( $meta['theme_color'] ); ?>;
+        --bg-color: <?php echo esc_attr( $bg_color ); ?>;
+    }
+    body {
+        <?php if ($bg_type === 'gradient' && $gradient) : ?>
+            background: <?php echo esc_attr($gradient); ?>;
+        <?php else : ?>
+            background-color: var(--bg-color);
+        <?php endif; ?>
+    }
 </style>
 
 <div id="profile-container">
