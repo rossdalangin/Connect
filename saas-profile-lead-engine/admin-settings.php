@@ -9,6 +9,7 @@ class Saas_Admin_Settings {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
         add_action( 'admin_init', [ $this, 'settings_init' ] );
+        add_action( 'wp_dashboard_setup', [ $this, 'add_dashboard_widget' ] );
         add_action( 'admin_post_saas_load_samples', [ $this, 'handle_load_samples' ] );
         add_action( 'admin_post_saas_generate_pages', [ $this, 'handle_generate_pages' ] );
     }
@@ -43,6 +44,25 @@ class Saas_Admin_Settings {
         Saas_Sample_Data::generate();
         wp_redirect( admin_url('admin.php?page=saas_settings&samples_loaded=1') );
         exit;
+    }
+
+    public function add_dashboard_widget() {
+        wp_add_dashboard_widget(
+            'saas_admin_summary_widget',
+            'SaaS System Overview',
+            [ $this, 'render_dashboard_widget' ]
+        );
+    }
+
+    public function render_dashboard_widget() {
+        $analytics = new Saas_Analytics();
+        $summary = $analytics->get_global_summary();
+        echo '<div class="saas-widget-content">';
+        echo '<p><strong>Total Page Views:</strong> ' . number_format($summary['views']) . '</p>';
+        echo '<p><strong>Total Link Clicks:</strong> ' . number_format($summary['clicks']) . '</p>';
+        echo '<p><strong>Total Leads Captured:</strong> ' . number_format($summary['leads']) . '</p>';
+        echo '<hr><p><a href="'.admin_url('admin.php?page=saas_settings').'" class="button button-primary">SaaS Settings</a></p>';
+        echo '</div>';
     }
 
     public function add_admin_menu() {

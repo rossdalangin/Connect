@@ -176,3 +176,28 @@ SaaS Dashboard - Modern Interface Styles
     color: #0073aa;
     margin-top: 8px;
 }
+
+/* Pricing Plans */
+.saas-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.plan-card {
+    border: 1px solid #ddd;
+    padding: 32px;
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.plan-card.featured {
+    border: 2px solid #0073aa;
+    box-shadow: 0 10px 25px rgba(0,115,170,0.1);
+}
+
+.plan-card h4 { margin: 0 0 10px; font-size: 1.25rem; }
+.plan-card .price { font-size: 2rem; font-weight: 800; margin-bottom: 20px; }
+.plan-card button, .plan-card select { width: 100%; margin-top: 10px; padding: 12px; border-radius: 8px; }

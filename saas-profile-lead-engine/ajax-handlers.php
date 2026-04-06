@@ -10,7 +10,7 @@ add_action( 'wp_ajax_saas_update_link_order', 'saas_ajax_update_link_order' );
 function saas_ajax_update_link_order() {
     check_ajax_referer( 'saas_dashboard_nonce', 'security' );
 
-    $link_ids = isset( $_POST['link_ids'] ) ? array_map( 'intval', $_POST['link_ids'] ) : [];
+    $link_ids = isset( $_POST['link_ids'] ) ? (array) $_POST['link_ids'] : [];
 
     if ( empty( $link_ids ) ) {
         wp_send_json_error( 'Invalid link IDs' );
@@ -120,4 +120,34 @@ function saas_ajax_delete_link() {
     } else {
         wp_send_json_error( 'Unauthorized' );
     }
+}
+
+// 5. AJAX: Export Leads CSV
+add_action( 'wp_ajax_saas_export_leads', 'saas_ajax_export_leads' );
+function saas_ajax_export_leads() {
+    check_ajax_referer( 'saas_export_nonce', 'security' );
+
+    $user_id = get_current_user_id();
+    $leads = get_posts([
+        'post_type'   => 'saas_lead',
+        'post_author' => $user_id,
+        'numberposts' => -1,
+    ]);
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="leads.csv"');
+
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Name', 'Email', 'Date', 'Source Profile ID']);
+
+    foreach ($leads as $lead) {
+        fputcsv($output, [
+            get_post_meta($lead->ID, '_saas_lead_name', true),
+            get_post_meta($lead->ID, '_saas_lead_email', true),
+            get_the_date('Y-m-d H:i', $lead->ID),
+            get_post_meta($lead->ID, '_saas_lead_source_id', true),
+        ]);
+    }
+    fclose($output);
+    exit;
 }

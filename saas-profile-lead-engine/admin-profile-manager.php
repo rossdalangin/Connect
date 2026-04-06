@@ -55,6 +55,24 @@ class Saas_Admin_Profile_Manager {
             </select>
             <input type="text" name="saas_bg_value" value="<?php echo esc_attr($bg_value); ?>" placeholder="#ffffff or linear-gradient(...)">
         </p>
+        <hr>
+        <h4>Block & Font Styling</h4>
+        <p>
+            <label>Button Shape:</label>
+            <select name="saas_btn_shape">
+                <option value="pill" <?php selected(get_post_meta($post->ID, '_saas_btn_shape', true), 'pill'); ?>>Pill</option>
+                <option value="rounded" <?php selected(get_post_meta($post->ID, '_saas_btn_shape', true), 'rounded'); ?>>Rounded</option>
+                <option value="square" <?php selected(get_post_meta($post->ID, '_saas_btn_shape', true), 'square'); ?>>Square</option>
+            </select>
+        </p>
+        <p>
+            <label>Font Family:</label>
+            <select name="saas_font_family">
+                <option value="'Inter', sans-serif" <?php selected(get_post_meta($post->ID, '_saas_font_family', true), "'Inter', sans-serif"); ?>>Inter (Modern)</option>
+                <option value="'Roboto', sans-serif" <?php selected(get_post_meta($post->ID, '_saas_font_family', true), "'Roboto', sans-serif"); ?>>Roboto (Clean)</option>
+                <option value="serif" <?php selected(get_post_meta($post->ID, '_saas_font_family', true), "serif"); ?>>Serif (Elegant)</option>
+            </select>
+        </p>
         <?php
     }
 
@@ -67,6 +85,8 @@ class Saas_Admin_Profile_Manager {
         update_post_meta( $post_id, '_saas_theme_color', sanitize_hex_color( $_POST['saas_theme_color'] ) );
         update_post_meta( $post_id, '_saas_bg_type', sanitize_text_field( $_POST['saas_bg_type'] ) );
         update_post_meta( $post_id, '_saas_bg_color', sanitize_text_field( $_POST['saas_bg_value'] ) );
+        update_post_meta( $post_id, '_saas_btn_shape', sanitize_text_field( $_POST['saas_btn_shape'] ) );
+        update_post_meta( $post_id, '_saas_font_family', sanitize_text_field( $_POST['saas_font_family'] ) );
     }
 
     public function add_links_column( $columns ) {

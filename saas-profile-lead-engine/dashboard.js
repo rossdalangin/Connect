@@ -131,8 +131,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 4. Drag-and-Drop Order (Stub for Sortable.js or native)
-    // In production, we'd use 'new Sortable(list, { onEnd: updateOrder })'
+    // 6. Checkout Handling
+    document.querySelectorAll('.checkout-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            formData.append('action', 'saas_checkout');
+
+            fetch(saas_dashboard_data.ajax_url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.data.redirect_url) {
+                    window.location.href = data.data.redirect_url;
+                } else {
+                    alert(data.data || 'Checkout failed');
+                }
+            });
+        });
+    });
+
+    // 5. Drag-and-Drop Order (Sortable.js Integration)
+    const sortableList = document.getElementById('saas-links-list');
+    if (sortableList && typeof Sortable !== 'undefined') {
+        new Sortable(sortableList, {
+            handle: '.handle',
+            animation: 150,
+            onEnd: function() {
+                const linkIds = Array.from(sortableList.querySelectorAll('li')).map(li => li.dataset.id);
+                updateOrder(linkIds);
+            }
+        });
+    }
+
     function updateOrder(linkIds) {
         fetch(saas_dashboard_data.ajax_url, {
             method: 'POST',
@@ -140,8 +173,13 @@ document.addEventListener('DOMContentLoaded', function() {
             body: new URLSearchParams({
                 action: 'saas_update_link_order',
                 security: saas_dashboard_data.nonce,
-                link_ids: linkIds
+                'link_ids[]': linkIds
             })
+        })
+        .then(r => r.json())
+        .then(data => {
+            // Refresh preview to show new order
+            document.getElementById('saas-preview-frame').contentWindow.location.reload();
         });
     }
 });

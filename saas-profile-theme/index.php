@@ -21,6 +21,8 @@ $meta = saas_get_profile_meta( $profile_id );
 $bg_type = get_post_meta( $profile_id, '_saas_bg_type', true ) ?: 'flat';
 $bg_color = get_post_meta( $profile_id, '_saas_bg_color', true ) ?: '#f3f3f1';
 $gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
+$btn_shape = get_post_meta( $profile_id, '_saas_btn_shape', true ) ?: 'pill';
+$font_family = get_post_meta( $profile_id, '_saas_font_family', true ) ?: "'Inter', sans-serif";
 
 // Fetch Links (Modular Blocks)
 $blocks = get_posts([
@@ -41,6 +43,12 @@ include __DIR__ . '/header.php';
     :root {
         --primary-color: <?php echo esc_attr( $meta['theme_color'] ); ?>;
         --bg-color: <?php echo esc_attr( $bg_color ); ?>;
+        --btn-radius: <?php
+            if ($btn_shape === 'pill') echo '50px';
+            elseif ($btn_shape === 'rounded') echo '12px';
+            else echo '0px';
+        ?>;
+        --font-family: <?php echo $font_family; ?>;
     }
     body {
         <?php if ($bg_type === 'gradient' && $gradient) : ?>

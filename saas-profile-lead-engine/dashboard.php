@@ -14,7 +14,11 @@ class Saas_Dashboard {
     public function enqueue_dashboard_scripts() {
         // Only enqueue on pages where the dashboard shortcode is present
         wp_enqueue_style( 'saas-dashboard-css', plugin_dir_url( __FILE__ ) . 'dashboard.css', [], '1.0' );
-        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [], '1.0', true );
+
+        // Enqueue Sortable.js
+        wp_enqueue_script( 'sortable-js', 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js', [], '1.15.0', true );
+
+        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'sortable-js' ], '1.0', true );
         wp_localize_script( 'saas-dashboard-js', 'saas_dashboard_data', [
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'saas_dashboard_nonce' )
@@ -146,7 +150,10 @@ class Saas_Dashboard {
 
             <!-- Other tabs -->
             <div id="tab-leads" class="saas-tab-content">
-                <h3>Your Leads</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Your Leads</h3>
+                    <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_leads&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button button-secondary">Download CSV</a>
+                </div>
                 <?php
                 $leads = get_posts([
                     'post_type' => 'saas_lead',
@@ -192,8 +199,28 @@ class Saas_Dashboard {
                 </div>
             </div>
             <div id="tab-billing" class="saas-tab-content">
-                <h3>Plan & Billing</h3>
-                <p>Manage your subscription and payment methods.</p>
+                <h3>Choose Your Plan</h3>
+                <div class="saas-plans-grid">
+                    <div class="plan-card">
+                        <h4>Free</h4>
+                        <div class="price">$0/mo</div>
+                        <p>Basic Link Hub</p>
+                        <button disabled>Current Plan</button>
+                    </div>
+                    <div class="plan-card featured">
+                        <h4>Pro</h4>
+                        <div class="price">$19/mo</div>
+                        <p>Unlimited Blocks + Lead Gen</p>
+                        <form class="checkout-form">
+                            <input type="hidden" name="plan_id" value="pro">
+                            <select name="gateway">
+                                <option value="stripe">Stripe</option>
+                                <option value="paypal">PayPal</option>
+                            </select>
+                            <button type="submit">Upgrade Now</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Live Preview -->
