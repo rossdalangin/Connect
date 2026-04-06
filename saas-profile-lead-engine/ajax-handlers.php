@@ -61,6 +61,11 @@ function saas_ajax_add_link() {
             update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($_POST['extra']));
         } elseif ($type === 'pricing' && isset($_POST['extra'])) {
             update_post_meta($link_id, '_saas_price', sanitize_text_field($_POST['extra']));
+            // Sample feature list for pricing
+            update_post_meta($link_id, '_saas_features', ['Premium Support', 'Unlimited Links', 'No Branding']);
+        } elseif ($type === 'image_gallery' && isset($_POST['extra'])) {
+            $urls = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
+            update_post_meta($link_id, '_saas_gallery_images', $urls);
         }
 
         wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url, 'type' => $type, 'style' => $style ]);

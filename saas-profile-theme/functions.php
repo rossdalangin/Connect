@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 function saas_theme_scripts() {
     wp_enqueue_style( 'saas-main-style', get_stylesheet_uri() );
+    wp_enqueue_script( 'jquery' ); // Ensure jQuery is loaded
 
     // Pass AJAX and REST URLs to theme
     wp_localize_script( 'jquery', 'saas_data', [

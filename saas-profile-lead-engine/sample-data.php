@@ -29,6 +29,8 @@ class Saas_Sample_Data {
             ['title' => '👉 Join My Newsletter', 'url' => 'https://newsletter.alex.com', 'type' => 'button', 'style' => 'featured'],
             ['title' => 'Watch My Latest Keynote', 'url' => 'https://youtube.com/watch?v=123', 'type' => 'video', 'style' => 'regular'],
             ['title' => 'How much do you charge?', 'url' => '#', 'type' => 'faq', 'style' => 'regular'],
+            ['title' => 'Pro Plan', 'url' => 'https://stripe.com/checkout', 'type' => 'pricing', 'style' => 'glow'],
+            ['title' => 'My Portfolio', 'url' => '#', 'type' => 'image_gallery', 'style' => 'regular'],
         ];
 
         foreach ($blocks as $index => $b) {
@@ -44,6 +46,16 @@ class Saas_Sample_Data {
             update_post_meta($link_id, '_saas_priority', $index);
             if ($b['type'] === 'faq') {
                 update_post_meta($link_id, '_saas_faq_answer', 'I offer tiered pricing based on project scope. Contact me for a custom quote.');
+            } elseif ($b['type'] === 'pricing') {
+                update_post_meta($link_id, '_saas_price', '$19/mo');
+                update_post_meta($link_id, '_saas_features', ['Priority Support', 'No Ads', 'API Access']);
+            } elseif ($b['type'] === 'image_gallery') {
+                update_post_meta($link_id, '_saas_gallery_images', [
+                    'https://via.placeholder.com/300',
+                    'https://via.placeholder.com/301',
+                    'https://via.placeholder.com/302',
+                    'https://via.placeholder.com/303'
+                ]);
             }
         }
 

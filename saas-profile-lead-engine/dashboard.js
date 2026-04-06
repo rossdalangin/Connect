@@ -16,6 +16,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // 0.1 Dynamic Block Extra Field Placeholder
+    const blockTypeSelector = document.getElementById('saas-block-type');
+    const extraField = document.querySelector('textarea[name="extra"]');
+    if (blockTypeSelector && extraField) {
+        blockTypeSelector.addEventListener('change', () => {
+            const type = blockTypeSelector.value;
+            const placeholders = {
+                'testimonial': 'Enter Testimonial Quote...',
+                'faq': 'Enter FAQ Answer...',
+                'pricing': 'Enter Price (e.g. $19/mo)...',
+                'image_gallery': 'Enter Image URLs (one per line)...',
+                'button': 'Extra info (optional)...',
+                'video': 'Extra info (optional)...',
+                'calendar': 'Extra info (optional)...'
+            };
+            extraField.placeholder = placeholders[type] || 'Extra content...';
+        });
+    }
+
     // 1. Tab Switching
     const tabButtons = document.querySelectorAll('.saas-tabs button');
     const tabContents = document.querySelectorAll('.saas-tab-content');
