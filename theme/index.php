@@ -92,6 +92,24 @@ get_header();
                         </ul>
                         <a href="<?php echo esc_url($url); ?>" class="saas-link-btn">Select Plan</a>
                     </div>
+                <?php elseif ($type === 'image_gallery') : ?>
+                    <div class="image-gallery-block">
+                        <h3><?php echo esc_html($block->post_title); ?></h3>
+                        <div class="gallery-grid">
+                            <?php
+                            $images = get_post_meta($block->ID, '_saas_gallery_images', true) ?: [];
+                            foreach ($images as $img_url) : ?>
+                                <img src="<?php echo esc_url($img_url); ?>" alt="Gallery Image">
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php elseif ($type === 'calendar') : ?>
+                    <div class="calendar-block">
+                        <h3><?php echo esc_html($block->post_title); ?></h3>
+                        <div class="calendar-embed">
+                            <iframe src="<?php echo esc_url($url); ?>" width="100%" height="400" frameborder="0"></iframe>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>

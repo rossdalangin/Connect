@@ -139,6 +139,26 @@ body {
     color: #666;
 }
 
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.gallery-grid img {
+    width: 100%;
+    border-radius: 8px;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+.calendar-block {
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+}
+
 .lead-form-section {
     margin-top: 40px;
     background: #fff;

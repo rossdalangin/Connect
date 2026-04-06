@@ -67,11 +67,20 @@ class Saas_Dashboard {
 
             <!-- Links Tab -->
             <div id="tab-links" class="saas-tab-content active">
-                <h3>Your Links</h3>
+                <h3>Manage Blocks</h3>
                 <form id="saas-add-link-form">
-                    <input type="text" name="title" placeholder="Link Title" required>
-                    <input type="url" name="url" placeholder="Destination URL" required>
-                    <button type="submit">Add Link</button>
+                    <select name="block_type" id="saas-block-type">
+                        <option value="button">Button Link</option>
+                        <option value="video">Video Embed</option>
+                        <option value="testimonial">Testimonial</option>
+                        <option value="faq">FAQ Item</option>
+                        <option value="pricing">Pricing Table</option>
+                        <option value="image_gallery">Image Gallery</option>
+                        <option value="calendar">Calendar Embed</option>
+                    </select>
+                    <input type="text" name="title" placeholder="Block Title" required>
+                    <input type="url" name="url" placeholder="URL / Embed Link" required>
+                    <button type="submit">Add Block</button>
                 </form>
 
                 <ul id="saas-links-list" class="sortable">
@@ -110,7 +119,28 @@ class Saas_Dashboard {
             <!-- Other tabs -->
             <div id="tab-leads" class="saas-tab-content">
                 <h3>Your Leads</h3>
-                <p>Manage and export your captured leads from here.</p>
+                <?php
+                $leads = get_posts([
+                    'post_type' => 'saas_lead',
+                    'post_author' => $user_id,
+                    'numberposts' => 20
+                ]);
+                if ($leads) : ?>
+                    <table class="saas-table">
+                        <thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($leads as $lead) : ?>
+                            <tr>
+                                <td><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_name', true)); ?></td>
+                                <td><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_email', true)); ?></td>
+                                <td><?php echo get_the_date('', $lead->ID); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else : ?>
+                    <p>No leads captured yet.</p>
+                <?php endif; ?>
             </div>
             <div id="tab-analytics" class="saas-tab-content">
                 <h3>Profile Insights</h3>

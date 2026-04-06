@@ -34,6 +34,7 @@ function saas_ajax_add_link() {
 
     $title = sanitize_text_field( $_POST['title'] );
     $url   = esc_url_raw( $_POST['url'] );
+    $type  = sanitize_text_field( $_POST['block_type'] );
 
     if ( empty( $title ) || empty( $url ) ) {
         wp_send_json_error( 'Missing fields' );
@@ -47,9 +48,10 @@ function saas_ajax_add_link() {
     ]);
 
     if ( ! is_wp_error( $link_id ) ) {
+        update_post_meta( $link_id, '_saas_block_type', $type );
         update_post_meta( $link_id, '_saas_link_url', $url );
         update_post_meta( $link_id, '_saas_priority', 0 );
-        wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url ]);
+        wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url, 'type' => $type ]);
     } else {
         wp_send_json_error( 'Failed to add link' );
     }

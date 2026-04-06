@@ -15,12 +15,28 @@ Unlike Linktree (just links) or Kontak (just contact info), we combine identity 
 - **Pro Tier ($19/mo):** Unlimited Links, Lead Gen Form, Custom Themes, No Branding, Priority Support.
 - **Agency Tier ($99/mo):** Manage up to 10 Profiles, Team Access, Webhook Integrations, API Access.
 
-## 3. Video Sales Letter (VSL) Script (Highlights)
-- **The Hook:** "Stop losing 70% of your traffic in the 'Link in Bio' dead-end."
-- **The Problem:** "You're sending people to a list of links, but you're not capturing their contact info. You're losing potential clients every single day."
-- **The Solution:** "Introducing [SaaS Name]. The only digital card that actually pays for itself by capturing leads while you sleep."
-- **The Proof:** Show a side-by-side comparison of a boring link list vs. our high-converting lead funnel.
-- **The Call to Action:** "Get your professional identity page today. Start for free."
+## 3. Full Video Sales Letter (VSL) Script (High-Conversion)
+
+**[0:00-0:15] The Hook**
+*(Visual: Fast cuts of influencers and business owners pointing to their Instagram bio links)*
+"Stop losing 70% of your traffic in the 'Link in Bio' dead-end. Most people think they need a 'Linktree' or a simple list of links. They’re wrong. You aren't just looking to route traffic... you’re looking to build a business."
+
+**[0:15-1:00] The Problem**
+"Think about it. You spend hours creating content. You finally get someone to click your bio link... and then what? You give them 10 buttons and pray they click one? That’s not a strategy. That’s a gamble. Every person who clicks that link and doesn't leave their contact info is a lost opportunity. A lost lead. A lost sale."
+
+**[1:00-2:00] The Solution**
+"Introducing **[SaaS Name]**. The first all-in-one Digital Identity and Lead Generation engine. We don’t just give you links. We give you a high-converting profile that works for you 24/7."
+*(Visual: Screen recording showing the dynamic blocks - Video, FAQ, Pricing, and the Lead Form)*
+"With [SaaS Name], you can embed your latest video, answer FAQs before they ask, show your pricing clearly, and most importantly... capture leads directly on the page."
+
+**[2:00-3:30] The Core Differentiator**
+"And it’s not just for social media. When you meet someone in person, don't just 'exchange numbers.' Let them scan your QR code. They get your professional profile, they can save your contact details with one tap, and they can join your waitlist or book a call immediately. It’s the ultimate digital business card."
+
+**[3:30-4:30] The Proof & Scarcity**
+"Our users are seeing a 300% increase in lead capture compared to standard link lists. Whether you're a coach, a realtor, or a freelancer, your bio link is your most valuable real estate. Stop wasting it."
+
+**[4:30-End] The Call to Action**
+"We’re currently offering a limited-time 'Pro' lifetime deal for our early adopters. Get unlimited links, custom themes, and full lead generation capabilities for one tiny investment. Click the button below, claim your custom username, and turn your bio link into a lead machine today."
 
 ## 4. Sales Assets (Landing Page Copy)
 - **Headline:** "Turn Your 'Link in Bio' Into a Lead Machine."
