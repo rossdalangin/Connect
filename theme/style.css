@@ -1,0 +1,126 @@
+/*
+Theme Name: SaaS Profile Theme
+Author: Elite SaaS Architect
+Description: Fast, conversion-optimized profile pages for the Link-in-Bio system.
+Version: 1.0
+*/
+
+:root {
+    --primary-color: #0073aa;
+    --text-color: #333;
+    --bg-color: #f4f7f6;
+    --link-bg: #fff;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+#profile-container {
+    width: 100%;
+    max-width: 480px;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.profile-header img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 3px solid var(--primary-color);
+}
+
+.profile-header h1 {
+    font-size: 1.5rem;
+    margin: 0 0 8px;
+}
+
+.profile-header p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.links-list {
+    list-style: none;
+    padding: 0;
+}
+
+.links-list li {
+    margin-bottom: 16px;
+}
+
+.saas-link-btn {
+    display: block;
+    background-color: var(--link-bg);
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 16px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.saas-link-btn:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.lead-form-section {
+    margin-top: 40px;
+    background: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.lead-form-section input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.lead-form-section button {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.sticky-cta {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 440px;
+}
+
+.save-contact-btn {
+    display: block;
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 12px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+}

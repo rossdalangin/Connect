@@ -1,0 +1,138 @@
+<?php
+/**
+ * Main Template - Public Profile Rendering Engine (Enhanced for Modular Blocks)
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+// Get Profile from Query Var
+$slug = get_query_var( 'saas_profile' );
+$profile = get_page_by_path( $slug, OBJECT, 'saas_profile' );
+
+if ( ! $profile ) {
+    status_header( 404 );
+    get_template_part( '404' );
+    exit;
+}
+
+$profile_id = $profile->ID;
+$user_id = $profile->post_author;
+$meta = saas_get_profile_meta( $profile_id );
+
+// Fetch Links (Modular Blocks)
+$blocks = get_posts([
+    'post_type'   => 'saas_link',
+    'post_author' => $user_id,
+    'orderby'     => 'meta_value_num',
+    'meta_key'    => '_saas_priority',
+    'order'       => 'ASC',
+    'numberposts' => -1,
+]);
+
+// Include Header (Assuming it handles <html> and <head>)
+get_header();
+?>
+
+<style>
+    :root { --primary-color: <?php echo esc_attr( $meta['theme_color'] ); ?>; }
+</style>
+
+<div id="profile-container">
+    <!-- Header Block -->
+    <header class="profile-header">
+        <?php if ( has_post_thumbnail( $profile_id ) ) : ?>
+            <?php echo get_the_post_thumbnail( $profile_id, 'thumbnail' ); ?>
+        <?php else : ?>
+            <img src="https://via.placeholder.com/150" alt="Avatar">
+        <?php endif; ?>
+        <h1><?php echo esc_html( $profile->post_title ); ?></h1>
+        <p class="headline"><?php echo esc_html( $meta['headline'] ); ?></p>
+        <p class="bio"><?php echo nl2br( esc_html( $meta['bio'] ) ); ?></p>
+    </header>
+
+    <!-- Dynamic Blocks Engine -->
+    <div class="blocks-container">
+        <?php foreach ( $blocks as $block ) :
+            $type = get_post_meta( $block->ID, '_saas_block_type', true ) ?: 'button';
+            $url = get_post_meta( $block->ID, '_saas_link_url', true );
+            ?>
+            <div class="saas-block block-<?php echo esc_attr($type); ?>">
+                <?php if ($type === 'button') : ?>
+                    <a href="<?php echo esc_url( $url ); ?>"
+                       class="saas-link-btn"
+                       data-link-id="<?php echo $block->ID; ?>"
+                       onclick="saasTrackClick(<?php echo $block->ID; ?>)">
+                        <?php echo esc_html( $block->post_title ); ?>
+                    </a>
+                <?php elseif ($type === 'video') : ?>
+                    <!-- Embed logic for Video -->
+                    <div class="video-embed">
+                        <?php echo wp_oembed_get( $url ); ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Lead Funnel Block -->
+    <section class="lead-form-section">
+        <h3><?php echo esc_html( get_post_meta( $profile_id, '_saas_lead_title', true ) ?: 'Contact Me' ); ?></h3>
+        <form id="lead-form">
+            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+            <div class="input-group">
+                <input type="text" name="name" placeholder="Your Name" required>
+            </div>
+            <div class="input-group">
+                <input type="email" name="email" placeholder="Your Email" required>
+            </div>
+            <button type="submit">Submit Request</button>
+        </form>
+        <div id="lead-feedback"></div>
+    </section>
+
+    <!-- vCard Block (Sticky) -->
+    <div class="sticky-cta">
+        <a href="<?php echo home_url('/?action=vcard&profile=' . $profile_id); ?>" class="save-contact-btn">
+            💾 Save Contact Info
+        </a>
+    </div>
+</div>
+
+<script>
+// Analytics tracking using REST API
+function saasTrackClick(linkId) {
+    fetch('/wp-json/saas/v1/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            event: 'click',
+            target_id: linkId
+        })
+    });
+}
+
+// Lead form handling via AJAX
+document.getElementById('lead-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const feedback = document.getElementById('lead-feedback');
+    const formData = new FormData(this);
+    formData.append('action', 'saas_submit_lead');
+
+    feedback.innerText = 'Sending...';
+
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        feedback.innerText = data.data;
+        if (data.success) this.reset();
+    })
+    .catch(err => {
+        feedback.innerText = 'Error sending lead.';
+    });
+});
+</script>
+
+<?php get_footer(); ?>
