@@ -31,6 +31,10 @@ function saas_ajax_submit_lead() {
         update_post_meta( $lead_id, '_saas_lead_email', $email );
         update_post_meta( $lead_id, '_saas_lead_source_id', $profile_id );
 
+        // Basic Tagging System
+        $tags = get_post_meta( $profile_id, '_saas_lead_tags', true ) ?: [ 'New' ];
+        update_post_meta( $lead_id, '_saas_lead_tags', $tags );
+
         // Automation Hooks
         $redirect_url = get_post_meta( $profile_id, '_saas_lead_redirect', true );
         $webhook_url  = get_post_meta( $profile_id, '_saas_lead_webhook', true );
@@ -41,9 +45,13 @@ function saas_ajax_submit_lead() {
             ]);
         }
 
+        // Lead Magnet Delivery (Simulated)
+        $lead_magnet_url = get_post_meta( $profile_id, '_saas_lead_magnet_url', true );
+
         wp_send_json_success([
             'message'  => 'Thank you! We will contact you soon.',
-            'redirect' => $redirect_url ? esc_url($redirect_url) : ''
+            'redirect' => $redirect_url ? esc_url($redirect_url) : '',
+            'download' => $lead_magnet_url ? esc_url($lead_magnet_url) : ''
         ]);
     } else {
         wp_send_json_error( 'Failed to save lead' );

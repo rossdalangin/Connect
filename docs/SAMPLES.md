@@ -37,3 +37,15 @@
 - **Referrer:** `https://t.co/xyz` (Twitter/X)
 - **User Agent:** `iPhone; CPU iPhone OS 17_0 like Mac OS X`
 - **Created At:** `2024-05-01 10:35:12`
+
+## 5. Elite Use Case: The NFC "Instant Exchange"
+- **User:** Marcus Luxury (High-End Real Estate)
+- **Profile Slug:** `marcus-luxury`
+- **NFC Hardware:** NTAG215 PVC Card with Matte Finish
+- **Workflow:**
+  1. Marcus taps his card to a prospect's iPhone.
+  2. The prospect's phone opens `https://marcus-realestate.com/marcus-luxury?src=nfc`.
+  3. The profile loads with Marcus's headshot and a featured "Save My Contact" button.
+  4. After 3 seconds, a browser-triggered download for `marcus_contact.vcf` starts.
+  5. The prospect taps 'Save' and Marcus is instantly in their address book.
+  6. Marcus checks his Analytics Dashboard and sees a 'View' with the 'NFC' tag.

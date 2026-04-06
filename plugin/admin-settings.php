@@ -67,9 +67,20 @@ class Saas_Admin_Settings {
 
     public function settings_page_html() {
         if ( ! current_user_can( 'manage_options' ) ) return;
+
+        $analytics = new Saas_Analytics();
+        $summary = $analytics->get_global_summary();
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+            <!-- Global Analytics Dashboard Card -->
+            <div class="saas-admin-card" style="background:#fff; padding:20px; border-radius:8px; display:flex; gap:40px; margin:20px 0;">
+                <div><strong>Total Views:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['views']); ?></span></div>
+                <div><strong>Total Clicks:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['clicks']); ?></span></div>
+                <div><strong>Total Leads:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['leads']); ?></span></div>
+            </div>
+
             <form action="options.php" method="post">
                 <?php
                 settings_fields( 'saas_settings_group' );

@@ -21,7 +21,8 @@
 7. **Track:** Check the Analytics tab to see who is visiting and clicking.
 
 ## 4. Scaling Plan (Future Roadmap)
-- **NFC Support:** Integration with NFC-enabled business cards.
+- **Whitelabel Domains:** Allow Pro users to map their own custom domains (e.g., `links.sarah.com`).
+- **NFC Support:** Full integration with NFC hardware providers.
 - **Advanced CRM:** Integration with HubSpot, Mailchimp, and Zapier.
 - **Team Plans:** Allow companies to manage 100+ employee profile pages.
 - **Multi-language:** Dynamic profile translation based on geo-location.

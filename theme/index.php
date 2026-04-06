@@ -177,6 +177,15 @@ document.getElementById('lead-form').addEventListener('submit', function(e) {
         feedback.innerText = data.data.message;
         if (data.success) {
             this.reset();
+            // Lead Magnet Delivery
+            if (data.data.download) {
+                const a = document.createElement('a');
+                a.href = data.data.download;
+                a.download = '';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
             if (data.data.redirect) window.location.href = data.data.redirect;
         }
     })

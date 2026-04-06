@@ -29,6 +29,22 @@ class Saas_Analytics {
     }
 
     /**
+     * Get Global Analytics Summary (for Admin Dashboard)
+     */
+    public function get_global_summary() {
+        global $wpdb;
+        $total_views  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'view'" );
+        $total_clicks = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'click'" );
+        $total_leads  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'lead_gen'" );
+
+        return [
+            'views'  => $total_views ?: 0,
+            'clicks' => $total_clicks ?: 0,
+            'leads'  => $total_leads ?: 0,
+        ];
+    }
+
+    /**
      * REST: Track Event (High Efficiency)
      */
     public function rest_track_event( $request ) {
