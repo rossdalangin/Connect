@@ -31,9 +31,20 @@ function saas_ajax_submit_lead() {
         update_post_meta( $lead_id, '_saas_lead_email', $email );
         update_post_meta( $lead_id, '_saas_lead_source_id', $profile_id );
 
-        // TODO: Trigger Webhook or Email Notification
+        // Automation Hooks
+        $redirect_url = get_post_meta( $profile_id, '_saas_lead_redirect', true );
+        $webhook_url  = get_post_meta( $profile_id, '_saas_lead_webhook', true );
 
-        wp_send_json_success( 'Thank you! We will contact you soon.' );
+        if ( $webhook_url ) {
+            wp_remote_post( $webhook_url, [
+                'body' => [ 'name' => $name, 'email' => $email, 'profile' => $profile_id ]
+            ]);
+        }
+
+        wp_send_json_success([
+            'message'  => 'Thank you! We will contact you soon.',
+            'redirect' => $redirect_url ? esc_url($redirect_url) : ''
+        ]);
     } else {
         wp_send_json_error( 'Failed to save lead' );
     }

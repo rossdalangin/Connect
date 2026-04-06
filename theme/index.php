@@ -54,10 +54,11 @@ get_header();
     <div class="blocks-container">
         <?php foreach ( $blocks as $block ) :
             $type = get_post_meta( $block->ID, '_saas_block_type', true ) ?: 'button';
+            $style = get_post_meta( $block->ID, '_saas_block_style', true ) ?: 'regular';
             $base_url = get_post_meta( $block->ID, '_saas_link_url', true );
             $url = saas_get_effective_url( $block->ID, $base_url ); // Device/Geo Routing
             ?>
-            <div class="saas-block block-<?php echo esc_attr($type); ?>">
+            <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?>">
                 <?php if ($type === 'button') : ?>
                     <a href="<?php echo esc_url( $url ); ?>"
                        class="saas-link-btn"
@@ -132,6 +133,12 @@ get_header();
     </section>
 
     <!-- vCard Block (Sticky) -->
+    <div class="social-share-buttons">
+        <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(home_url($slug)); ?>" target="_blank">𝕏</a>
+        <a href="https://wa.me/?text=<?php echo urlencode(home_url($slug)); ?>" target="_blank">WhatsApp</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(home_url($slug)); ?>" target="_blank">FB</a>
+    </div>
+
     <div class="sticky-cta">
         <a href="<?php echo home_url('/?saas_action=vcard&profile=' . $profile_id); ?>" class="save-contact-btn">
             💾 Save Contact Info
@@ -167,8 +174,11 @@ document.getElementById('lead-form').addEventListener('submit', function(e) {
     })
     .then(r => r.json())
     .then(data => {
-        feedback.innerText = data.data;
-        if (data.success) this.reset();
+        feedback.innerText = data.data.message;
+        if (data.success) {
+            this.reset();
+            if (data.data.redirect) window.location.href = data.data.redirect;
+        }
     })
     .catch(err => {
         feedback.innerText = 'Error sending lead.';

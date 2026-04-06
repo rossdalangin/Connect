@@ -76,6 +76,41 @@ body {
     color: #fff;
 }
 
+/* Link Styles */
+.block-button.style-featured .saas-link-btn {
+    animation: pulse 2s infinite;
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.block-button.style-outline .saas-link-btn {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+}
+
+.block-button.style-glow .saas-link-btn {
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+.social-share-buttons {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.social-share-buttons a {
+    text-decoration: none;
+    font-size: 1.2rem;
+    color: #666;
+}
+
 .saas-block {
     margin-bottom: 24px;
 }
