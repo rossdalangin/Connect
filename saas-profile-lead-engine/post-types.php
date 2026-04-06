@@ -45,6 +45,19 @@ function saas_register_post_types() {
         'supports' => [ 'title', 'author' ],
         'show_in_rest' => true,
     ]);
+
+    // 4. Licenses CPT
+    register_post_type( 'saas_license', [
+        'labels' => [
+            'name' => 'Licenses',
+            'singular_name' => 'License',
+        ],
+        'public' => false,
+        'show_ui' => true,
+        'menu_icon' => 'dashicons-id-alt',
+        'supports' => [ 'title', 'editor' ],
+        'show_in_rest' => true,
+    ]);
 }
 add_action( 'init', 'saas_register_post_types' );
 
@@ -55,7 +68,7 @@ function saas_add_rewrite_rules() {
     add_rewrite_rule(
         '^([^/]+)/?$',
         'index.php?saas_profile=$matches[1]',
-        'bottom'
+        'top'
     );
 }
 add_action( 'init', 'saas_add_rewrite_rules' );
@@ -68,17 +81,25 @@ add_filter( 'query_vars', 'saas_query_vars' );
 
 // Load the profile theme if the query var is set
 function saas_template_redirect( $template ) {
-    if ( get_query_var( 'saas_profile' ) ) {
+    $profile_slug = get_query_var( 'saas_profile' );
+
+    if ( $profile_slug ) {
         // Find if a profile with this slug exists
-        $profile = get_page_by_path( get_query_var( 'saas_profile' ), OBJECT, 'saas_profile' );
-        if ( $profile ) {
-            // Force the profile theme index.php from the dedicated theme folder
+        $profile = get_posts([
+            'name'        => $profile_slug,
+            'post_type'   => 'saas_profile',
+            'post_status' => 'publish',
+            'numberposts' => 1
+        ]);
+
+        if ( ! empty($profile) ) {
             $custom_template = get_theme_root() . '/saas-profile-theme/index.php';
             if ( file_exists($custom_template) ) {
                 return $custom_template;
             }
-            // Fallback to active theme if special folder not found
-            return get_template_directory() . '/index.php';
+            // Fallback if the folder is renamed or doesn't exist
+            $fallback = plugin_dir_path(__DIR__) . 'saas-profile-theme/index.php';
+            if ( file_exists($fallback) ) return $fallback;
         }
     }
     return $template;

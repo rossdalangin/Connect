@@ -87,6 +87,21 @@ class Saas_Admin_Settings {
             'saas_payment_section',
             [ 'id' => 'saas_stripe_secret_key' ]
         );
+
+        add_settings_section(
+            'saas_license_section',
+            'License Management',
+            null,
+            'saas_settings'
+        );
+
+        add_settings_field(
+            'global_license_status',
+            'System License Status',
+            function() { echo '<strong>Active (Enterprise)</strong>'; },
+            'saas_settings',
+            'saas_license_section'
+        );
     }
 
     public function checkbox_render( $args ) {
