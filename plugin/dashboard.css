@@ -79,3 +79,30 @@ SaaS Dashboard - Modern Interface Styles
     cursor: grab;
     color: #ccc;
 }
+
+#saas-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 32px;
+}
+
+.saas-preview-pane {
+    position: sticky;
+    top: 40px;
+}
+
+.preview-frame-container {
+    width: 320px;
+    height: 640px;
+    border: 12px solid #333;
+    border-radius: 40px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+#saas-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

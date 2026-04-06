@@ -79,6 +79,12 @@ class Saas_Dashboard {
                         <option value="image_gallery">Image Gallery</option>
                         <option value="calendar">Calendar Embed</option>
                     </select>
+                    <select name="block_style" id="saas-block-style">
+                        <option value="regular">Regular Style</option>
+                        <option value="featured">Featured (Pulse)</option>
+                        <option value="outline">Outline Only</option>
+                        <option value="glow">Glow Effect</option>
+                    </select>
                     <input type="text" name="title" placeholder="Block Title" required>
                     <input type="url" name="url" placeholder="URL / Embed Link" required>
                     <button type="submit">Add Block</button>
@@ -110,8 +116,19 @@ class Saas_Dashboard {
                         <textarea name="bio"><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
                     </div>
                     <div class="field">
-                        <label>Theme Color</label>
+                        <label>Theme Primary Color</label>
                         <input type="color" name="theme_color" value="<?php echo esc_attr( $meta['theme_color'] ); ?>">
+                    </div>
+                    <div class="field">
+                        <label>Background Type</label>
+                        <select name="bg_type">
+                            <option value="flat" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'flat'); ?>>Flat Color</option>
+                            <option value="gradient" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'gradient'); ?>>Modern Gradient</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Background Color / Gradient CSS</label>
+                        <input type="text" name="bg_value" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_bg_color', true)); ?>" placeholder="#ffffff or linear-gradient(...)">
                     </div>
                     <button type="submit">Save Changes</button>
                 </form>
@@ -150,6 +167,14 @@ class Saas_Dashboard {
             <div id="tab-billing" class="saas-tab-content">
                 <h3>Plan & Billing</h3>
                 <p>Manage your subscription and payment methods.</p>
+            </div>
+
+            <!-- Live Preview -->
+            <div class="saas-preview-pane">
+                <h3>Live Preview</h3>
+                <div class="preview-frame-container">
+                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile[0]->post_name); ?>"></iframe>
+                </div>
             </div>
         </div>
         <?php

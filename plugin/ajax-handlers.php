@@ -35,6 +35,7 @@ function saas_ajax_add_link() {
     $title = sanitize_text_field( $_POST['title'] );
     $url   = esc_url_raw( $_POST['url'] );
     $type  = sanitize_text_field( $_POST['block_type'] );
+    $style = sanitize_text_field( $_POST['block_style'] );
 
     if ( empty( $title ) || empty( $url ) ) {
         wp_send_json_error( 'Missing fields' );
@@ -49,9 +50,10 @@ function saas_ajax_add_link() {
 
     if ( ! is_wp_error( $link_id ) ) {
         update_post_meta( $link_id, '_saas_block_type', $type );
+        update_post_meta( $link_id, '_saas_block_style', $style );
         update_post_meta( $link_id, '_saas_link_url', $url );
         update_post_meta( $link_id, '_saas_priority', 0 );
-        wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url, 'type' => $type ]);
+        wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url, 'type' => $type, 'style' => $style ]);
     } else {
         wp_send_json_error( 'Failed to add link' );
     }
@@ -79,5 +81,28 @@ function saas_ajax_save_profile() {
 
     saas_update_profile_meta( $profile_id, $data );
 
+    // Additional profile meta
+    update_post_meta($profile_id, '_saas_bg_type', sanitize_text_field($_POST['bg_type']));
+    update_post_meta($profile_id, '_saas_bg_color', sanitize_text_field($_POST['bg_value']));
+    if ($_POST['bg_type'] === 'gradient') {
+        update_post_meta($profile_id, '_saas_bg_gradient', sanitize_text_field($_POST['bg_value']));
+    }
+
     wp_send_json_success( 'Profile saved' );
+}
+
+// 4. AJAX: Delete Link
+add_action( 'wp_ajax_saas_delete_link', 'saas_ajax_delete_link' );
+function saas_ajax_delete_link() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $link_id = intval( $_POST['link_id'] );
+    $post = get_post( $link_id );
+
+    if ( $post && $post->post_author == get_current_user_id() ) {
+        wp_delete_post( $link_id, true );
+        wp_send_json_success( 'Link deleted' );
+    } else {
+        wp_send_json_error( 'Unauthorized' );
+    }
 }

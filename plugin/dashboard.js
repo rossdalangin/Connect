@@ -66,9 +66,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData
             })
             .then(r => r.json())
-            .then(data => alert(data.data));
+            .then(data => {
+                alert(data.data);
+                // Refresh preview
+                document.getElementById('saas-preview-frame').contentWindow.location.reload();
+            });
         });
     }
+
+    // 4. Delete Link Handling (Event Delegation)
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('delete-link')) {
+            const btn = e.target;
+            const linkId = btn.closest('li').dataset.id;
+            if (!confirm('Are you sure?')) return;
+
+            fetch(saas_dashboard_data.ajax_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    action: 'saas_delete_link',
+                    security: saas_dashboard_data.nonce,
+                    link_id: linkId
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    btn.closest('li').remove();
+                    document.getElementById('saas-preview-frame').contentWindow.location.reload();
+                }
+            });
+        }
+    });
 
     // 4. Drag-and-Drop Order (Stub for Sortable.js or native)
     // In production, we'd use 'new Sortable(list, { onEnd: updateOrder })'
