@@ -66,6 +66,17 @@ SaaS Dashboard - Modern Interface Styles
     border-bottom: 2px solid #0073aa;
 }
 
+/* Responsive Table */
+@media screen and (max-width: 600px) {
+    .saas-table thead { display: none; }
+    .saas-table tr { display: block; margin-bottom: 16px; border: 1px solid #eee; border-radius: 8px; padding: 12px; }
+    .saas-table td { display: block; border: none; padding: 8px 0; }
+    .saas-table td::before { content: attr(data-label); font-weight: 800; display: block; margin-bottom: 4px; }
+
+    #saas-dashboard { grid-template-columns: 1fr; }
+    .saas-preview-pane { display: none; } /* Hide preview on mobile dashboard */
+}
+
 .saas-tab-content {
     display: none;
 }

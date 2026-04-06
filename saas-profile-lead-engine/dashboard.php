@@ -41,8 +41,10 @@ class Saas_Dashboard {
                 'post_status' => 'publish',
                 'post_author' => $user_id,
             ]);
+            $profile_obj = get_post($profile_id);
         } else {
             $profile_id = $profile[0]->ID;
+            $profile_obj = $profile[0];
         }
 
         $meta = saas_get_profile_meta( $profile_id );
@@ -61,7 +63,7 @@ class Saas_Dashboard {
             <div class="saas-dashboard-header">
                 <h2>Welcome, <?php echo esc_html(wp_get_current_user()->display_name); ?></h2>
                 <div class="saas-share-bar">
-                    <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile[0]->post_name); ?>" readonly>
+                    <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile_obj->post_name); ?>" readonly>
                     <button id="saas-copy-btn">Copy My Link</button>
                 </div>
             </div>
@@ -92,8 +94,9 @@ class Saas_Dashboard {
                         <option value="outline">Outline Only</option>
                         <option value="glow">Glow Effect</option>
                     </select>
-                    <input type="text" name="title" placeholder="Block Title" required>
+                    <input type="text" name="title" placeholder="Block Title (e.g. FAQ Question)" required>
                     <input type="url" name="url" placeholder="URL / Embed Link" required>
+                    <textarea name="extra" placeholder="Extra content (e.g. FAQ Answer, Price, or Testimonial text)"></textarea>
                     <button type="submit">Add Block</button>
                 </form>
 
@@ -156,9 +159,9 @@ class Saas_Dashboard {
                         <tbody>
                         <?php foreach ($leads as $lead) : ?>
                             <tr>
-                                <td><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_name', true)); ?></td>
-                                <td><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_email', true)); ?></td>
-                                <td><?php echo get_the_date('', $lead->ID); ?></td>
+                                <td data-label="Name"><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_name', true)); ?></td>
+                                <td data-label="Email"><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_email', true)); ?></td>
+                                <td data-label="Date"><?php echo get_the_date('', $lead->ID); ?></td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -180,7 +183,7 @@ class Saas_Dashboard {
             <div class="saas-preview-pane">
                 <h3>Live Preview</h3>
                 <div class="preview-frame-container">
-                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile[0]->post_name); ?>"></iframe>
+                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name); ?>"></iframe>
                 </div>
             </div>
         </div>

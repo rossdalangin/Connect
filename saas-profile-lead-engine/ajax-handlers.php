@@ -53,6 +53,16 @@ function saas_ajax_add_link() {
         update_post_meta( $link_id, '_saas_block_style', $style );
         update_post_meta( $link_id, '_saas_link_url', $url );
         update_post_meta( $link_id, '_saas_priority', 0 );
+
+        // Extended meta for complex blocks
+        if ($type === 'testimonial' && isset($_POST['extra'])) {
+            update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($_POST['extra']));
+        } elseif ($type === 'faq' && isset($_POST['extra'])) {
+            update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($_POST['extra']));
+        } elseif ($type === 'pricing' && isset($_POST['extra'])) {
+            update_post_meta($link_id, '_saas_price', sanitize_text_field($_POST['extra']));
+        }
+
         wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url, 'type' => $type, 'style' => $style ]);
     } else {
         wp_send_json_error( 'Failed to add link' );

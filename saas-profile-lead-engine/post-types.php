@@ -72,7 +72,12 @@ function saas_template_redirect( $template ) {
         // Find if a profile with this slug exists
         $profile = get_page_by_path( get_query_var( 'saas_profile' ), OBJECT, 'saas_profile' );
         if ( $profile ) {
-            // Force the profile theme index.php
+            // Force the profile theme index.php from the dedicated theme folder
+            $custom_template = get_theme_root() . '/saas-profile-theme/index.php';
+            if ( file_exists($custom_template) ) {
+                return $custom_template;
+            }
+            // Fallback to active theme if special folder not found
             return get_template_directory() . '/index.php';
         }
     }

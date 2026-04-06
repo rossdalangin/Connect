@@ -9,6 +9,15 @@ class Saas_Admin_Settings {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
         add_action( 'admin_init', [ $this, 'settings_init' ] );
+        add_action( 'admin_post_saas_load_samples', [ $this, 'handle_load_samples' ] );
+    }
+
+    public function handle_load_samples() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die('Unauthorized');
+        require_once plugin_dir_path( __FILE__ ) . 'sample-data.php';
+        Saas_Sample_Data::generate();
+        wp_redirect( admin_url('admin.php?page=saas_settings&samples_loaded=1') );
+        exit;
     }
 
     public function add_admin_menu() {
@@ -81,6 +90,8 @@ class Saas_Admin_Settings {
                 <div><strong>Total Leads:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['leads']); ?></span></div>
             </div>
 
+            <?php if ( isset($_GET['samples_loaded']) ) echo '<div class="updated"><p>Sample data generated successfully!</p></div>'; ?>
+
             <form action="options.php" method="post">
                 <?php
                 settings_fields( 'saas_settings_group' );
@@ -88,6 +99,11 @@ class Saas_Admin_Settings {
                 submit_button( 'Save Global Settings' );
                 ?>
             </form>
+
+            <hr>
+            <h2>Sample Data Generator</h2>
+            <p>Click below to populate your site with elite sample profiles, links, leads, and analytics for testing.</p>
+            <a href="<?php echo admin_url('admin-post.php?action=saas_load_samples'); ?>" class="button button-secondary">Generate Sample Data</a>
         </div>
         <?php
     }
