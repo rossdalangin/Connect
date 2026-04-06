@@ -33,7 +33,8 @@ $blocks = get_posts([
 ]);
 
 // Include Header
-get_header();
+if ( ! defined('ABSPATH') ) exit;
+include __DIR__ . '/header.php';
 ?>
 
 <style>
@@ -219,4 +220,4 @@ document.getElementById('lead-form').addEventListener('submit', function(e) {
 });
 </script>
 
-<?php get_footer(); ?>
+<?php include __DIR__ . '/footer.php'; ?>
