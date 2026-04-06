@@ -4,6 +4,18 @@
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    // 0. Copy Link Handling
+    const copyBtn = document.getElementById('saas-copy-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const linkInput = document.getElementById('saas-my-link');
+            linkInput.select();
+            document.execCommand('copy');
+            copyBtn.innerText = 'Copied!';
+            setTimeout(() => copyBtn.innerText = 'Copy My Link', 2000);
+        });
+    }
+
     // 1. Tab Switching
     const tabButtons = document.querySelectorAll('.saas-tabs button');
     const tabContents = document.querySelectorAll('.saas-tab-content');

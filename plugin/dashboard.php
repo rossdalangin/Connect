@@ -58,6 +58,13 @@ class Saas_Dashboard {
         ob_start();
         ?>
         <div id="saas-dashboard">
+            <div class="saas-dashboard-header">
+                <h2>Welcome, <?php echo esc_html(wp_get_current_user()->display_name); ?></h2>
+                <div class="saas-share-bar">
+                    <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile[0]->post_name); ?>" readonly>
+                    <button id="saas-copy-btn">Copy My Link</button>
+                </div>
+            </div>
             <nav class="saas-tabs">
                 <button class="active" data-tab="links">Links</button>
                 <button data-tab="profile">Profile</button>

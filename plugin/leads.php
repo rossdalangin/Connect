@@ -10,6 +10,8 @@ add_action( 'wp_ajax_saas_submit_lead', 'saas_ajax_submit_lead' );
 add_action( 'wp_ajax_nopriv_saas_submit_lead', 'saas_ajax_submit_lead' );
 
 function saas_ajax_submit_lead() {
+    check_ajax_referer( 'saas_lead_nonce', 'security' );
+
     $profile_id = intval( $_POST['profile_id'] );
     $name       = sanitize_text_field( $_POST['name'] );
     $email      = sanitize_email( $_POST['email'] );

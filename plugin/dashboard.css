@@ -12,6 +12,37 @@ SaaS Dashboard - Modern Interface Styles
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+.saas-dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.saas-share-bar {
+    display: flex;
+    gap: 10px;
+}
+
+.saas-share-bar input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f9f9f9;
+    font-size: 0.9rem;
+    width: 250px;
+}
+
+#saas-copy-btn {
+    padding: 8px 16px;
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
 .saas-tabs {
     display: flex;
     gap: 12px;

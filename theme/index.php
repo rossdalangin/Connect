@@ -134,6 +134,7 @@ get_header();
         <h3><?php echo esc_html( get_post_meta( $profile_id, '_saas_lead_title', true ) ?: 'Contact Me' ); ?></h3>
         <form id="lead-form">
             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+            <input type="hidden" name="security" value="<?php echo wp_create_nonce('saas_lead_nonce'); ?>">
             <div style="display:none;"><input type="text" name="saas_honeypot"></div> <!-- Spam Honeypot -->
             <div class="input-group">
                 <input type="text" name="name" placeholder="Your Name" required>
@@ -161,14 +162,23 @@ get_header();
 </div>
 
 <script>
-// Analytics tracking using REST API
+// Track Profile View on Load
+document.addEventListener('DOMContentLoaded', function() {
+    saasTrackEvent('view', <?php echo $profile_id; ?>);
+});
+
+// Analytics tracking
 function saasTrackClick(linkId) {
+    saasTrackEvent('click', linkId);
+}
+
+function saasTrackEvent(type, targetId) {
     fetch(saas_data.rest_url + '/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            event: 'click',
-            target_id: linkId
+            event: type,
+            target_id: targetId
         })
     });
 }
@@ -182,7 +192,7 @@ document.getElementById('lead-form').addEventListener('submit', function(e) {
 
     feedback.innerText = 'Sending...';
 
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+    fetch(saas_data.ajax_url, {
         method: 'POST',
         body: formData
     })
