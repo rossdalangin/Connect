@@ -13,6 +13,17 @@ function saas_ajax_submit_lead() {
     $profile_id = intval( $_POST['profile_id'] );
     $name       = sanitize_text_field( $_POST['name'] );
     $email      = sanitize_email( $_POST['email'] );
+
+    // 1. Simple Honeypot Check (Spam Protection)
+    if ( ! empty( $_POST['saas_honeypot'] ) ) {
+        wp_send_json_error( 'Spam detected' );
+    }
+
+    // 2. Mock reCAPTCHA verification stub
+    $recaptcha_response = $_POST['g-recaptcha-response'] ?? '';
+    // if ( $recaptcha_response && ! saas_verify_recaptcha($recaptcha_response) ) {
+    //     wp_send_json_error( 'Verification failed' );
+    // }
     $owner_id   = get_post_field( 'post_author', $profile_id );
 
     if ( ! $profile_id || ! is_email( $email ) ) {

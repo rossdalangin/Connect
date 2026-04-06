@@ -1,0 +1,81 @@
+/*
+SaaS Dashboard - Modern Interface Styles
+*/
+
+#saas-dashboard {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.saas-tabs {
+    display: flex;
+    gap: 12px;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 32px;
+}
+
+.saas-tabs button {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.saas-tabs button.active {
+    color: #0073aa;
+    border-bottom: 2px solid #0073aa;
+}
+
+.saas-tab-content {
+    display: none;
+}
+
+.saas-tab-content.active {
+    display: block;
+}
+
+.saas-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.saas-table th, .saas-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.saas-table th {
+    background: #f9f9f9;
+    font-weight: 700;
+}
+
+#saas-links-list {
+    list-style: none;
+    padding: 0;
+}
+
+#saas-links-list li {
+    background: #f9f9f9;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#saas-links-list .handle {
+    cursor: grab;
+    color: #ccc;
+}

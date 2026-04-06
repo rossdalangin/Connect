@@ -121,6 +121,7 @@ get_header();
         <h3><?php echo esc_html( get_post_meta( $profile_id, '_saas_lead_title', true ) ?: 'Contact Me' ); ?></h3>
         <form id="lead-form">
             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+            <div style="display:none;"><input type="text" name="saas_honeypot"></div> <!-- Spam Honeypot -->
             <div class="input-group">
                 <input type="text" name="name" placeholder="Your Name" required>
             </div>

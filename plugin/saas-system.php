@@ -29,6 +29,7 @@ require_once SAAS_PLUGIN_DIR . 'utils.php';
 
 // 4. Admin Interface
 require_once SAAS_PLUGIN_DIR . 'admin-settings.php';
+require_once SAAS_PLUGIN_DIR . 'blocks.php'; // Gutenberg Integration
 
 // Plugin Activation Hook
 register_activation_hook( __FILE__, 'saas_plugin_activation' );

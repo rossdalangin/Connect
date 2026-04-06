@@ -13,6 +13,7 @@ class Saas_Dashboard {
 
     public function enqueue_dashboard_scripts() {
         // Only enqueue on pages where the dashboard shortcode is present
+        wp_enqueue_style( 'saas-dashboard-css', plugin_dir_url( __FILE__ ) . 'dashboard.css', [], '1.0' );
         wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [], '1.0', true );
         wp_localize_script( 'saas-dashboard-js', 'saas_dashboard_data', [
             'ajax_url' => admin_url( 'admin-ajax.php' ),
