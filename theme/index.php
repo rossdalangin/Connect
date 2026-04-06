@@ -29,7 +29,7 @@ $blocks = get_posts([
     'numberposts' => -1,
 ]);
 
-// Include Header (Assuming it handles <html> and <head>)
+// Include Header
 get_header();
 ?>
 
@@ -54,7 +54,8 @@ get_header();
     <div class="blocks-container">
         <?php foreach ( $blocks as $block ) :
             $type = get_post_meta( $block->ID, '_saas_block_type', true ) ?: 'button';
-            $url = get_post_meta( $block->ID, '_saas_link_url', true );
+            $base_url = get_post_meta( $block->ID, '_saas_link_url', true );
+            $url = saas_get_effective_url( $block->ID, $base_url ); // Device/Geo Routing
             ?>
             <div class="saas-block block-<?php echo esc_attr($type); ?>">
                 <?php if ($type === 'button') : ?>
@@ -65,9 +66,31 @@ get_header();
                         <?php echo esc_html( $block->post_title ); ?>
                     </a>
                 <?php elseif ($type === 'video') : ?>
-                    <!-- Embed logic for Video -->
                     <div class="video-embed">
                         <?php echo wp_oembed_get( $url ); ?>
+                    </div>
+                <?php elseif ($type === 'testimonial') : ?>
+                    <div class="testimonial-block">
+                        <p class="quote">"<?php echo esc_html( get_post_meta($block->ID, '_saas_testimonial_text', true) ); ?>"</p>
+                        <cite>- <?php echo esc_html( $block->post_title ); ?></cite>
+                    </div>
+                <?php elseif ($type === 'faq') : ?>
+                    <details class="faq-block">
+                        <summary><?php echo esc_html( $block->post_title ); ?></summary>
+                        <p><?php echo esc_html( get_post_meta($block->ID, '_saas_faq_answer', true) ); ?></p>
+                    </details>
+                <?php elseif ($type === 'pricing') : ?>
+                    <div class="pricing-card">
+                        <h3><?php echo esc_html( $block->post_title ); ?></h3>
+                        <div class="price"><?php echo esc_html( get_post_meta($block->ID, '_saas_price', true) ); ?></div>
+                        <ul>
+                            <?php
+                            $features = get_post_meta($block->ID, '_saas_features', true) ?: [];
+                            foreach ($features as $feature) : ?>
+                                <li>✓ <?php echo esc_html($feature); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <a href="<?php echo esc_url($url); ?>" class="saas-link-btn">Select Plan</a>
                     </div>
                 <?php endif; ?>
             </div>
@@ -92,7 +115,7 @@ get_header();
 
     <!-- vCard Block (Sticky) -->
     <div class="sticky-cta">
-        <a href="<?php echo home_url('/?action=vcard&profile=' . $profile_id); ?>" class="save-contact-btn">
+        <a href="<?php echo home_url('/?saas_action=vcard&profile=' . $profile_id); ?>" class="save-contact-btn">
             💾 Save Contact Info
         </a>
     </div>
@@ -101,7 +124,7 @@ get_header();
 <script>
 // Analytics tracking using REST API
 function saasTrackClick(linkId) {
-    fetch('/wp-json/saas/v1/track', {
+    fetch(saas_data.rest_url + '/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

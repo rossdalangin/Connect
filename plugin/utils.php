@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 // Handle vCard Download
 add_action( 'init', 'saas_handle_vcard_download' );
 function saas_handle_vcard_download() {
-    if ( isset( $_GET['action'] ) && $_GET['action'] === 'vcard' && isset( $_GET['profile'] ) ) {
+    if ( isset( $_GET['saas_action'] ) && $_GET['saas_action'] === 'vcard' && isset( $_GET['profile'] ) ) {
         $profile_id = intval( $_GET['profile'] );
         $profile = get_post( $profile_id );
 

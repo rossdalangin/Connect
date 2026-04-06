@@ -5,6 +5,9 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// Include Admin Settings
+require_once( plugin_dir_path( __FILE__ ) . 'admin-settings.php' );
+
 function saas_register_post_types() {
     // 1. Profiles CPT
     register_post_type( 'saas_profile', [

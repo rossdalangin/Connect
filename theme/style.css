@@ -76,6 +76,69 @@ body {
     color: #fff;
 }
 
+.saas-block {
+    margin-bottom: 24px;
+}
+
+.testimonial-block {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    text-align: left;
+}
+
+.testimonial-block .quote {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.testimonial-block cite {
+    font-weight: bold;
+    display: block;
+}
+
+.faq-block {
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: left;
+    margin-bottom: 12px;
+}
+
+.faq-block summary {
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+}
+
+.pricing-card {
+    background: #fff;
+    padding: 24px;
+    border-radius: 16px;
+    border: 2px solid #eee;
+    margin: 20px 0;
+}
+
+.pricing-card .price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 12px 0;
+}
+
+.pricing-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+}
+
+.pricing-card li {
+    margin-bottom: 8px;
+    color: #666;
+}
+
 .lead-form-section {
     margin-top: 40px;
     background: #fff;
