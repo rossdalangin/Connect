@@ -63,12 +63,14 @@ add_action( 'init', 'saas_register_post_types' );
 
 /**
  * Custom Routing for Top-Level Slugs (yourdomain.com/username)
+ * Using a more resilient approach to avoid hijacking homepage/admin/existing pages.
  */
 function saas_add_rewrite_rules() {
+    // Only apply if it's not a standard WP path
     add_rewrite_rule(
         '^([^/]+)/?$',
         'index.php?saas_profile=$matches[1]',
-        'top'
+        'bottom' // Move to bottom to let existing pages/posts take precedence
     );
 }
 add_action( 'init', 'saas_add_rewrite_rules' );
@@ -81,9 +83,13 @@ add_filter( 'query_vars', 'saas_query_vars' );
 
 // Load the profile theme if the query var is set
 function saas_template_redirect( $template ) {
+    // Never hijack admin
+    if ( is_admin() ) return $template;
+
     $profile_slug = get_query_var( 'saas_profile' );
 
-    if ( $profile_slug ) {
+    // Check if it's actually a profile and not a standard page/post
+    if ( $profile_slug && ! is_singular(['page', 'post']) ) {
         // Find if a profile with this slug exists
         $profile = get_posts([
             'name'        => $profile_slug,

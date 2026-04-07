@@ -7,12 +7,31 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Get Profile from Query Var
 $slug = get_query_var( 'saas_profile' );
-$profile = get_page_by_path( $slug, OBJECT, 'saas_profile' );
+$profile = null;
 
+if ( $slug ) {
+    $profile = get_posts([
+        'name'        => $slug,
+        'post_type'   => 'saas_profile',
+        'post_status' => 'publish',
+        'numberposts' => 1
+    ]);
+    $profile = ! empty($profile) ? $profile[0] : null;
+}
+
+// If it's not a profile, fallback to standard WP loop (Theme as Active Theme support)
 if ( ! $profile ) {
-    status_header( 404 );
-    get_template_part( '404' );
-    exit;
+    include __DIR__ . '/header.php';
+    if ( have_posts() ) :
+        while ( have_posts() ) : the_post();
+            the_title('<h1>', '</h1>');
+            the_content();
+        endwhile;
+    else :
+        echo "<h1>Page not found.</h1>";
+    endif;
+    include __DIR__ . '/footer.php';
+    return;
 }
 
 $profile_id = $profile->ID;
