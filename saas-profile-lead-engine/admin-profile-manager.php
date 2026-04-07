@@ -80,6 +80,22 @@ class Saas_Admin_Profile_Manager {
                 <option value="serif" <?php selected(get_post_meta($post->ID, '_saas_font_family', true), "serif"); ?>>Serif (Elegant)</option>
             </select>
         </p>
+        <p>
+            <label>Profile Theme (Light/Dark):</label>
+            <select name="saas_profile_theme">
+                <option value="light" <?php selected(get_post_meta($post->ID, '_saas_profile_theme', true), "light"); ?>>Light</option>
+                <option value="dark" <?php selected(get_post_meta($post->ID, '_saas_profile_theme', true), "dark"); ?>>Dark</option>
+                <option value="vibrant" <?php selected(get_post_meta($post->ID, '_saas_profile_theme', true), "vibrant"); ?>>Vibrant Gradient</option>
+            </select>
+        </p>
+        <p>
+            <label>Container Shadow:</label>
+            <select name="saas_container_shadow">
+                <option value="none" <?php selected(get_post_meta($post->ID, '_saas_container_shadow', true), "none"); ?>>None</option>
+                <option value="soft" <?php selected(get_post_meta($post->ID, '_saas_container_shadow', true), "soft"); ?>>Soft Shadow</option>
+                <option value="hard" <?php selected(get_post_meta($post->ID, '_saas_container_shadow', true), "hard"); ?>>Hard Retro Shadow</option>
+            </select>
+        </p>
         <?php
     }
 
@@ -96,6 +112,7 @@ class Saas_Admin_Profile_Manager {
         update_post_meta( $post_id, '_saas_font_family', sanitize_text_field( $_POST['saas_font_family'] ) );
         update_post_meta( $post_id, '_saas_license_key', sanitize_text_field( $_POST['saas_license_key'] ) );
         update_post_meta( $post_id, '_saas_container_shadow', sanitize_text_field( $_POST['saas_container_shadow'] ) );
+        update_post_meta( $post_id, '_saas_profile_theme', sanitize_text_field( $_POST['saas_profile_theme'] ) );
     }
 
     public function add_links_column( $columns ) {

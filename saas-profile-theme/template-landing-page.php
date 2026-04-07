@@ -71,6 +71,46 @@ $h_img   = get_option('saas_home_image');
     </div>
 </section>
 
+<!-- Testimonials Section -->
+<section style="padding: 100px 20px; background: #fff;">
+    <div style="max-width: 1000px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 60px;">Trusted by 10,000+ creators</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <?php
+            $t_json = get_option('saas_home_testimonials');
+            $testimonials = json_decode($t_json, true) ?: [
+                ['name' => 'Sarah J.', 'role' => 'Coach', 'text' => 'This tool changed my business. I capture 3x more leads now.'],
+                ['name' => 'Mark D.', 'role' => 'Realtor', 'text' => 'The NFC business card feature is a game-changer at events.']
+            ];
+            foreach ($testimonials as $t) : ?>
+                <div style="background: #f8f9fa; padding: 40px; border-radius: 32px; text-align: left;">
+                    <p style="font-style: italic; margin-bottom: 20px;">"<?php echo esc_html($t['text']); ?>"</p>
+                    <strong><?php echo esc_html($t['name']); ?></strong> - <small><?php echo esc_html($t['role']); ?></small>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section style="padding: 100px 20px; background: #f8f9fa;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px;">Common Questions</h2>
+        <?php
+        $f_json = get_option('saas_home_faq');
+        $faqs = json_decode($f_json, true) ?: [
+            ['q' => 'Is it free?', 'a' => 'Yes, we have a generous free tier for everyone.'],
+            ['q' => 'Can I use my own domain?', 'a' => 'Absolutely! Custom domain support is available on Pro plans.']
+        ];
+        foreach ($faqs as $f) : ?>
+            <details style="background:#fff; padding:20px; border-radius:16px; margin-bottom:15px; box-shadow:0 4px 10px rgba(0,0,0,0.02);">
+                <summary style="font-weight:700; cursor:pointer; outline:none;"><?php echo esc_html($f['q']); ?></summary>
+                <p style="margin-top:15px;"><?php echo esc_html($f['a']); ?></p>
+            </details>
+        <?php endforeach; ?>
+    </div>
+</section>
+
 <style>
     .saas-cta-btn-vibrant {
         display: inline-block;

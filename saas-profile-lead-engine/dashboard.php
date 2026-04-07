@@ -113,6 +113,11 @@ class Saas_Dashboard {
                         <option value="outline">Outline Only</option>
                         <option value="glow">Glow Effect</option>
                     </select>
+                    <select name="block_animation" id="saas-block-animation">
+                        <option value="fadeinup">Fade In Up</option>
+                        <option value="bouncein">Bounce In</option>
+                        <option value="none">No Animation</option>
+                    </select>
                     <input type="text" name="title" placeholder="Block Title (e.g. FAQ Question)" required>
                     <input type="url" name="url" placeholder="URL / Embed Link" required>
                     <textarea name="extra" placeholder="Extra content (e.g. FAQ Answer, Price, or Testimonial text)"></textarea>

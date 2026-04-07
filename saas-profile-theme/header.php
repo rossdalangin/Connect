@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <?php wp_head(); ?>
 </head>
-<body <?php body_class(); ?>>
+<body <?php body_class( $theme_class ?? '' ); ?> data-saas-theme="light">
 
 <?php
 $global_logo = get_option('saas_global_logo');

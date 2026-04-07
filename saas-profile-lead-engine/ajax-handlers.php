@@ -36,6 +36,7 @@ function saas_ajax_add_link() {
     $url   = esc_url_raw( $_POST['url'] );
     $type  = sanitize_text_field( $_POST['block_type'] );
     $style = sanitize_text_field( $_POST['block_style'] );
+    $animation = sanitize_text_field( $_POST['block_animation'] );
 
     if ( empty( $title ) || empty( $url ) ) {
         wp_send_json_error( 'Missing fields' );
@@ -51,6 +52,7 @@ function saas_ajax_add_link() {
     if ( ! is_wp_error( $link_id ) ) {
         update_post_meta( $link_id, '_saas_block_type', $type );
         update_post_meta( $link_id, '_saas_block_style', $style );
+        update_post_meta( $link_id, '_saas_block_animation', $animation );
         update_post_meta( $link_id, '_saas_link_url', $url );
         update_post_meta( $link_id, '_saas_priority', 0 );
 

@@ -43,6 +43,7 @@ $gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
 $btn_shape = get_post_meta( $profile_id, '_saas_btn_shape', true ) ?: 'pill';
 $font_family = get_post_meta( $profile_id, '_saas_font_family', true ) ?: "'Inter', sans-serif";
 $shadow_style = get_post_meta( $profile_id, '_saas_container_shadow', true ) ?: 'soft';
+$profile_theme = get_post_meta($profile_id, '_saas_profile_theme', true) ?: 'light';
 
 // Fetch Links (Modular Blocks)
 $blocks = get_posts([
@@ -56,6 +57,7 @@ $blocks = get_posts([
 
 // Include Header
 if ( ! defined('ABSPATH') ) exit;
+$theme_class = 'theme-' . $profile_theme;
 include __DIR__ . '/header.php';
 ?>
 
@@ -99,13 +101,14 @@ include __DIR__ . '/header.php';
 
     <!-- Dynamic Blocks Engine -->
     <div class="blocks-container">
-        <?php foreach ( $blocks as $block ) :
+        <?php foreach ( $blocks as $index => $block ) :
             $type = get_post_meta( $block->ID, '_saas_block_type', true ) ?: 'button';
             $style = get_post_meta( $block->ID, '_saas_block_style', true ) ?: 'regular';
+            $animation = get_post_meta($block->ID, '_saas_block_animation', true) ?: 'fadeinup';
             $base_url = get_post_meta( $block->ID, '_saas_link_url', true );
             $url = saas_get_effective_url( $block->ID, $base_url ); // Device/Geo Routing
             ?>
-            <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?>">
+            <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" style="animation-delay: <?php echo $index * 0.1; ?>s;">
                 <?php if ($type === 'button') : ?>
                     <a href="<?php echo esc_url( $url ); ?>"
                        class="saas-link-btn"
@@ -221,7 +224,9 @@ include __DIR__ . '/header.php';
 <script>
 // Track Profile View on Load
 document.addEventListener('DOMContentLoaded', function() {
-    saasTrackEvent('view', <?php echo $profile_id; ?>);
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventType = urlParams.get('src') === 'nfc' ? 'nfc_tap' : 'view';
+    saasTrackEvent(eventType, <?php echo $profile_id; ?>);
 });
 
 // Analytics tracking
