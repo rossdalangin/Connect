@@ -509,6 +509,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Apply Template
+    // Lead Filtering logic
+    const statusFilter = document.getElementById('crm-filter-status');
+    const leadSearch = document.getElementById('crm-search-leads');
+    if (statusFilter && leadSearch) {
+        const filterLeads = () => {
+            const status = statusFilter.value.toLowerCase();
+            const search = leadSearch.value.toLowerCase();
+            document.querySelectorAll('.saas-table tbody tr').forEach(row => {
+                const rowStatus = row.className.replace('lead-row-', '').toLowerCase();
+                const rowText = row.innerText.toLowerCase();
+                const statusMatch = status === 'all' || rowStatus === status;
+                const searchMatch = rowText.includes(search);
+                row.style.display = (statusMatch && searchMatch) ? '' : 'none';
+            });
+        };
+        statusFilter.addEventListener('change', filterLeads);
+        leadSearch.addEventListener('input', filterLeads);
+    }
+
     const applyTemplateBtn = document.getElementById('saas-btn-apply-template');
     if (applyTemplateBtn) {
         applyTemplateBtn.addEventListener('click', () => {

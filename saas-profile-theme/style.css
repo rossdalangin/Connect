@@ -47,9 +47,14 @@ body {
     background-attachment: fixed;
     color: var(--text-color);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+}
+
+.site-header, .site-footer {
+    width: 100%;
 }
 
 #profile-container {
@@ -133,7 +138,7 @@ body {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: #1e2329;
-    padding: 22px 28px;
+    padding: 20px 28px;
     text-decoration: none;
     border-radius: var(--btn-radius, 50px);
     font-weight: 700;
@@ -141,6 +146,7 @@ body {
     transition: var(--transition);
     box-shadow: var(--shadow-style, 0 4px 15px rgba(0,0,0,0.05));
     border: 1px solid rgba(255,255,255,0.3);
+    margin-bottom: 0;
 }
 
 .saas-link-btn:hover {
@@ -149,12 +155,8 @@ body {
     background: #fff;
 }
 
-.saas-link-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
-}
-
-.saas-link-btn:hover {
+/* Modular Link Overrides */
+.saas-block.block-button .saas-link-btn:hover {
     background-color: #1e2329;
     color: #fff;
 }
@@ -230,6 +232,38 @@ body {
     margin-bottom: 24px;
     width: 100%;
 }
+
+/* Profile Bottom Bar (Mobile App-like Navigation) */
+.profile-bottom-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+    border-radius: 40px;
+    padding: 10px 25px;
+    display: none;
+    gap: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    z-index: 1000;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .profile-bottom-nav { display: flex; }
+    .sticky-cta { bottom: 90px; }
+    .social-proof-bubble { bottom: 160px; }
+}
+
+.profile-bottom-nav a {
+    text-decoration: none;
+    font-size: 1.5rem;
+    color: #666;
+    transition: var(--transition);
+}
+
+.profile-bottom-nav a:hover { transform: translateY(-5px); color: var(--primary-color); }
 
 .testimonial-block {
     background: var(--glass-bg);
@@ -508,3 +542,38 @@ body {
     border: 1px solid rgba(0,0,0,0.05);
 }
 .btn-label { flex: 1; text-align: center; }
+
+/* Standard Page Layout (Elite SaaS aesthetic) */
+.standard-page-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 100px auto;
+    padding: 80px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 48px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.4);
+    position: relative;
+    z-index: 1;
+}
+
+.entry-content {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #444;
+}
+
+.entry-content p { margin-bottom: 30px; }
+.entry-content h2 { font-size: 2rem; margin-top: 60px; margin-bottom: 25px; }
+
+@media (max-width: 768px) {
+    .standard-page-container {
+        margin: 60px 15px;
+        padding: 40px 25px;
+        border-radius: 32px;
+    }
+    .entry-header h1 { font-size: 2rem !important; }
+}

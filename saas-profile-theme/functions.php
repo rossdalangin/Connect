@@ -23,6 +23,15 @@ add_theme_support( 'custom-background' );
 // Add support for theme logo
 add_theme_support( 'custom-logo' );
 
+// Register Menus
+function saas_register_menus() {
+    register_nav_menus([
+        'primary' => 'Primary Menu (Header)',
+        'footer'  => 'Footer Menu',
+    ]);
+}
+add_action( 'init', 'saas_register_menus' );
+
 /**
  * Customizer Enhancements for Global Branding
  */
@@ -68,3 +77,35 @@ function saas_customizer_css() {
     <?php
 }
 add_action( 'wp_head', 'saas_customizer_css' );
+
+/**
+ * Data Helpers (Robustness check)
+ */
+if ( ! function_exists( 'saas_get_profile_meta' ) ) {
+    function saas_get_profile_meta( $profile_id ) {
+        return [
+            'bio'          => get_post_meta( $profile_id, '_saas_bio', true ),
+            'headline'     => get_post_meta( $profile_id, '_saas_headline', true ),
+            'theme_color'  => get_post_meta( $profile_id, '_saas_theme_color', true ) ?: '#0073aa',
+            'social_links' => get_post_meta( $profile_id, '_saas_social_links', true ) ?: [],
+        ];
+    }
+}
+
+if ( ! function_exists( 'saas_get_profile_by_slug' ) ) {
+    function saas_get_profile_by_slug( $slug ) {
+        $posts = get_posts([
+            'name'        => $slug,
+            'post_type'   => 'saas_profile',
+            'post_status' => 'publish',
+            'numberposts' => 1
+        ]);
+        return $posts ? $posts[0] : null;
+    }
+}
+
+if ( ! function_exists( 'saas_get_effective_url' ) ) {
+    function saas_get_effective_url( $block_id, $default_url ) {
+        return $default_url; // Default if plugin is inactive
+    }
+}

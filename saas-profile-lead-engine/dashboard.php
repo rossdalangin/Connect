@@ -435,11 +435,22 @@ class Saas_Dashboard {
                         <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_leads&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button button-secondary">Download CSV</a>
                     </div>
                 </div>
+
+                <div class="crm-filters">
+                    <select id="crm-filter-status">
+                        <option value="all">All Statuses</option>
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="converted">Converted</option>
+                    </select>
+                    <input type="text" id="crm-search-leads" placeholder="Search leads...">
+                </div>
+
                 <?php
                 $leads = get_posts([
                     'post_type' => 'saas_lead',
                     'post_author' => $user_id,
-                    'numberposts' => 50
+                    'numberposts' => 100
                 ]);
                 if ($leads) : ?>
                     <table class="saas-table">

@@ -23,12 +23,18 @@ if ( $slug ) {
 if ( ! $profile ) {
     include __DIR__ . '/header.php';
     if ( have_posts() ) :
-        while ( have_posts() ) : the_post();
-            the_title('<h1>', '</h1>');
-            the_content();
-        endwhile;
+        while ( have_posts() ) : the_post(); ?>
+            <article id="post-<?php the_ID(); ?>" <?php post_class('standard-page-container'); ?>>
+                <header class="entry-header">
+                    <?php the_title( '<h1 class="entry-title" style="font-size: 2.5rem; margin-bottom: 40px; text-align: center;">', '</h1>' ); ?>
+                </header>
+                <div class="entry-content">
+                    <?php the_content(); ?>
+                </div>
+            </article>
+        <?php endwhile;
     else :
-        echo "<h1>Page not found.</h1>";
+        echo "<div class='standard-page-container'><h1>Page not found.</h1></div>";
     endif;
     include __DIR__ . '/footer.php';
     return;
@@ -309,6 +315,14 @@ include __DIR__ . '/header.php';
             💾 Save Contact Info
         </a>
     </div>
+
+    <!-- Mobile Navigation Bar -->
+    <nav class="profile-bottom-nav">
+        <a href="#profile-container" title="Top">🏠</a>
+        <a href="mailto:<?php echo get_the_author_meta('user_email', $user_id); ?>" title="Email">✉️</a>
+        <a href="<?php echo home_url('/register'); ?>" title="Create Yours">➕</a>
+        <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" title="Share">📤</a>
+    </nav>
 </div>
 
 <script>

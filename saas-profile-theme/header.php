@@ -53,4 +53,42 @@ if ($global_logo) : ?>
     </div>
 <?php endif; ?>
 
+<header id="masthead" class="site-header" style="padding: 20px 0; background: #fff; border-bottom: 1px solid #eee;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+        <div class="site-branding">
+            <?php
+            if ( has_custom_logo() ) {
+                the_custom_logo();
+            } else {
+                echo '<a href="' . esc_url( home_url( '/' ) ) . '" style="font-size: 1.5rem; font-weight: 800; text-decoration: none; color: #333;">' . get_bloginfo( 'name' ) . '</a>';
+            }
+            ?>
+        </div>
+        <nav id="site-navigation" class="main-navigation">
+            <?php
+            wp_nav_menu([
+                'theme_location' => 'primary',
+                'menu_id'        => 'primary-menu',
+                'container'      => false,
+                'menu_class'     => 'primary-menu-list',
+                'fallback_cb'    => false,
+            ]);
+            ?>
+            <style>
+                .primary-menu-list { list-style: none; display: flex; gap: 30px; margin: 0; padding: 0; }
+                .primary-menu-list a { text-decoration: none; color: #666; font-weight: 600; font-size: 0.95rem; }
+                .primary-menu-list a:hover { color: var(--primary-color, #6c5ce7); }
+            </style>
+        </nav>
+        <div class="header-cta">
+            <?php if ( is_user_logged_in() ) : ?>
+                <a href="<?php echo home_url('/dashboard'); ?>" class="button button-primary" style="background: var(--primary-color, #6c5ce7); color: #fff; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700;">Dashboard</a>
+            <?php else : ?>
+                <a href="<?php echo home_url('/login'); ?>" style="text-decoration: none; color: #666; font-weight: 600; margin-right: 20px;">Login</a>
+                <a href="<?php echo home_url('/register'); ?>" class="button button-primary" style="background: var(--primary-color, #6c5ce7); color: #fff; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700;">Get Started</a>
+            <?php endif; ?>
+        </div>
+    </div>
+</header>
+
 <?php wp_body_open(); ?>

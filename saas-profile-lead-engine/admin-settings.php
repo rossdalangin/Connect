@@ -25,6 +25,7 @@ class Saas_Admin_Settings {
         if ( ! current_user_can( 'manage_options' ) ) wp_die('Unauthorized');
 
         $pages = [
+            'Home'      => 'Welcome to our platform.',
             'Dashboard' => '[saas_dashboard]',
             'Login'     => '[saas_login_form]',
             'Register'  => '[saas_register_form]',
@@ -33,15 +34,41 @@ class Saas_Admin_Settings {
             'About'     => 'Learn about us',
         ];
 
+        $home_id = 0;
         foreach ( $pages as $title => $content ) {
-            if ( ! get_page_by_title($title) ) {
-                wp_insert_post([
+            $page = get_page_by_title($title);
+            if ( ! $page ) {
+                $id = wp_insert_post([
                     'post_title'   => $title,
                     'post_content' => $content,
                     'post_status'  => 'publish',
                     'post_type'    => 'page',
                 ]);
+
+                if ($title === 'Home') {
+                    update_post_meta($id, '_wp_page_template', 'template-landing-page.php');
+                    $home_id = $id;
+                }
+                if ($title === 'Login' || $title === 'Register') {
+                    update_post_meta($id, '_wp_page_template', 'template-auth.php');
+                }
+                if ($title === 'Pricing') {
+                    update_post_meta($id, '_wp_page_template', 'template-pricing.php');
+                }
+                if ($title === 'Contact') {
+                    update_post_meta($id, '_wp_page_template', 'template-contact.php');
+                }
+                if ($title === 'About') {
+                    update_post_meta($id, '_wp_page_template', 'template-about.php');
+                }
+            } else {
+                if ($title === 'Home') $home_id = $page->ID;
             }
+        }
+
+        if ($home_id) {
+            update_option('show_on_front', 'page');
+            update_option('page_on_front', $home_id);
         }
 
         wp_redirect( admin_url('admin.php?page=saas_settings&pages_generated=1') );
