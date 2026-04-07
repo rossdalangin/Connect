@@ -308,23 +308,32 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
-    border-radius: 12px;
+    border-radius: 50%;
     text-decoration: none;
     color: #333;
-    font-size: 0.8rem;
-    font-weight: 600;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    transition: transform 0.2s;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .social-icon:hover {
-    transform: translateY(-3px);
-    color: var(--primary-color);
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
+
+.si-icon { line-height: 1; }
+
+/* Icon specific colors (optional) */
+.social-instagram:hover { background: #E1306C; color: #fff; }
+.social-linkedin:hover { background: #0A66C2; color: #fff; }
+.social-twitter:hover, .social-x:hover { background: #000; color: #fff; }
+.social-whatsapp:hover { background: #25D366; color: #fff; }
+.social-youtube:hover { background: #FF0000; color: #fff; }
 
 .countdown-block {
     background: #333;
@@ -370,6 +379,18 @@ body {
     color: #fff;
     font-weight: 700;
 }
+
+.milestone-block {
+    background: var(--glass-bg);
+    padding: 24px;
+    border-radius: 24px;
+    text-align: left;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.ms-title { font-weight: 800; margin-bottom: 12px; }
+.ms-bar-bg { background: #eee; height: 12px; border-radius: 10px; overflow: hidden; margin-bottom: 8px; }
+.ms-bar-fill { background: var(--primary-color); height: 100%; transition: width 1s ease-out; }
+.ms-label { font-size: 0.8rem; font-weight: 700; color: #888; text-align: right; }
 
 .social-icon[href*="instagram.com"] { background: #E1306C; color: #fff; }
 .social-icon[href*="facebook.com"] { background: #1877F2; color: #fff; }

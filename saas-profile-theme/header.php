@@ -16,6 +16,7 @@
             <meta property="og:description" content="<?php echo esc_attr($p_meta['headline']); ?>">
             <meta property="og:type" content="profile">
             <meta property="og:url" content="<?php echo home_url('/' . $slug); ?>">
+            <link rel="canonical" href="<?php echo home_url('/' . $slug); ?>">
             <?php if (has_post_thumbnail($profile->ID)) : ?>
                 <meta property="og:image" content="<?php echo get_the_post_thumbnail_url($profile->ID, 'full'); ?>">
             <?php endif; ?>

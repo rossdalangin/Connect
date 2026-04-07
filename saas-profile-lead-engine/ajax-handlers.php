@@ -131,6 +131,14 @@ function saas_ajax_save_profile() {
         update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
     }
 
+    // Automation specific
+    if (isset($_POST['lead_magnet_url'])) {
+        update_post_meta($profile_id, '_saas_lead_magnet_url', esc_url_raw($_POST['lead_magnet_url']));
+        update_post_meta($profile_id, '_saas_lead_redirect', esc_url_raw($_POST['lead_redirect']));
+        update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
+        update_post_meta($profile_id, '_saas_lead_success_msg', sanitize_text_field($_POST['lead_success_msg']));
+    }
+
     wp_send_json_success( 'Data saved' );
 }
 
@@ -171,6 +179,9 @@ function saas_ajax_save_link() {
     ]);
 
     update_post_meta( $link_id, '_saas_link_url', $url );
+
+    if (isset($_POST['start_date'])) update_post_meta($link_id, '_saas_start_date', sanitize_text_field($_POST['start_date']));
+    if (isset($_POST['end_date'])) update_post_meta($link_id, '_saas_end_date', sanitize_text_field($_POST['end_date']));
 
     // Determine meta key based on type
     $type = get_post_meta( $link_id, '_saas_block_type', true );
@@ -264,4 +275,69 @@ function saas_ajax_export_leads() {
     }
     fclose($output);
     exit;
+}
+
+// 8. AJAX: Get Lead Details
+add_action( 'wp_ajax_saas_get_lead_details', 'saas_ajax_get_lead_details' );
+function saas_ajax_get_lead_details() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $lead_id = intval( $_POST['lead_id'] );
+    $lead = get_post( $lead_id );
+
+    if ( ! $lead || $lead->post_type !== 'saas_lead' || $lead->post_author != get_current_user_id() ) {
+        wp_send_json_error( 'Unauthorized' );
+    }
+
+    $name = get_post_meta($lead_id, '_saas_lead_name', true);
+    $email = get_post_meta($lead_id, '_saas_lead_email', true);
+    $status = get_post_meta($lead_id, '_saas_lead_status', true) ?: 'New';
+    $notes = get_post_meta($lead_id, '_saas_lead_notes', true);
+
+    ob_start();
+    ?>
+    <div class="lead-detail-view">
+        <p><strong>Name:</strong> <?php echo esc_html($name); ?></p>
+        <p><strong>Email:</strong> <?php echo esc_html($email); ?></p>
+        <p><strong>Date:</strong> <?php echo get_the_date('F j, Y g:i a', $lead_id); ?></p>
+        <hr>
+        <form id="saas-update-lead-form">
+            <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+            <div class="field">
+                <label>Status</label>
+                <select name="status">
+                    <option value="New" <?php selected($status, 'New'); ?>>New</option>
+                    <option value="Contacted" <?php selected($status, 'Contacted'); ?>>Contacted</option>
+                    <option value="Converted" <?php selected($status, 'Converted'); ?>>Converted</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Internal Notes</label>
+                <textarea name="notes" rows="4"><?php echo esc_textarea($notes); ?></textarea>
+            </div>
+            <button type="submit" class="button button-primary">Update Lead</button>
+        </form>
+    </div>
+    <?php
+    wp_send_json_success( ob_get_clean() );
+}
+
+// 9. AJAX: Update Lead
+add_action( 'wp_ajax_saas_update_lead', 'saas_ajax_update_lead' );
+function saas_ajax_update_lead() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $lead_id = intval( $_POST['lead_id'] );
+    $status = sanitize_text_field( $_POST['status'] );
+    $notes = sanitize_textarea_field( $_POST['notes'] );
+
+    $lead = get_post( $lead_id );
+    if ( ! $lead || $lead->post_author != get_current_user_id() ) {
+        wp_send_json_error( 'Unauthorized' );
+    }
+
+    update_post_meta($lead_id, '_saas_lead_status', $status);
+    update_post_meta($lead_id, '_saas_lead_notes', $notes);
+
+    wp_send_json_success( 'Lead updated successfully' );
 }

@@ -23,6 +23,12 @@ function saas_handle_vcard_download() {
         $vcard .= "TEL;TYPE=CELL:" . get_post_meta($profile_id, '_saas_phone', true) . "\n";
         $vcard .= "EMAIL;TYPE=INTERNET:" . get_the_author_meta('user_email', $profile->post_author) . "\n";
         $vcard .= "URL:" . home_url('/' . $profile->post_name) . "\n";
+
+        // Add social links to vCard
+        foreach ($meta['social_links'] as $platform => $url) {
+            $vcard .= "X-SOCIALPROFILE;TYPE=" . strtoupper($platform) . ":" . $url . "\n";
+        }
+
         $vcard .= "NOTE:" . str_replace("\n", "\\n", $meta['bio']) . "\n";
         $vcard .= "END:VCARD";
 

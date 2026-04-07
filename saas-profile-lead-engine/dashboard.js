@@ -128,6 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const brandingForm = document.getElementById('saas-branding-form');
     if (brandingForm) brandingForm.addEventListener('submit', genericFormHandler);
 
+    const automationForm = document.getElementById('saas-automation-form');
+    if (automationForm) automationForm.addEventListener('submit', genericFormHandler);
+
     // 4. Edit & Delete Link Handling (Event Delegation)
     document.addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('edit-link')) {
@@ -137,9 +140,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const title = li.querySelector('strong').innerText;
             const url = li.querySelector('span:not(.handle)').innerText;
 
+            // Fetch extra data for modal
+            const startDate = li.dataset.start || '';
+            const endDate = li.dataset.end || '';
+
             document.getElementById('edit-link-id').value = linkId;
             document.getElementById('edit-link-title').value = title;
             document.getElementById('edit-link-url').value = url;
+            document.getElementById('edit-link-start').value = startDate;
+            document.getElementById('edit-link-end').value = endDate;
             document.getElementById('saas-edit-modal').style.display = 'block';
         }
 
@@ -167,13 +176,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Dark Mode Toggle Logic
+    const initDarkMode = () => {
+        const isDark = localStorage.getItem('saas-dark-mode') === 'true';
+        if (isDark) document.body.classList.add('saas-admin-dark');
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.innerHTML = isDark ? '☀️ Light' : '🌙 Dark';
+        toggleBtn.className = 'saas-dark-toggle';
+        document.querySelector('.saas-dashboard-header').appendChild(toggleBtn);
+
+        toggleBtn.onclick = () => {
+            const nowDark = document.body.classList.toggle('saas-admin-dark');
+            localStorage.setItem('saas-dark-mode', nowDark);
+            toggleBtn.innerHTML = nowDark ? '☀️ Light' : '🌙 Dark';
+        };
+    };
+    initDarkMode();
+
     // Modal Close
     const modal = document.getElementById('saas-edit-modal');
-    const closeBtn = document.querySelector('.close-modal');
-    if (closeBtn) {
-        closeBtn.onclick = () => modal.style.display = 'none';
-    }
-    window.onclick = (e) => { if (e.target == modal) modal.style.display = 'none'; };
+    const leadModal = document.getElementById('saas-lead-modal');
+    const closeBtns = document.querySelectorAll('.close-modal');
+
+    closeBtns.forEach(btn => {
+        btn.onclick = () => {
+            modal.style.display = 'none';
+            leadModal.style.display = 'none';
+        }
+    });
+
+    window.onclick = (e) => {
+        if (e.target == modal) modal.style.display = 'none';
+        if (e.target == leadModal) leadModal.style.display = 'none';
+    };
 
     // Edit Form Submission
     const editForm = document.getElementById('saas-edit-link-form');
@@ -240,6 +276,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+    });
+
+    // 5.0 Lead Details Management
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('view-lead-btn')) {
+            const leadId = e.target.dataset.id;
+            const content = document.getElementById('lead-details-content');
+            content.innerHTML = '<p>Loading lead details...</p>';
+            leadModal.style.display = 'block';
+
+            fetch(saas_dashboard_data.ajax_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    action: 'saas_get_lead_details',
+                    security: saas_dashboard_data.nonce,
+                    lead_id: leadId
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    content.innerHTML = data.data;
+                    // Bind Update Lead Form
+                    const updateLeadForm = document.getElementById('saas-update-lead-form');
+                    updateLeadForm.addEventListener('submit', function(ev) {
+                        ev.preventDefault();
+                        const updateData = new FormData(this);
+                        updateData.append('action', 'saas_update_lead');
+                        updateData.append('security', saas_dashboard_data.nonce);
+
+                        fetch(saas_dashboard_data.ajax_url, {
+                            method: 'POST',
+                            body: updateData
+                        })
+                        .then(r => r.json())
+                        .then(d => {
+                            alert(d.data);
+                            location.reload();
+                        });
+                    });
+                }
+            });
+        }
     });
 
     // 5. Drag-and-Drop Order (Sortable.js Integration)

@@ -250,6 +250,27 @@ SaaS Dashboard - Modern Interface Styles
     justify-content: space-between;
 }
 
+/* Status Badges */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.status-badge.new { background: #e3f2fd; color: #1976d2; }
+.status-badge.contacted { background: #fff3e0; color: #f57c00; }
+.status-badge.converted { background: #e8f5e9; color: #388e3c; }
+
+.view-lead-btn {
+    background: #eee;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
 /* Pricing Plans */
 .saas-plans-grid {
     display: grid;
@@ -274,3 +295,23 @@ SaaS Dashboard - Modern Interface Styles
 .plan-card h4 { margin: 0 0 10px; font-size: 1.25rem; }
 .plan-card .price { font-size: 2rem; font-weight: 800; margin-bottom: 20px; }
 .plan-card button, .plan-card select { width: 100%; margin-top: 10px; padding: 12px; border-radius: 8px; }
+
+/* Admin Dark Mode */
+.saas-admin-dark { background: #1a1a1a !important; color: #fff; }
+.saas-admin-dark #saas-dashboard { background: #2d2d2d; color: #fff; box-shadow: none; }
+.saas-admin-dark .saas-tabs button { color: #aaa; }
+.saas-admin-dark .saas-tabs button.active { color: #fff; border-color: #fff; }
+.saas-admin-dark #saas-links-list li, .saas-admin-dark .stat-card, .saas-admin-dark .saas-analytics-list li { background: #3d3d3d; }
+.saas-admin-dark .saas-table th { background: #3d3d3d; color: #fff; }
+.saas-admin-dark .saas-modal-content { background: #2d2d2d; color: #fff; }
+.saas-admin-dark .field input, .saas-admin-dark .field textarea, .saas-admin-dark .field select { background: #3d3d3d; border-color: #4d4d4d; color: #fff; }
+
+.saas-dark-toggle {
+    background: #eee;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 700;
+}
+.saas-admin-dark .saas-dark-toggle { background: #4d4d4d; color: #fff; }

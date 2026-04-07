@@ -107,6 +107,13 @@ include __DIR__ . '/header.php';
             $animation = get_post_meta($block->ID, '_saas_block_animation', true) ?: 'fadeinup';
             $base_url = get_post_meta( $block->ID, '_saas_link_url', true );
             $url = saas_get_effective_url( $block->ID, $base_url ); // Device/Geo Routing
+
+            // Scheduling Check
+            $start_date = get_post_meta($block->ID, '_saas_start_date', true);
+            $end_date = get_post_meta($block->ID, '_saas_end_date', true);
+            $now = time();
+            if ($start_date && strtotime($start_date) > $now) continue;
+            if ($end_date && strtotime($end_date) < $now) continue;
             ?>
             <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" style="animation-delay: <?php echo $index * 0.1; ?>s;">
                 <?php if ($type === 'button') : ?>
@@ -165,9 +172,16 @@ include __DIR__ . '/header.php';
                     <div class="social-icons-block">
                         <?php
                         $socials = get_post_meta($block->ID, '_saas_social_data', true) ?: [];
-                        foreach ($socials as $platform => $p_url) : ?>
-                            <a href="<?php echo esc_url($p_url); ?>" class="social-icon" target="_blank">
-                                <span><?php echo esc_html(ucfirst($platform)); ?></span>
+                        foreach ($socials as $platform => $p_url) :
+                            $icon_map = [
+                                'instagram' => '📸', 'facebook' => '👥', 'twitter' => '🐦', 'x' => '𝕏',
+                                'linkedin' => '💼', 'youtube' => '🎥', 'whatsapp' => '💬', 'tiktok' => '🎵',
+                                'email' => '✉️', 'phone' => '📞', 'website' => '🌐'
+                            ];
+                            $icon = $icon_map[strtolower($platform)] ?? '🔗';
+                            ?>
+                            <a href="<?php echo esc_url($p_url); ?>" class="social-icon social-<?php echo esc_attr(strtolower($platform)); ?>" target="_blank" title="<?php echo esc_attr(ucfirst($platform)); ?>">
+                                <span class="si-icon"><?php echo $icon; ?></span>
                             </a>
                         <?php endforeach; ?>
                     </div>
@@ -183,6 +197,14 @@ include __DIR__ . '/header.php';
                             <input type="email" placeholder="Email Address" required>
                             <button type="submit">Join</button>
                         </form>
+                    </div>
+                <?php elseif ($type === 'milestone') : ?>
+                    <div class="milestone-block">
+                        <div class="ms-title"><?php echo esc_html($block->post_title); ?></div>
+                        <div class="ms-bar-bg">
+                            <div class="ms-bar-fill" style="width: <?php echo esc_attr(get_post_meta($block->ID, '_saas_ms_percent', true) ?: '50'); ?>%;"></div>
+                        </div>
+                        <div class="ms-label"><?php echo esc_html(get_post_meta($block->ID, '_saas_ms_label', true) ?: 'Progress'); ?></div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -212,6 +234,7 @@ include __DIR__ . '/header.php';
         <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(home_url($slug)); ?>" target="_blank">𝕏</a>
         <a href="https://wa.me/?text=<?php echo urlencode(home_url($slug)); ?>" target="_blank">WhatsApp</a>
         <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(home_url($slug)); ?>" target="_blank">FB</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo urlencode(home_url($slug)); ?>" target="_blank">LI</a>
     </div>
 
     <div class="sticky-cta">
@@ -244,6 +267,71 @@ function saasTrackEvent(type, targetId) {
         })
     });
 }
+
+// Countdown Timer Logic
+function saasInitCountdowns() {
+    document.querySelectorAll('.countdown-block').forEach(block => {
+        const expiryStr = block.dataset.expiry;
+        if (!expiryStr) return;
+        const expiry = new Date(expiryStr).getTime();
+        const display = block.querySelector('.timer-display');
+
+        const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = expiry - now;
+
+            if (distance < 0) {
+                clearInterval(interval);
+                display.innerHTML = "EXPIRED";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            display.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }, 1000);
+    });
+}
+document.addEventListener('DOMContentLoaded', saasInitCountdowns);
+
+// Newsletter form handling via AJAX
+document.querySelectorAll('.newsletter-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const block = this.closest('.saas-block');
+        const emailInput = this.querySelector('input[type="email"]');
+        const submitBtn = this.querySelector('button');
+        const originalBtnText = submitBtn.innerText;
+
+        submitBtn.innerText = 'Joining...';
+        submitBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('action', 'saas_submit_lead');
+        formData.append('email', emailInput.value);
+        formData.append('name', 'Newsletter Subscriber');
+        formData.append('profile_id', '<?php echo $profile_id; ?>');
+        formData.append('security', '<?php echo wp_create_nonce('saas_lead_nonce'); ?>');
+
+        fetch(saas_data.ajax_url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                this.innerHTML = '<p style="font-weight:bold; color:#fff; margin-top:10px;">✓ Subscribed successfully!</p>';
+            } else {
+                alert(data.data);
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        });
+    });
+});
 
 // Lead form handling via AJAX
 document.getElementById('lead-form').addEventListener('submit', function(e) {

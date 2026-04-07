@@ -86,6 +86,7 @@ class Saas_Dashboard {
                 <button class="active" data-tab="links">Links</button>
                 <button data-tab="profile">Profile</button>
                 <button data-tab="branding">Branding</button>
+                <button data-tab="automation">Lead Setup</button>
                 <button data-tab="leads">Leads</button>
                 <button data-tab="analytics">Analytics</button>
                 <button data-tab="billing">Billing</button>
@@ -126,8 +127,11 @@ class Saas_Dashboard {
                 </form>
 
                 <ul id="saas-links-list" class="sortable">
-                    <?php foreach ( $links as $link ) : ?>
-                        <li data-id="<?php echo $link->ID; ?>">
+                    <?php foreach ( $links as $link ) :
+                        $s_date = get_post_meta($link->ID, '_saas_start_date', true);
+                        $e_date = get_post_meta($link->ID, '_saas_end_date', true);
+                        ?>
+                        <li data-id="<?php echo $link->ID; ?>" data-start="<?php echo esc_attr($s_date); ?>" data-end="<?php echo esc_attr($e_date); ?>">
                             <span class="handle">:::</span>
                             <strong><?php echo esc_html( $link->post_title ); ?></strong>
                             <span><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ); ?></span>
@@ -158,6 +162,31 @@ class Saas_Dashboard {
                         <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>">
                     </div>
                     <button type="submit">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- Automation / Lead Setup Tab -->
+            <div id="tab-automation" class="saas-tab-content">
+                <h3>Lead Automation Settings</h3>
+                <form id="saas-automation-form">
+                    <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                    <div class="field">
+                        <label>Lead Magnet URL (Automatic Download)</label>
+                        <input type="url" name="lead_magnet_url" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_magnet_url', true)); ?>" placeholder="https://yoursite.com/guide.pdf">
+                    </div>
+                    <div class="field">
+                        <label>Redirect URL after Submit</label>
+                        <input type="url" name="lead_redirect" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_redirect', true)); ?>" placeholder="https://yoursite.com/thank-you">
+                    </div>
+                    <div class="field">
+                        <label>Webhook URL (Zapier/Make)</label>
+                        <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" placeholder="https://hooks.zapier.com/...">
+                    </div>
+                    <div class="field">
+                        <label>Custom Success Message</label>
+                        <input type="text" name="lead_success_msg" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_lead_success_msg', true)); ?>" placeholder="Thank you! We will contact you soon.">
+                    </div>
+                    <button type="submit">Save Automation</button>
                 </form>
             </div>
 
@@ -215,23 +244,33 @@ class Saas_Dashboard {
             <div id="tab-leads" class="saas-tab-content">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>Your Leads</h3>
-                    <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_leads&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button button-secondary">Download CSV</a>
+                    <div style="display:flex; gap:10px;">
+                        <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_leads&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button button-secondary">Download CSV</a>
+                    </div>
                 </div>
                 <?php
                 $leads = get_posts([
                     'post_type' => 'saas_lead',
                     'post_author' => $user_id,
-                    'numberposts' => 20
+                    'numberposts' => 50
                 ]);
                 if ($leads) : ?>
                     <table class="saas-table">
-                        <thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
                         <tbody>
-                        <?php foreach ($leads as $lead) : ?>
-                            <tr>
+                        <?php foreach ($leads as $lead) :
+                            $status = get_post_meta($lead->ID, '_saas_lead_status', true) ?: 'New';
+                            ?>
+                            <tr class="lead-row-<?php echo esc_attr(strtolower($status)); ?>">
                                 <td data-label="Name"><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_name', true)); ?></td>
                                 <td data-label="Email"><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_email', true)); ?></td>
+                                <td data-label="Status">
+                                    <span class="status-badge <?php echo esc_attr(strtolower($status)); ?>"><?php echo esc_html($status); ?></span>
+                                </td>
                                 <td data-label="Date"><?php echo get_the_date('', $lead->ID); ?></td>
+                                <td data-label="Actions">
+                                    <button class="view-lead-btn" data-id="<?php echo $lead->ID; ?>">View Details</button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -307,6 +346,18 @@ class Saas_Dashboard {
             </div>
         </div>
 
+        <!-- Lead View Modal -->
+        <div id="saas-lead-modal" class="saas-modal">
+            <div class="saas-modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>Lead Details</h3>
+                <div id="lead-details-content">
+                    <!-- Loaded via AJAX -->
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Edit Block Modal -->
         <div id="saas-edit-modal" class="saas-modal">
             <div class="saas-modal-content">
@@ -325,6 +376,16 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>Extra Data</label>
                         <textarea name="extra" id="edit-link-extra"></textarea>
+                    </div>
+                    <div class="field-row" style="display:flex; gap:10px;">
+                        <div class="field">
+                            <label>Start Date</label>
+                            <input type="date" name="start_date" id="edit-link-start">
+                        </div>
+                        <div class="field">
+                            <label>End Date</label>
+                            <input type="date" name="end_date" id="edit-link-end">
+                        </div>
                     </div>
                     <button type="submit" class="button button-primary">Save Changes</button>
                 </form>
