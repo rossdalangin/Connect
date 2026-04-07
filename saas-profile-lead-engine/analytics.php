@@ -54,6 +54,19 @@ class Saas_Analytics {
     }
 
     /**
+     * Get Click Counts for all of a user's links
+     */
+    public function get_user_link_stats( $user_id ) {
+        global $wpdb;
+        $results = $wpdb->get_results( $wpdb->prepare(
+            "SELECT target_id, COUNT(*) as clicks FROM {$this->table_name} WHERE user_id = %d AND event_type = 'click' GROUP BY target_id",
+            $user_id
+        ), OBJECT_K ); // Use target_id as key
+
+        return $results ?: [];
+    }
+
+    /**
      * Get Global Analytics Summary (for Admin Dashboard)
      */
     public function get_global_summary() {

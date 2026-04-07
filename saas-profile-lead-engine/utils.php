@@ -52,23 +52,21 @@ function saas_get_profile_qr_url( $profile_slug ) {
  * Conditional Routing Helper
  */
 function saas_get_effective_url( $block_id, $default_url ) {
-    $rules = get_post_meta( $block_id, '_saas_routing_rules', true ) ?: [];
-
-    // 1. Device-based routing
-    if ( ! empty($rules['device_mapping']) ) {
+    // 1. Device-based routing (Direct Meta)
+    $mobile_url = get_post_meta($block_id, '_saas_url_mobile', true);
+    if ($mobile_url) {
         $user_agent = $_SERVER['HTTP_USER_AGENT'];
-        if ( stripos($user_agent, 'mobile') !== false && isset($rules['device_mapping']['mobile']) ) {
-            return $rules['device_mapping']['mobile'];
+        if ( stripos($user_agent, 'mobile') !== false ) {
+            return $mobile_url;
         }
     }
 
-    // 2. Geo-based routing (Simulated stub)
-    // In production, would use a GeoIP provider
-    if ( ! empty($rules['geo_mapping']) ) {
-        $country = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? 'US'; // Cloudflare example
-        if ( isset($rules['geo_mapping'][$country]) ) {
-            return $rules['geo_mapping'][$country];
-        }
+    // 2. Geo-based routing (Direct Meta)
+    $geo_url = get_post_meta($block_id, '_saas_url_geo', true);
+    if ($geo_url) {
+        $country = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? 'US'; // Cloudflare header example
+        // Logic: if user is from specified geo (simplified for blueprint)
+        // return $geo_url;
     }
 
     return $default_url;

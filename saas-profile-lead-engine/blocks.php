@@ -6,6 +6,13 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function saas_register_gutenberg_blocks() {
+    // Enqueue Block Editor Script
+    wp_register_script(
+        'saas-block-editor-js',
+        plugin_dir_url( __FILE__ ) . 'block-editor.js',
+        [ 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components' ]
+    );
+
     // Register the SaaS Profile Embed block
     register_block_type( 'saas/profile-embed', [
         'editor_script' => 'saas-block-editor-js',

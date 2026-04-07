@@ -58,6 +58,8 @@ class Saas_Dashboard {
         $meta = saas_get_profile_meta( $profile_id );
         $payments = new Saas_Payments();
         $is_pro = $payments->is_pro_user($user_id);
+        $analytics = new Saas_Analytics();
+        $link_stats = $analytics->get_user_link_stats($user_id);
 
         $links = get_posts([
             'post_type'   => 'saas_link',
@@ -73,16 +75,26 @@ class Saas_Dashboard {
         <div id="saas-dashboard">
             <!-- Onboarding Checklist -->
             <div class="saas-onboarding-card">
-                <h4>🚀 Get Started Checklist</h4>
-                <div style="display:flex; gap:20px; font-size:0.9rem;">
-                    <span>[<?php echo $meta['bio'] ? '✓' : ' '; ?>] Bio</span>
-                    <span>[<?php echo count($links) > 0 ? '✓' : ' '; ?>] Blocks</span>
-                    <span>[<?php echo $is_pro ? '✓' : ' '; ?>] Pro Upgrade</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h4>🚀 Get Started Checklist</h4>
+                        <div style="display:flex; gap:20px; font-size:0.9rem;">
+                            <span>[<?php echo $meta['bio'] ? '✓' : ' '; ?>] Bio</span>
+                            <span>[<?php echo count($links) > 0 ? '✓' : ' '; ?>] Blocks</span>
+                            <span>[<?php echo $is_pro ? '✓' : ' '; ?>] Pro Upgrade</span>
+                        </div>
+                    </div>
+                    <button id="saas-start-wizard" class="button button-primary" style="background:#fff; color:#6c5ce7; border:none; font-weight:800;">Launch Setup Wizard</button>
                 </div>
             </div>
 
             <div class="saas-dashboard-header">
-                <h2>Welcome, <?php echo esc_html(wp_get_current_user()->display_name); ?></h2>
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <h2>Welcome, <?php echo esc_html(wp_get_current_user()->display_name); ?></h2>
+                    <div class="saas-notification-bell" id="saas-notif-trigger" style="cursor:pointer; position:relative; font-size:1.5rem;">
+                        🔔<span id="notif-count" style="position:absolute; top:-5px; right:-5px; background:red; color:#fff; font-size:0.7rem; padding:2px 5px; border-radius:50%; display:none;">0</span>
+                    </div>
+                </div>
                 <div class="saas-share-bar">
                     <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile_obj->post_name); ?>" readonly>
                     <button id="saas-copy-btn">Copy My Link</button>
@@ -93,6 +105,7 @@ class Saas_Dashboard {
                 <button data-tab="profile">Profile</button>
                 <button data-tab="branding">Branding</button>
                 <button data-tab="share">Share & QR</button>
+                <button data-tab="seo">SEO & Icons</button>
                 <button data-tab="automation">Lead Setup</button>
                 <button data-tab="leads">Leads</button>
                 <button data-tab="analytics">Analytics</button>
@@ -115,6 +128,9 @@ class Saas_Dashboard {
                     <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="countdown"><span>⏳</span> Count <?php if(!$is_pro) echo '🔒'; ?></div>
                     <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="newsletter"><span>📧</span> Mail <?php if(!$is_pro) echo '🔒'; ?></div>
                     <div class="picker-item" data-type="milestone"><span>📊</span> Stats</div>
+                    <div class="picker-item pro-locked" data-type="product"><span>🛒</span> Shop 🔒</div>
+                    <div class="picker-item" data-type="social_feed"><span>📱</span> Feed</div>
+                    <div class="picker-item" data-type="lead_form"><span>🎯</span> Form</div>
                 </div>
 
                 <form id="saas-add-link-form">
@@ -146,10 +162,18 @@ class Saas_Dashboard {
                             data-start="<?php echo esc_attr($s_date); ?>"
                             data-end="<?php echo esc_attr($e_date); ?>"
                             data-custom-bg="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_bg', true)); ?>"
-                            data-custom-text="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_text', true)); ?>">
+                            data-custom-text="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_text', true)); ?>"
+                            data-url-mobile="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_mobile', true)); ?>"
+                            data-url-geo="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_geo', true)); ?>"
+                            data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>"
+                            data-image-id="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_image_id', true)); ?>"
+                            data-image-url="<?php echo esc_url(wp_get_attachment_thumb_url(get_post_meta($link->ID, '_saas_link_image_id', true))); ?>">
                             <span class="handle">:::</span>
                             <strong><?php echo esc_html( $link->post_title ); ?></strong>
                             <span><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ); ?></span>
+                            <span class="click-counter" style="background:#e3f2fd; color:#1976d2; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; margin-left:10px;" title="Total Clicks">
+                                🖱️ <?php echo isset($link_stats[$link->ID]) ? $link_stats[$link->ID]->clicks : 0; ?>
+                            </span>
                             <div class="block-actions">
                                 <button class="edit-link button-secondary">Edit</button>
                                 <button class="delete-link button-link-delete">Delete</button>
@@ -217,8 +241,14 @@ class Saas_Dashboard {
                 <form id="saas-automation-form" class="<?php echo $is_pro ? '' : 'pro-gated'; ?>">
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
                     <div class="field">
-                        <label>Lead Magnet URL (Automatic Download)</label>
-                        <input type="url" name="lead_magnet_url" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_magnet_url', true)); ?>" placeholder="https://yoursite.com/guide.pdf">
+                        <label>Lead Magnet (Automatic Download)</label>
+                        <div id="lead-magnet-preview" style="margin-bottom:10px;">
+                            <?php
+                            $lm_url = get_post_meta($profile_id, '_saas_lead_magnet_url', true);
+                            if ($lm_url) : ?><span>📄 <?php echo basename($lm_url); ?></span><?php endif; ?>
+                        </div>
+                        <input type="hidden" name="lead_magnet_url" id="saas-lead-magnet-url" value="<?php echo esc_url($lm_url); ?>">
+                        <button type="button" class="button" id="saas-lead-magnet-upload">Select File</button>
                     </div>
                     <div class="field">
                         <label>Redirect URL after Submit</label>
@@ -233,9 +263,24 @@ class Saas_Dashboard {
                         <input type="text" name="lead_success_msg" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_lead_success_msg', true)); ?>" placeholder="Thank you! We will contact you soon.">
                     </div>
                     <div class="field">
-                        <label>Enabled Form Fields</label>
-                        <label><input type="checkbox" name="form_field_phone" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_phone', true), 1); ?>> Phone Number</label>
-                        <label><input type="checkbox" name="form_field_msg" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_msg', true), 1); ?>> Message/Comments</label>
+                        <label>Lead Capture Form Builder</label>
+                        <table class="saas-mini-table">
+                            <thead><tr><th>Field</th><th>Show</th><th>Label</th><th>Req</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Phone</td>
+                                    <td><input type="checkbox" name="form_field_phone" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_phone', true), 1); ?>></td>
+                                    <td><input type="text" name="form_label_phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_form_label_phone', true) ?: 'Phone Number'); ?>" placeholder="Phone Label"></td>
+                                    <td><input type="checkbox" name="form_req_phone" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_req_phone', true), 1); ?>></td>
+                                </tr>
+                                <tr>
+                                    <td>Message</td>
+                                    <td><input type="checkbox" name="form_field_msg" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_msg', true), 1); ?>></td>
+                                    <td><input type="text" name="form_label_msg" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_form_label_msg', true) ?: 'Your Message'); ?>" placeholder="Message Label"></td>
+                                    <td><input type="checkbox" name="form_req_msg" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_req_msg', true), 1); ?>></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <button type="submit">Save Automation</button>
                 </form>
@@ -266,6 +311,53 @@ class Saas_Dashboard {
                             <a href="https://wa.me/?text=<?php echo urlencode(home_url($profile_obj->post_name)); ?>" target="_blank" class="button">WhatsApp</a>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- SEO Tab -->
+            <div id="tab-seo" class="saas-tab-content">
+                <h3>SEO & Profile Discovery</h3>
+                <form id="saas-seo-form">
+                    <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                    <div class="field">
+                        <label>Meta Title Tag</label>
+                        <input type="text" name="meta_title" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_seo_title', true)); ?>" placeholder="Page title for Google">
+                    </div>
+                    <div class="field">
+                        <label>Meta Description</label>
+                        <textarea name="meta_desc" rows="3" placeholder="Page description for Google"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_seo_desc', true)); ?></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Custom Favicon</label>
+                        <div id="favicon-preview" style="margin-bottom:10px;">
+                            <?php
+                            $favicon = get_post_meta($profile_id, '_saas_favicon', true);
+                            if ($favicon) : ?><img src="<?php echo esc_url($favicon); ?>" style="width:32px; height:32px;"><?php endif; ?>
+                        </div>
+                        <input type="hidden" name="favicon" id="saas-favicon-url" value="<?php echo esc_url($favicon); ?>">
+                        <button type="button" class="button" id="saas-favicon-upload">Upload Icon</button>
+                    </div>
+                    <button type="submit">Save SEO Settings</button>
+                </form>
+            </div>
+
+            <!-- Tracking & Analytics Tab (Pro Only) -->
+            <div id="tab-tracking" class="saas-tab-content">
+                <h3>Custom Tracking & Scripts</h3>
+                <div style="position:relative;">
+                <form id="saas-tracking-form" class="<?php echo $is_pro ? '' : 'pro-gated'; ?>">
+                    <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                    <div class="field">
+                        <label>Custom Header Scripts (e.g. Google Analytics / Meta Pixel)</label>
+                        <textarea name="header_scripts" rows="6" placeholder="<script>...</script>" <?php if(!$is_pro) echo 'disabled'; ?>><?php echo esc_textarea(get_post_meta($profile_id, '_saas_header_scripts', true)); ?></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Custom Footer Scripts</label>
+                        <textarea name="footer_scripts" rows="6" placeholder="<script>...</script>" <?php if(!$is_pro) echo 'disabled'; ?>><?php echo esc_textarea(get_post_meta($profile_id, '_saas_footer_scripts', true)); ?></textarea>
+                    </div>
+                    <button type="submit">Save Scripts</button>
+                </form>
+                <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to add custom tracking</button></div><?php endif; ?>
                 </div>
             </div>
 
@@ -308,7 +400,20 @@ class Saas_Dashboard {
                         </select>
                     </div>
                     <div class="field">
-                        <label>Apply Template</label>
+                        <label>One-Click Style Presets</label>
+                        <div class="saas-style-presets" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:20px;">
+                            <button type="button" class="preset-btn" data-preset="midnight" style="background:#1a1a1a; color:#fff; border:none; padding:10px; border-radius:8px;">Midnight</button>
+                            <button type="button" class="preset-btn" data-preset="glass" style="background:#eee; color:#333; border:1px solid #ddd; padding:10px; border-radius:8px;">Glassy</button>
+                            <button type="button" class="preset-btn" data-preset="vibrant" style="background:linear-gradient(45deg, #f093fb, #f5576c); color:#fff; border:none; padding:10px; border-radius:8px;">Vibrant</button>
+                            <button type="button" class="preset-btn" data-preset="minimal" style="background:#fff; color:#333; border:1px solid #ddd; padding:10px; border-radius:8px;">Minimal</button>
+                        </div>
+                    </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label><input type="checkbox" name="social_proof" value="1" <?php checked(get_post_meta($profile_id, '_saas_social_proof', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Enable Social Proof Pulse <?php if(!$is_pro) echo '🔒'; ?></label>
+                        <small>Shows a live view count bubble on your profile to build trust.</small>
+                    </div>
+                    <div class="field">
+                        <label>Apply Page Template</label>
                         <select id="saas-apply-template">
                             <option value="">Select Template...</option>
                             <option value="coach">Coach Funnel</option>
@@ -453,6 +558,107 @@ class Saas_Dashboard {
             </div>
         </div>
 
+        <!-- Setup Wizard Modal -->
+        <div id="saas-wizard-modal" class="saas-modal">
+            <div class="saas-modal-content wizard-content">
+                <span class="close-modal">&times;</span>
+                <div id="wizard-steps">
+                    <!-- Step 1: Profile Photo -->
+                    <div class="wizard-step active" data-step="1">
+                        <h3>Step 1: Your Brand Identity</h3>
+                        <p>A professional photo increases conversions by 40%.</p>
+                        <div class="wizard-image-selector" style="text-align:center; margin:30px 0;">
+                            <div id="wizard-photo-preview" style="width:120px; height:120px; border-radius:50%; background:#eee; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                <?php if ( has_post_thumbnail($profile_id) ) : echo get_the_post_thumbnail($profile_id, 'thumbnail'); else: ?><span>📷</span><?php endif; ?>
+                            </div>
+                            <button type="button" class="button" id="wizard-photo-btn">Select Profile Photo</button>
+                        </div>
+                        <div class="wizard-footer">
+                            <button class="button next-step">Next: Bio & Headline</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Bio & Headline -->
+                    <div class="wizard-step" data-step="2">
+                        <h3>Step 2: Tell your story</h3>
+                        <p>Briefly explain what you do and how you help.</p>
+                        <div class="field">
+                            <label>Professional Headline</label>
+                            <input type="text" id="wizard-headline" value="<?php echo esc_attr($meta['headline']); ?>" placeholder="e.g. Digital Marketing Consultant">
+                        </div>
+                        <div class="field">
+                            <label>Short Bio</label>
+                            <textarea id="wizard-bio" rows="3" placeholder="e.g. Helping businesses scale through high-performance ads."><?php echo esc_textarea($meta['bio']); ?></textarea>
+                        </div>
+                        <div class="wizard-footer">
+                            <button class="button prev-step">Back</button>
+                            <button class="button next-step">Next: Themes</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Themes -->
+                    <div class="wizard-step" data-step="3">
+                        <h3>Step 3: Choose your vibe</h3>
+                        <p>Select a primary color that matches your brand.</p>
+                        <div class="field">
+                            <label>Brand Primary Color</label>
+                            <input type="color" id="wizard-color" value="<?php echo esc_attr($meta['theme_color']); ?>" style="width:100%; height:50px; border-radius:8px;">
+                        </div>
+                        <div class="wizard-footer">
+                            <button class="button prev-step">Back</button>
+                            <button class="button next-step">Final Step: Share</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Finish -->
+                    <div class="wizard-step" data-step="4">
+                        <h3>You're all set! 🚀</h3>
+                        <p>Your professional profile is ready to go. Share it on your socials to start capturing leads.</p>
+                        <div class="wizard-share-preview" style="background:#f8f9fa; padding:20px; border-radius:12px; margin:20px 0; text-align:center;">
+                            <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name); ?>" width="100">
+                            <p><strong><?php echo home_url('/' . $profile_obj->post_name); ?></strong></p>
+                        </div>
+                        <div class="wizard-footer">
+                            <button class="button prev-step">Back</button>
+                            <button class="button button-primary" id="wizard-finish-btn">Finish & Save</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="wizard-progress">
+                    <div class="progress-bar-fill" style="width: 25%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Modal -->
+        <div id="saas-notif-modal" class="saas-modal">
+            <div class="saas-modal-content" style="max-width:400px;">
+                <span class="close-modal">&times;</span>
+                <h3>Notifications</h3>
+                <div id="saas-notif-list" style="max-height:400px; overflow-y:auto;">
+                    <?php
+                    $unread_leads = get_posts([
+                        'post_type' => 'saas_lead',
+                        'post_author' => $user_id,
+                        'meta_query' => [
+                            ['key' => '_saas_lead_status', 'value' => 'New']
+                        ],
+                        'numberposts' => 5
+                    ]);
+                    if ($unread_leads) :
+                        foreach ($unread_leads as $ul) : ?>
+                            <div class="notif-item" style="padding:15px; border-bottom:1px solid #eee;">
+                                <strong>New Lead:</strong> <?php echo esc_html(get_post_meta($ul->ID, '_saas_lead_name', true)); ?>
+                                <br><small><?php echo get_the_date('', $ul->ID); ?></small>
+                            </div>
+                        <?php endforeach;
+                    else : ?>
+                        <p>No new notifications.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
         <!-- Edit Block Modal -->
         <div id="saas-edit-modal" class="saas-modal">
             <div class="saas-modal-content">
@@ -464,9 +670,28 @@ class Saas_Dashboard {
                         <label>Title</label>
                         <input type="text" name="title" id="edit-link-title" required>
                     </div>
+                    <div class="field-row" style="display:flex; gap:10px;">
+                        <div class="field" style="flex:1;">
+                            <label>Thumbnail / Icon</label>
+                            <div id="edit-link-thumb-preview" style="width:50px; height:50px; background:#eee; margin-bottom:10px; border-radius:8px; overflow:hidden;"></div>
+                            <input type="hidden" name="link_image_id" id="edit-link-image-id">
+                            <button type="button" class="button" id="edit-link-image-btn">Upload</button>
+                        </div>
+                    </div>
                     <div class="field">
                         <label>URL / Embed</label>
                         <input type="url" name="url" id="edit-link-url" required>
+                    </div>
+                    <div id="routing-settings" class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <h4>Conditional Routing <?php if(!$is_pro) echo '🔒'; ?></h4>
+                        <div class="field">
+                            <label>Mobile-only URL</label>
+                            <input type="url" name="url_mobile" id="edit-link-mobile" placeholder="Leave empty for default" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+                        <div class="field">
+                            <label>Geo-targeted URL (e.g. US only)</label>
+                            <input type="url" name="url_geo" id="edit-link-geo" placeholder="e.g. US Specific link" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
                     </div>
                     <div class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="display:flex; gap:10px;">
                         <div class="field">
@@ -481,6 +706,12 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>Extra Data</label>
                         <textarea name="extra" id="edit-link-extra"></textarea>
+                    </div>
+                    <div class="field-row" style="display:flex; gap:10px;">
+                        <div class="field" style="flex:1;">
+                            <label>Password Protect <?php if(!$is_pro) echo '🔒'; ?></label>
+                            <input type="text" name="link_password" id="edit-link-pass" placeholder="Pro only" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
                     </div>
                     <div class="field-row" style="display:flex; gap:10px;">
                         <div class="field">

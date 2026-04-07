@@ -29,6 +29,7 @@ class Saas_Auth {
         ob_start();
         ?>
         <form id="saas-registration-form" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
+            <?php wp_nonce_field( 'saas_register_nonce', 'saas_register_security' ); ?>
             <input type="hidden" name="action" value="saas_register_user">
             <p><input type="text" name="user_login" placeholder="Username" required></p>
             <p><input type="email" name="user_email" placeholder="Email" required></p>
@@ -41,6 +42,10 @@ class Saas_Auth {
 
     public static function handle_registration() {
         if ( $_POST['action'] !== 'saas_register_user' ) return;
+
+        if ( ! isset( $_POST['saas_register_security'] ) || ! wp_verify_nonce( $_POST['saas_register_security'], 'saas_register_nonce' ) ) {
+            wp_die( 'Security check failed' );
+        }
 
         $user_login = sanitize_user( $_POST['user_login'] );
         $user_email = sanitize_email( $_POST['user_email'] );

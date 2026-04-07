@@ -44,6 +44,7 @@ function saas_ajax_submit_lead() {
         update_post_meta( $lead_id, '_saas_lead_email', $email );
         if (isset($_POST['phone'])) update_post_meta($lead_id, '_saas_lead_phone', sanitize_text_field($_POST['phone']));
         if (isset($_POST['message'])) update_post_meta($lead_id, '_saas_lead_message', sanitize_textarea_field($_POST['message']));
+        if (isset($_POST['block_id'])) update_post_meta($lead_id, '_saas_lead_block_id', intval($_POST['block_id']));
         update_post_meta( $lead_id, '_saas_lead_source_id', $profile_id );
 
         // Basic Tagging System

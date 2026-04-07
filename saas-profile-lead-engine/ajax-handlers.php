@@ -61,10 +61,11 @@ function saas_ajax_add_link() {
             update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($_POST['extra']));
         } elseif ($type === 'faq' && isset($_POST['extra'])) {
             update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($_POST['extra']));
-        } elseif ($type === 'pricing' && isset($_POST['extra'])) {
+        } elseif (($type === 'pricing' || $type === 'product') && isset($_POST['extra'])) {
             update_post_meta($link_id, '_saas_price', sanitize_text_field($_POST['extra']));
-            // Sample feature list for pricing
-            update_post_meta($link_id, '_saas_features', ['Premium Support', 'Unlimited Links', 'No Branding']);
+            if ($type === 'pricing') {
+                update_post_meta($link_id, '_saas_features', ['Premium Support', 'Unlimited Links', 'No Branding']);
+            }
         } elseif ($type === 'image_gallery' && isset($_POST['extra'])) {
             $urls = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
             update_post_meta($link_id, '_saas_gallery_images', $urls);
@@ -139,6 +140,11 @@ function saas_ajax_save_profile() {
     if (isset($_POST['btn_shape'])) {
         update_post_meta($profile_id, '_saas_btn_shape', sanitize_text_field($_POST['btn_shape']));
     }
+    if (isset($_POST['social_proof'])) {
+        update_post_meta($profile_id, '_saas_social_proof', 1);
+    } else {
+        update_post_meta($profile_id, '_saas_social_proof', 0);
+    }
     if (isset($_POST['font_family'])) {
         update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
     }
@@ -152,6 +158,24 @@ function saas_ajax_save_profile() {
 
         update_post_meta($profile_id, '_saas_form_phone', isset($_POST['form_field_phone']) ? 1 : 0);
         update_post_meta($profile_id, '_saas_form_msg', isset($_POST['form_field_msg']) ? 1 : 0);
+
+        update_post_meta($profile_id, '_saas_form_label_phone', sanitize_text_field($_POST['form_label_phone']));
+        update_post_meta($profile_id, '_saas_form_label_msg', sanitize_text_field($_POST['form_label_msg']));
+        update_post_meta($profile_id, '_saas_form_req_phone', isset($_POST['form_req_phone']) ? 1 : 0);
+        update_post_meta($profile_id, '_saas_form_req_msg', isset($_POST['form_req_msg']) ? 1 : 0);
+    }
+
+    // SEO specific
+    if (isset($_POST['meta_title'])) {
+        update_post_meta($profile_id, '_saas_seo_title', sanitize_text_field($_POST['meta_title']));
+        update_post_meta($profile_id, '_saas_seo_desc', sanitize_textarea_field($_POST['meta_desc']));
+        update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
+    }
+
+    // Tracking specific
+    if (isset($_POST['header_scripts'])) {
+        update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
+        update_post_meta($profile_id, '_saas_footer_scripts', $_POST['footer_scripts']);
     }
 
     wp_send_json_success( 'Data saved' );
@@ -200,11 +224,18 @@ function saas_ajax_save_link() {
     if (isset($_POST['custom_bg'])) update_post_meta($link_id, '_saas_custom_bg', sanitize_hex_color($_POST['custom_bg']));
     if (isset($_POST['custom_text'])) update_post_meta($link_id, '_saas_custom_text', sanitize_hex_color($_POST['custom_text']));
 
+    if (isset($_POST['url_mobile'])) update_post_meta($link_id, '_saas_url_mobile', esc_url_raw($_POST['url_mobile']));
+    if (isset($_POST['url_geo'])) update_post_meta($link_id, '_saas_url_geo', esc_url_raw($_POST['url_geo']));
+    if (isset($_POST['link_password'])) update_post_meta($link_id, '_saas_link_password', sanitize_text_field($_POST['link_password']));
+    if (isset($_POST['block_style'])) update_post_meta($link_id, '_saas_block_style', sanitize_text_field($_POST['block_style']));
+    if (isset($_POST['block_animation'])) update_post_meta($link_id, '_saas_block_animation', sanitize_text_field($_POST['block_animation']));
+    if (isset($_POST['link_image_id'])) update_post_meta($link_id, '_saas_link_image_id', intval($_POST['link_image_id']));
+
     // Determine meta key based on type
     $type = get_post_meta( $link_id, '_saas_block_type', true );
     if ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
-    elseif ($type === 'pricing') update_post_meta($link_id, '_saas_price', $extra);
+    elseif ($type === 'pricing' || $type === 'product') update_post_meta($link_id, '_saas_price', $extra);
     elseif ($type === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
     elseif ($type === 'milestone') {
         if (strpos($extra, ':') !== false) {
@@ -298,12 +329,15 @@ function saas_ajax_export_leads() {
     header('Content-Disposition: attachment; filename="leads.csv"');
 
     $output = fopen('php://output', 'w');
-    fputcsv($output, ['Name', 'Email', 'Date', 'Source Profile ID']);
+    fputcsv($output, ['Name', 'Email', 'Phone', 'Message', 'Status', 'Date', 'Source Profile ID']);
 
     foreach ($leads as $lead) {
         fputcsv($output, [
             get_post_meta($lead->ID, '_saas_lead_name', true),
             get_post_meta($lead->ID, '_saas_lead_email', true),
+            get_post_meta($lead->ID, '_saas_lead_phone', true),
+            get_post_meta($lead->ID, '_saas_lead_message', true),
+            get_post_meta($lead->ID, '_saas_lead_status', true) ?: 'New',
             get_the_date('Y-m-d H:i', $lead->ID),
             get_post_meta($lead->ID, '_saas_lead_source_id', true),
         ]);
@@ -328,8 +362,11 @@ function saas_ajax_get_lead_details() {
     $email = get_post_meta($lead_id, '_saas_lead_email', true);
     $phone = get_post_meta($lead_id, '_saas_lead_phone', true);
     $msg = get_post_meta($lead_id, '_saas_lead_message', true);
+    $block_id = get_post_meta($lead_id, '_saas_lead_block_id', true);
     $status = get_post_meta($lead_id, '_saas_lead_status', true) ?: 'New';
     $notes = get_post_meta($lead_id, '_saas_lead_notes', true);
+    $tags = get_post_meta($lead_id, '_saas_lead_tags', true);
+    if (is_array($tags)) $tags = implode(', ', $tags);
 
     ob_start();
     ?>
@@ -338,6 +375,9 @@ function saas_ajax_get_lead_details() {
         <p><strong>Email:</strong> <?php echo esc_html($email); ?></p>
         <?php if($phone) : ?><p><strong>Phone:</strong> <?php echo esc_html($phone); ?></p><?php endif; ?>
         <?php if($msg) : ?><p><strong>Message:</strong> <br><?php echo nl2br(esc_html($msg)); ?></p><?php endif; ?>
+        <?php if($block_id) : ?>
+            <p><strong>Source Block:</strong> <?php echo get_the_title($block_id); ?> (ID: <?php echo $block_id; ?>)</p>
+        <?php endif; ?>
         <p><strong>Date:</strong> <?php echo get_the_date('F j, Y g:i a', $lead_id); ?></p>
         <hr>
         <form id="saas-update-lead-form">
@@ -349,6 +389,10 @@ function saas_ajax_get_lead_details() {
                     <option value="Contacted" <?php selected($status, 'Contacted'); ?>>Contacted</option>
                     <option value="Converted" <?php selected($status, 'Converted'); ?>>Converted</option>
                 </select>
+            </div>
+            <div class="field">
+                <label>Tags (comma separated)</label>
+                <input type="text" name="tags" value="<?php echo esc_attr($tags); ?>">
             </div>
             <div class="field">
                 <label>Internal Notes</label>
@@ -369,6 +413,7 @@ function saas_ajax_update_lead() {
     $lead_id = intval( $_POST['lead_id'] );
     $status = sanitize_text_field( $_POST['status'] );
     $notes = sanitize_textarea_field( $_POST['notes'] );
+    $tags = array_map('trim', explode(',', sanitize_text_field($_POST['tags'])));
 
     $lead = get_post( $lead_id );
     if ( ! $lead || $lead->post_author != get_current_user_id() ) {
@@ -377,6 +422,7 @@ function saas_ajax_update_lead() {
 
     update_post_meta($lead_id, '_saas_lead_status', $status);
     update_post_meta($lead_id, '_saas_lead_notes', $notes);
+    update_post_meta($lead_id, '_saas_lead_tags', $tags);
 
     wp_send_json_success( 'Lead updated successfully' );
 }

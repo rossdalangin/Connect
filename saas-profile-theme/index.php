@@ -37,6 +37,10 @@ if ( ! $profile ) {
 $profile_id = $profile->ID;
 $user_id = $profile->post_author;
 $meta = saas_get_profile_meta( $profile_id );
+
+// Check Pro Status
+$payments = new Saas_Payments();
+$is_pro = $payments->is_pro_user($user_id);
 $bg_type = get_post_meta( $profile_id, '_saas_bg_type', true ) ?: 'flat';
 $bg_color = get_post_meta( $profile_id, '_saas_bg_color', true ) ?: '#f3f3f1';
 $gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
@@ -112,6 +116,11 @@ include __DIR__ . '/header.php';
     <div class="blocks-container">
         <?php foreach ( $blocks as $index => $block ) :
             $type = get_post_meta( $block->ID, '_saas_block_type', true ) ?: 'button';
+
+            // Pro Gating Check
+            $pro_blocks = ['image_gallery', 'newsletter', 'product', 'calendar'];
+            if (in_array($type, $pro_blocks) && !$is_pro) continue;
+
             $style = get_post_meta( $block->ID, '_saas_block_style', true ) ?: 'regular';
             $animation = get_post_meta($block->ID, '_saas_block_animation', true) ?: 'fadeinup';
             $base_url = get_post_meta( $block->ID, '_saas_link_url', true );
@@ -129,14 +138,21 @@ include __DIR__ . '/header.php';
             if ($start_date && strtotime($start_date) > $now) continue;
             if ($end_date && strtotime($end_date) < $now) continue;
             ?>
-            <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" style="animation-delay: <?php echo $index * 0.1; ?>s; <?php echo $block_style_attr; ?>">
-                <?php if ($type === 'button') : ?>
+            <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" data-block-id="<?php echo $block->ID; ?>" style="animation-delay: <?php echo $index * 0.1; ?>s; <?php echo $block_style_attr; ?>">
+                <?php if ($type === 'button') :
+                    $link_pass = get_post_meta($block->ID, '_saas_link_password', true);
+                    ?>
                     <a href="<?php echo esc_url( $url ); ?>"
                        class="saas-link-btn"
                        style="<?php echo $block_style_attr; ?>"
                        data-link-id="<?php echo $block->ID; ?>"
-                       onclick="saasTrackClick(<?php echo $block->ID; ?>)">
-                        <?php echo esc_html( $block->post_title ); ?>
+                       onclick="return saasCheckLink(event, <?php echo $block->ID; ?>, '<?php echo esc_js($link_pass); ?>')">
+                        <?php
+                        $thumb_id = get_post_meta($block->ID, '_saas_link_image_id', true);
+                        if ($thumb_id) : ?>
+                            <img src="<?php echo esc_url(wp_get_attachment_thumb_url($thumb_id)); ?>" class="btn-thumb">
+                        <?php endif; ?>
+                        <span class="btn-label"><?php echo esc_html( $block->post_title ); ?> <?php if($link_pass) echo '🔒'; ?></span>
                     </a>
                 <?php elseif ($type === 'video') : ?>
                     <div class="video-embed">
@@ -221,38 +237,53 @@ include __DIR__ . '/header.php';
                         </div>
                         <div class="ms-label"><?php echo esc_html(get_post_meta($block->ID, '_saas_ms_label', true) ?: 'Progress'); ?></div>
                     </div>
+                <?php elseif ($type === 'product') : ?>
+                    <div class="product-block">
+                        <div class="product-info">
+                            <h4><?php echo esc_html($block->post_title); ?></h4>
+                            <div class="product-price"><?php echo esc_html(get_post_meta($block->ID, '_saas_price', true) ?: '$0'); ?></div>
+                        </div>
+                        <a href="<?php echo esc_url($url); ?>" class="saas-link-btn product-cta">Buy Now</a>
+                    </div>
+                <?php elseif ($type === 'social_feed') : ?>
+                    <div class="social-feed-block">
+                        <div style="border:1px dashed #ccc; padding:40px; border-radius:12px; background:rgba(0,0,0,0.02);">
+                            <p style="margin:0; font-weight:bold;"><?php echo esc_html($block->post_title); ?> Feed</p>
+                            <p style="font-size:0.8rem; color:#888;">Embed for <?php echo esc_url($url); ?> will appear here.</p>
+                        </div>
+                    </div>
+                <?php elseif ($type === 'lead_form') : ?>
+                    <section class="lead-form-section block-lead-form">
+                        <h3><?php echo esc_html( $block->post_title ?: 'Contact Me' ); ?></h3>
+                        <form class="saas-dynamic-form" data-block-id="<?php echo $block->ID; ?>">
+                            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="block_id" value="<?php echo $block->ID; ?>">
+                            <input type="hidden" name="security" value="<?php echo wp_create_nonce('saas_lead_nonce'); ?>">
+                            <div style="display:none;"><input type="text" name="saas_honeypot"></div>
+                            <div class="input-group">
+                                <input type="text" name="name" placeholder="Your Name" required>
+                            </div>
+                            <div class="input-group">
+                                <input type="email" name="email" placeholder="Your Email" required>
+                            </div>
+                            <?php if (get_post_meta($profile_id, '_saas_form_phone', true)) : ?>
+                                <div class="input-group">
+                                    <input type="text" name="phone" placeholder="<?php echo esc_attr(get_post_meta($profile_id, '_saas_form_label_phone', true) ?: 'Phone Number'); ?>" <?php if(get_post_meta($profile_id, '_saas_form_req_phone', true)) echo 'required'; ?>>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (get_post_meta($profile_id, '_saas_form_msg', true)) : ?>
+                                <div class="input-group">
+                                    <textarea name="message" placeholder="<?php echo esc_attr(get_post_meta($profile_id, '_saas_form_label_msg', true) ?: 'Your Message'); ?>" rows="3" <?php if(get_post_meta($profile_id, '_saas_form_req_msg', true)) echo 'required'; ?>></textarea>
+                                </div>
+                            <?php endif; ?>
+                            <button type="submit">Submit Request</button>
+                        </form>
+                        <div class="lead-feedback"></div>
+                    </section>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </div>
-
-    <!-- Lead Funnel Block -->
-    <section class="lead-form-section">
-        <h3><?php echo esc_html( get_post_meta( $profile_id, '_saas_lead_title', true ) ?: 'Contact Me' ); ?></h3>
-        <form id="lead-form">
-            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
-            <input type="hidden" name="security" value="<?php echo wp_create_nonce('saas_lead_nonce'); ?>">
-            <div style="display:none;"><input type="text" name="saas_honeypot"></div> <!-- Spam Honeypot -->
-            <div class="input-group">
-                <input type="text" name="name" placeholder="Your Name" required>
-            </div>
-            <div class="input-group">
-                <input type="email" name="email" placeholder="Your Email" required>
-            </div>
-            <?php if (get_post_meta($profile_id, '_saas_form_phone', true)) : ?>
-                <div class="input-group">
-                    <input type="text" name="phone" placeholder="Your Phone Number">
-                </div>
-            <?php endif; ?>
-            <?php if (get_post_meta($profile_id, '_saas_form_msg', true)) : ?>
-                <div class="input-group">
-                    <textarea name="message" placeholder="How can I help you?" rows="3"></textarea>
-                </div>
-            <?php endif; ?>
-            <button type="submit">Submit Request</button>
-        </form>
-        <div id="lead-feedback"></div>
-    </section>
 
     <!-- vCard Block (Sticky) -->
     <div class="social-share-buttons">
@@ -261,6 +292,17 @@ include __DIR__ . '/header.php';
         <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(home_url($slug)); ?>" target="_blank">FB</a>
         <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo urlencode(home_url($slug)); ?>" target="_blank">LI</a>
     </div>
+
+    <?php
+    $social_proof = get_post_meta($profile_id, '_saas_social_proof', true);
+    if ($social_proof && $is_pro) :
+        $analytics = new Saas_Analytics();
+        $summary = $analytics->get_user_summary($user_id);
+    ?>
+        <div class="social-proof-bubble animate-bouncein">
+            👁️ <?php echo number_format($summary['views'] + 100); ?> people visited recently
+        </div>
+    <?php endif; ?>
 
     <div class="sticky-cta">
         <a href="<?php echo home_url('/?saas_action=vcard&profile=' . $profile_id); ?>" class="save-contact-btn">
@@ -283,6 +325,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
     }
 });
+
+// Password protection check
+function saasCheckLink(e, linkId, pass) {
+    if (!pass) return true;
+    e.preventDefault();
+    const input = prompt("This link is password protected. Enter password:");
+    if (input === pass) {
+        saasTrackClick(linkId);
+        window.location.href = e.target.href;
+    } else {
+        alert("Incorrect password.");
+    }
+    return false;
+}
 
 // Analytics tracking
 function saasTrackClick(linkId) {
@@ -346,6 +402,7 @@ document.querySelectorAll('.newsletter-form').forEach(form => {
         formData.append('email', emailInput.value);
         formData.append('name', 'Newsletter Subscriber');
         formData.append('profile_id', '<?php echo $profile_id; ?>');
+        if (block.dataset.blockId) formData.append('block_id', block.dataset.blockId);
         formData.append('security', '<?php echo wp_create_nonce('saas_lead_nonce'); ?>');
 
         fetch(saas_data.ajax_url, {
@@ -382,38 +439,40 @@ window.addEventListener('message', function(event) {
     }
 });
 
-// Lead form handling via AJAX
-document.getElementById('lead-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const feedback = document.getElementById('lead-feedback');
-    const formData = new FormData(this);
-    formData.append('action', 'saas_submit_lead');
+// Lead form handling via AJAX (Dynamic Forms)
+document.querySelectorAll('.saas-dynamic-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const feedback = this.nextElementSibling;
+        const formData = new FormData(this);
+        formData.append('action', 'saas_submit_lead');
 
-    feedback.innerText = 'Sending...';
+        feedback.innerText = 'Sending...';
 
-    fetch(saas_data.ajax_url, {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        feedback.innerText = data.data.message;
-        if (data.success) {
-            this.reset();
-            // Lead Magnet Delivery
-            if (data.data.download) {
-                const a = document.createElement('a');
-                a.href = data.data.download;
-                a.download = '';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+        fetch(saas_data.ajax_url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            feedback.innerText = data.data.message;
+            if (data.success) {
+                this.reset();
+                // Lead Magnet Delivery
+                if (data.data.download) {
+                    const a = document.createElement('a');
+                    a.href = data.data.download;
+                    a.download = '';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+                if (data.data.redirect) window.location.href = data.data.redirect;
             }
-            if (data.data.redirect) window.location.href = data.data.redirect;
-        }
-    })
-    .catch(err => {
-        feedback.innerText = 'Error sending lead.';
+        })
+        .catch(err => {
+            feedback.innerText = 'Error sending lead.';
+        });
     });
 });
 </script>

@@ -18,6 +18,7 @@ class Saas_Admin_Settings {
 
     public function enqueue_admin_styles() {
         wp_enqueue_style( 'saas-admin-css', plugin_dir_url( __FILE__ ) . 'admin.css' );
+        wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', [], '4.0.0', true );
     }
 
     public function handle_generate_pages() {
@@ -338,6 +339,31 @@ class Saas_Admin_Settings {
                 <div><strong>Total Clicks:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['clicks']); ?></span></div>
                 <div><strong>Total Leads:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['leads']); ?></span></div>
             </div>
+
+            <div style="background:#fff; padding:30px; border-radius:12px; margin-bottom:40px; box-shadow:0 10px 30px rgba(0,0,0,0.05);">
+                <h3>System Growth Trends</h3>
+                <canvas id="saas-admin-chart" height="100"></canvas>
+            </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const ctx = document.getElementById('saas-admin-chart');
+                if (ctx && typeof Chart !== 'undefined') {
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                            datasets: [{
+                                label: 'New Profiles',
+                                data: [65, 59, 80, 81, 56, 95],
+                                backgroundColor: '#6c5ce7'
+                            }]
+                        },
+                        options: { responsive: true }
+                    });
+                }
+            });
+            </script>
 
             <form action="options.php" method="post">
                 <?php

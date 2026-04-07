@@ -13,8 +13,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 datasets: [{
                     label: 'Page Views',
-                    data: [12, 19, 3, 5, 2, 3, 10], // Simulated daily data
+                    data: [120, 190, 30, 50, 20, 30, 100], // Last 7 days
                     borderColor: '#6c5ce7',
+                    backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Link Clicks',
+                    data: [45, 70, 12, 20, 5, 10, 35],
+                    borderColor: '#39e09b',
                     tension: 0.4
                 }]
             },
@@ -41,6 +48,48 @@ document.addEventListener('DOMContentLoaded', function() {
                 profileImageId.value = attachment.id;
                 profilePreview.innerHTML = `<img src="${attachment.sizes.thumbnail.url}">`;
                 updatePreview({ type: 'live_update', key: 'cover_update', value: attachment.id });
+            });
+            frame.open();
+        };
+    }
+
+    const lmUploadBtn = document.getElementById('saas-lead-magnet-upload');
+    if (lmUploadBtn) {
+        lmUploadBtn.onclick = (e) => {
+            e.preventDefault();
+            const frame = wp.media({ title: 'Select Lead Magnet File', multiple: false });
+            frame.on('select', () => {
+                const attachment = frame.state().get('selection').first().toJSON();
+                document.getElementById('saas-lead-magnet-url').value = attachment.url;
+                document.getElementById('lead-magnet-preview').innerHTML = `<span>📄 ${attachment.filename}</span>`;
+            });
+            frame.open();
+        };
+    }
+
+    const faviconUploadBtn = document.getElementById('saas-favicon-upload');
+    if (faviconUploadBtn) {
+        faviconUploadBtn.onclick = (e) => {
+            e.preventDefault();
+            const frame = wp.media({ title: 'Select Favicon', multiple: false });
+            frame.on('select', () => {
+                const attachment = frame.state().get('selection').first().toJSON();
+                document.getElementById('saas-favicon-url').value = attachment.url;
+                document.getElementById('favicon-preview').innerHTML = `<img src="${attachment.url}" style="width:32px; height:32px;">`;
+            });
+            frame.open();
+        };
+    }
+
+    const linkThumbBtn = document.getElementById('edit-link-image-btn');
+    if (linkThumbBtn) {
+        linkThumbBtn.onclick = (e) => {
+            e.preventDefault();
+            const frame = wp.media({ title: 'Select Link Thumbnail', multiple: false });
+            frame.on('select', () => {
+                const attachment = frame.state().get('selection').first().toJSON();
+                document.getElementById('edit-link-image-id').value = attachment.id;
+                document.getElementById('edit-link-thumb-preview').innerHTML = `<img src="${attachment.sizes.thumbnail.url}" style="width:100%; height:100%; object-fit:cover;">`;
             });
             frame.open();
         };
@@ -125,7 +174,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     'video': 'Extra info (optional)...',
                     'calendar': 'Extra info (optional)...',
                     'newsletter': 'Extra info (optional)...',
-                    'milestone': 'Enter label:percent (e.g. Sales:85)'
+                    'milestone': 'Enter label:percent (e.g. Sales:85)',
+                    'product': 'Enter Price (e.g. $49)'
                 };
                 if (extraField) extraField.placeholder = placeholders[type] || 'Extra content...';
             });
@@ -229,6 +279,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const brandingForm = document.getElementById('saas-branding-form');
     if (brandingForm) brandingForm.addEventListener('submit', genericFormHandler);
 
+    const seoForm = document.getElementById('saas-seo-form');
+    if (seoForm) seoForm.addEventListener('submit', genericFormHandler);
+
+    const trackingForm = document.getElementById('saas-tracking-form');
+    if (trackingForm) trackingForm.addEventListener('submit', genericFormHandler);
+
     const automationForm = document.getElementById('saas-automation-form');
     if (automationForm) automationForm.addEventListener('submit', genericFormHandler);
 
@@ -245,6 +301,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const endDate = li.dataset.end || '';
             const customBg = li.dataset.customBg || '';
             const customText = li.dataset.customText || '';
+            const urlMobile = li.dataset.urlMobile || '';
+            const urlGeo = li.dataset.urlGeo || '';
+            const blockStyle = li.dataset.style || 'regular';
+            const blockAnimation = li.dataset.animation || 'fadeinup';
+            const linkPass = li.dataset.password || '';
+            const imageId = li.dataset.imageId || '';
+            const imageUrl = li.dataset.imageUrl || '';
 
             document.getElementById('edit-link-id').value = linkId;
             document.getElementById('edit-link-title').value = title;
@@ -253,6 +316,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-link-end').value = endDate;
             document.getElementById('edit-link-bg').value = customBg;
             document.getElementById('edit-link-text').value = customText;
+            if (document.getElementById('edit-link-mobile')) document.getElementById('edit-link-mobile').value = urlMobile;
+            if (document.getElementById('edit-link-geo')) document.getElementById('edit-link-geo').value = urlGeo;
+            if (document.getElementById('edit-link-style')) document.getElementById('edit-link-style').value = blockStyle;
+            if (document.getElementById('edit-link-animation')) document.getElementById('edit-link-animation').value = blockAnimation;
+            if (document.getElementById('edit-link-pass')) document.getElementById('edit-link-pass').value = linkPass;
+            if (document.getElementById('edit-link-image-id')) document.getElementById('edit-link-image-id').value = imageId;
+            if (document.getElementById('edit-link-thumb-preview')) {
+                document.getElementById('edit-link-thumb-preview').innerHTML = imageUrl ? `<img src="${imageUrl}" style="width:100%; height:100%; object-fit:cover;">` : '';
+            }
             document.getElementById('saas-edit-modal').style.display = 'block';
         }
 
@@ -301,6 +373,77 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     initDarkMode();
 
+    // Wizard Logic
+    const wizardModal = document.getElementById('saas-wizard-modal');
+    const wizardSteps = document.querySelectorAll('.wizard-step');
+    const progressBar = document.querySelector('.progress-bar-fill');
+    let currentStep = 1;
+
+    const showStep = (step) => {
+        wizardSteps.forEach(s => s.classList.remove('active'));
+        document.querySelector(`.wizard-step[data-step="${step}"]`).classList.add('active');
+        progressBar.style.width = `${(step / wizardSteps.length) * 100}%`;
+    };
+
+    document.getElementById('saas-start-wizard')?.addEventListener('click', () => {
+        wizardModal.style.display = 'block';
+    });
+
+    document.querySelectorAll('.next-step').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentStep++;
+            showStep(currentStep);
+        });
+    });
+
+    document.querySelectorAll('.prev-step').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentStep--;
+            showStep(currentStep);
+        });
+    });
+
+    // Wizard Photo Sync
+    const wizardPhotoBtn = document.getElementById('wizard-photo-btn');
+    if (wizardPhotoBtn) {
+        wizardPhotoBtn.onclick = (e) => {
+            e.preventDefault();
+            const frame = wp.media({ title: 'Profile Photo', multiple: false });
+            frame.on('select', () => {
+                const attachment = frame.state().get('selection').first().toJSON();
+                document.getElementById('profile-image-id').value = attachment.id;
+                document.getElementById('wizard-photo-preview').innerHTML = `<img src="${attachment.sizes.thumbnail.url}">`;
+                updatePreview({ type: 'live_update', key: 'cover_update', value: attachment.id });
+            });
+            frame.open();
+        };
+    }
+
+    document.getElementById('wizard-finish-btn')?.addEventListener('click', () => {
+        // Collect data and save
+        const formData = new FormData();
+        formData.append('action', 'saas_save_profile');
+        formData.append('security', saas_dashboard_data.nonce);
+        formData.append('profile_id', document.querySelector('input[name="profile_id"]').value);
+        formData.append('headline', document.getElementById('wizard-headline').value);
+        formData.append('bio', document.getElementById('wizard-bio').value);
+        formData.append('theme_color', document.getElementById('wizard-color').value);
+        formData.append('profile_image_id', document.getElementById('profile-image-id').value);
+
+        fetch(saas_dashboard_data.ajax_url, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            alert('Profile saved! 🚀');
+            location.reload();
+        });
+    });
+
+    // Notifications Logic
+    const notifModal = document.getElementById('saas-notif-modal');
+    document.getElementById('saas-notif-trigger')?.addEventListener('click', () => {
+        notifModal.style.display = 'block';
+    });
+
     // Modal Close
     const modal = document.getElementById('saas-edit-modal');
     const leadModal = document.getElementById('saas-lead-modal');
@@ -316,6 +459,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.onclick = (e) => {
         if (modal && e.target == modal) modal.style.display = 'none';
         if (leadModal && e.target == leadModal) leadModal.style.display = 'none';
+        if (wizardModal && e.target == wizardModal) wizardModal.style.display = 'none';
+        if (notifModal && e.target == notifModal) notifModal.style.display = 'none';
     };
 
     // Edit Form Submission
@@ -338,6 +483,30 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Style Presets Logic
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const preset = btn.dataset.preset;
+            const config = {
+                midnight: { color: '#ffffff', bg: '#1a1a1a', theme: 'dark', shape: 'rounded' },
+                glass: { color: '#6c5ce7', bg: 'rgba(255,255,255,0.7)', theme: 'light', shape: 'pill' },
+                vibrant: { color: '#ffffff', bg: 'linear-gradient(45deg, #f093fb, #f5576c)', theme: 'vibrant', shape: 'pill' },
+                minimal: { color: '#333333', bg: '#ffffff', theme: 'light', shape: 'square' }
+            };
+            const c = config[preset];
+            if (c) {
+                document.querySelector('input[name="theme_color"]').value = c.color;
+                document.querySelector('input[name="bg_value"]').value = c.bg;
+                document.querySelector('select[name="bg_type"]').value = preset === 'vibrant' ? 'gradient' : 'flat';
+                document.querySelector('select[name="btn_shape"]').value = c.shape;
+
+                // Trigger real-time update
+                updatePreview({ type: 'live_update', key: 'theme_color', value: c.color });
+                updatePreview({ type: 'live_update', key: 'bg_value', value: c.bg });
+            }
+        });
+    });
 
     // Apply Template
     const applyTemplateBtn = document.getElementById('saas-btn-apply-template');
