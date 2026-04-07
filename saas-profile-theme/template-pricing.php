@@ -5,9 +5,10 @@
 
 get_header(); ?>
 
+<?php $p_title = get_option('saas_pricing_title') ?: 'Simple, Transparent Pricing'; ?>
 <main id="pricing-page" class="site-main site-container" style="max-width: 1100px; margin: 80px auto; text-align: center; padding: 0 20px;">
     <header class="section-header" style="margin-bottom: 60px;">
-        <h1 style="font-size: 3rem; margin-bottom: 20px;">Simple, Transparent Pricing</h1>
+        <h1 style="font-size: 3rem; margin-bottom: 20px;"><?php echo esc_html($p_title); ?></h1>
         <p style="font-size: 1.25rem;">Choose the plan that's right for your business growth.</p>
     </header>
 

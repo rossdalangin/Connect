@@ -5,9 +5,10 @@
 
 get_header(); ?>
 
+<?php $c_title = get_option('saas_contact_title') ?: 'Get in Touch'; ?>
 <main id="contact-page" class="site-main site-container" style="max-width: 800px; margin: 80px auto; padding: 0 20px;">
     <div style="background:#fff; padding:60px; border-radius:32px; box-shadow:0 15px 40px rgba(0,0,0,0.05); text-align:center;">
-        <h1 style="font-size: 3rem; margin-bottom: 20px;">Get in Touch</h1>
+        <h1 style="font-size: 3rem; margin-bottom: 20px;"><?php echo esc_html($c_title); ?></h1>
         <p style="font-size: 1.25rem; margin-bottom: 40px;">Have questions? We're here to help you scale.</p>
 
         <form style="text-align:left;">

@@ -44,25 +44,29 @@ $h_img   = get_option('saas_home_image');
 </main>
 
 <!-- Features Grid -->
-<section class="features-section" style="padding: 100px 20px; background: #fff;">
+<section class="features-section" style="padding: 120px 20px; background: #f8f9fa; border-top: 1px solid #eee;">
     <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
         <h2 style="font-size: 2.5rem; margin-bottom: 60px;">Everything you need to grow online</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
-            <div>
-                <div style="font-size: 3rem; margin-bottom: 20px;">🚀</div>
-                <h3>Fast Setup</h3>
-                <p>Launch your profile in under 60 seconds with our pro templates.</p>
-            </div>
-            <div>
-                <div style="font-size: 3rem; margin-bottom: 20px;">📊</div>
-                <h3>Smart Analytics</h3>
-                <p>Track every click and view with high-performance tracking.</p>
-            </div>
-            <div>
-                <div style="font-size: 3rem; margin-bottom: 20px;">🎯</div>
-                <h3>Lead Capture</h3>
-                <p>Convert your social traffic into real customers with built-in forms.</p>
-            </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
+            <?php
+            $features_json = get_option('saas_home_features');
+            $features = json_decode($features_json, true);
+
+            if (!$features) {
+                $features = [
+                    ['icon' => '🚀', 'title' => 'Fast Setup', 'desc' => 'Launch your profile in under 60 seconds.'],
+                    ['icon' => '📊', 'title' => 'Smart Analytics', 'desc' => 'Track every click and view with high-performance tracking.'],
+                    ['icon' => '🎯', 'title' => 'Lead Capture', 'desc' => 'Convert traffic into real customers with built-in forms.']
+                ];
+            }
+
+            foreach ($features as $f) : ?>
+                <div style="background:#fff; padding:40px; border-radius:32px; box-shadow:0 10px 40px rgba(0,0,0,0.03); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='none'">
+                    <div style="font-size: 3rem; margin-bottom: 20px;"><?php echo esc_html($f['icon']); ?></div>
+                    <h3 style="font-size:1.5rem; margin-bottom:15px;"><?php echo esc_html($f['title']); ?></h3>
+                    <p><?php echo esc_html($f['desc']); ?></p>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>

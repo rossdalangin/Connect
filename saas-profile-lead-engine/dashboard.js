@@ -105,8 +105,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 4. Delete Link Handling (Event Delegation)
+    // 4. Edit & Delete Link Handling (Event Delegation)
     document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('edit-link')) {
+            const btn = e.target;
+            const li = btn.closest('li');
+            const linkId = li.dataset.id;
+            const title = li.querySelector('strong').innerText;
+            const url = li.querySelector('span:not(.handle)').innerText;
+
+            document.getElementById('edit-link-id').value = linkId;
+            document.getElementById('edit-link-title').value = title;
+            document.getElementById('edit-link-url').value = url;
+            document.getElementById('saas-edit-modal').style.display = 'block';
+        }
+
         if (e.target && e.target.classList.contains('delete-link')) {
             const btn = e.target;
             const linkId = btn.closest('li').dataset.id;
@@ -130,6 +143,35 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    // Modal Close
+    const modal = document.getElementById('saas-edit-modal');
+    const closeBtn = document.querySelector('.close-modal');
+    if (closeBtn) {
+        closeBtn.onclick = () => modal.style.display = 'none';
+    }
+    window.onclick = (e) => { if (e.target == modal) modal.style.display = 'none'; };
+
+    // Edit Form Submission
+    const editForm = document.getElementById('saas-edit-link-form');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            formData.append('action', 'saas_save_link');
+            formData.append('security', saas_dashboard_data.nonce);
+
+            fetch(saas_dashboard_data.ajax_url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.data);
+                location.reload();
+            });
+        });
+    }
 
     // 5.5 Apply Template Handling
     const applyTemplateBtn = document.getElementById('saas-btn-apply-template');

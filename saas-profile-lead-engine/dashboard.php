@@ -111,7 +111,10 @@ class Saas_Dashboard {
                             <span class="handle">:::</span>
                             <strong><?php echo esc_html( $link->post_title ); ?></strong>
                             <span><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ); ?></span>
-                            <button class="delete-link">Delete</button>
+                            <div class="block-actions">
+                                <button class="edit-link button-secondary">Edit</button>
+                                <button class="delete-link button-link-delete">Delete</button>
+                            </div>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -249,6 +252,30 @@ class Saas_Dashboard {
                 <div class="preview-frame-container">
                     <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name); ?>"></iframe>
                 </div>
+            </div>
+        </div>
+
+        <!-- Edit Block Modal -->
+        <div id="saas-edit-modal" class="saas-modal">
+            <div class="saas-modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>Edit Block</h3>
+                <form id="saas-edit-link-form">
+                    <input type="hidden" name="link_id" id="edit-link-id">
+                    <div class="field">
+                        <label>Title</label>
+                        <input type="text" name="title" id="edit-link-title" required>
+                    </div>
+                    <div class="field">
+                        <label>URL / Embed</label>
+                        <input type="url" name="url" id="edit-link-url" required>
+                    </div>
+                    <div class="field">
+                        <label>Extra Data</label>
+                        <textarea name="extra" id="edit-link-extra"></textarea>
+                    </div>
+                    <button type="submit" class="button button-primary">Save Changes</button>
+                </form>
             </div>
         </div>
         <?php

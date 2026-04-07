@@ -122,6 +122,37 @@ function saas_ajax_delete_link() {
     }
 }
 
+// 7. AJAX: Save Edited Link
+add_action( 'wp_ajax_saas_save_link', 'saas_ajax_save_link' );
+function saas_ajax_save_link() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $link_id = intval( $_POST['link_id'] );
+    $title   = sanitize_text_field( $_POST['title'] );
+    $url     = esc_url_raw( $_POST['url'] );
+    $extra   = sanitize_textarea_field( $_POST['extra'] );
+
+    $post = get_post( $link_id );
+    if ( ! $post || $post->post_author != get_current_user_id() ) {
+        wp_send_json_error( 'Unauthorized' );
+    }
+
+    wp_update_post([
+        'ID'         => $link_id,
+        'post_title' => $title,
+    ]);
+
+    update_post_meta( $link_id, '_saas_link_url', $url );
+
+    // Determine meta key based on type
+    $type = get_post_meta( $link_id, '_saas_block_type', true );
+    if ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
+    elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
+    elseif ($type === 'pricing') update_post_meta($link_id, '_saas_price', $extra);
+
+    wp_send_json_success( 'Link updated' );
+}
+
 // 6. AJAX: Apply Template
 add_action( 'wp_ajax_saas_apply_template', 'saas_ajax_apply_template' );
 function saas_ajax_apply_template() {

@@ -90,6 +90,10 @@ class Saas_Admin_Settings {
         register_setting( 'saas_settings_group', 'saas_home_faq' );
         register_setting( 'saas_settings_group', 'saas_login_title' );
         register_setting( 'saas_settings_group', 'saas_register_title' );
+        register_setting( 'saas_settings_group', 'saas_about_vision' );
+        register_setting( 'saas_settings_group', 'saas_pricing_title' );
+        register_setting( 'saas_settings_group', 'saas_contact_title' );
+        register_setting( 'saas_settings_group', 'saas_home_features' );
 
         add_settings_section(
             'saas_payment_section',
@@ -200,6 +204,42 @@ class Saas_Admin_Settings {
             'saas_settings',
             'saas_homepage_section',
             [ 'id' => 'saas_register_title' ]
+        );
+
+        add_settings_field(
+            'about_vision',
+            'About Us Vision Text',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_about_vision' ]
+        );
+
+        add_settings_field(
+            'pricing_title',
+            'Pricing Page Title',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_pricing_title' ]
+        );
+
+        add_settings_field(
+            'contact_title',
+            'Contact Page Title',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_contact_title' ]
+        );
+
+        add_settings_field(
+            'home_features',
+            'Homepage Features (JSON)',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_features' ]
         );
 
         add_settings_section(
