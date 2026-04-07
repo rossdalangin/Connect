@@ -95,6 +95,7 @@ class Saas_Dashboard {
                     <select name="block_style" id="saas-block-style">
                         <option value="regular">Regular Style</option>
                         <option value="featured">Featured (Pulse)</option>
+                        <option value="rainbow">Rainbow Glow</option>
                         <option value="outline">Outline Only</option>
                         <option value="glow">Glow Effect</option>
                     </select>

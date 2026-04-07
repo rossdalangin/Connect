@@ -9,9 +9,13 @@ class Saas_Admin_Settings {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
         add_action( 'admin_init', [ $this, 'settings_init' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ] );
         add_action( 'wp_dashboard_setup', [ $this, 'add_dashboard_widget' ] );
-        add_action( 'admin_post_saas_load_samples', [ $this, 'handle_load_samples' ] );
         add_action( 'admin_post_saas_generate_pages', [ $this, 'handle_generate_pages' ] );
+    }
+
+    public function enqueue_admin_styles() {
+        wp_enqueue_style( 'saas-admin-css', plugin_dir_url( __FILE__ ) . 'admin.css' );
     }
 
     public function handle_generate_pages() {
@@ -35,14 +39,6 @@ class Saas_Admin_Settings {
         }
 
         wp_redirect( admin_url('admin.php?page=saas_settings&pages_generated=1') );
-        exit;
-    }
-
-    public function handle_load_samples() {
-        if ( ! current_user_can( 'manage_options' ) ) wp_die('Unauthorized');
-        require_once plugin_dir_path( __FILE__ ) . 'sample-data.php';
-        Saas_Sample_Data::generate();
-        wp_redirect( admin_url('admin.php?page=saas_settings&samples_loaded=1') );
         exit;
     }
 
@@ -83,6 +79,13 @@ class Saas_Admin_Settings {
         register_setting( 'saas_settings_group', 'saas_paypal_email' );
         register_setting( 'saas_settings_group', 'saas_global_logo' );
 
+        // Homepage Content
+        register_setting( 'saas_settings_group', 'saas_home_title' );
+        register_setting( 'saas_settings_group', 'saas_home_hero' );
+        register_setting( 'saas_settings_group', 'saas_home_cta' );
+        register_setting( 'saas_settings_group', 'saas_login_title' );
+        register_setting( 'saas_settings_group', 'saas_register_title' );
+
         add_settings_section(
             'saas_payment_section',
             'Payment Gateway Configuration',
@@ -122,6 +125,58 @@ class Saas_Admin_Settings {
             'saas_settings',
             'saas_branding_section',
             [ 'id' => 'saas_global_logo' ]
+        );
+
+        add_settings_section(
+            'saas_homepage_section',
+            'Homepage Content Editor',
+            null,
+            'saas_settings'
+        );
+
+        add_settings_field(
+            'home_title',
+            'Homepage Title',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_title' ]
+        );
+
+        add_settings_field(
+            'home_hero',
+            'Hero Description',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_hero' ]
+        );
+
+        add_settings_field(
+            'home_cta',
+            'CTA Button Text',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_cta' ]
+        );
+
+        add_settings_field(
+            'login_title',
+            'Login Page Title',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_login_title' ]
+        );
+
+        add_settings_field(
+            'register_title',
+            'Register Page Title',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_register_title' ]
         );
 
         add_settings_section(
@@ -166,8 +221,6 @@ class Saas_Admin_Settings {
                 <div><strong>Total Leads:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['leads']); ?></span></div>
             </div>
 
-            <?php if ( isset($_GET['samples_loaded']) ) echo '<div class="updated"><p>Sample data generated successfully!</p></div>'; ?>
-
             <form action="options.php" method="post">
                 <?php
                 settings_fields( 'saas_settings_group' );
@@ -175,11 +228,6 @@ class Saas_Admin_Settings {
                 submit_button( 'Save Global Settings' );
                 ?>
             </form>
-
-            <hr>
-            <h2>Sample Data Generator</h2>
-            <p>Click below to populate your site with elite sample profiles, links, leads, and analytics for testing.</p>
-            <a href="<?php echo admin_url('admin-post.php?action=saas_load_samples'); ?>" class="button button-secondary">Generate Sample Data (10+ Records)</a>
 
             <hr>
             <h2>System Page Generator</h2>

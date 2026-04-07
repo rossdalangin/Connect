@@ -107,9 +107,23 @@ body {
 /* Link Styles */
 .block-button.style-featured .saas-link-btn {
     animation: pulse 2s infinite;
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #a29bfe 100%);
     color: #fff;
-    border-color: var(--primary-color);
+    border: none;
+}
+
+.block-button.style-rainbow .saas-link-btn {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+    background-size: 400% 400%;
+    animation: rainbow 5s ease infinite;
+    color: #fff;
+    border: none;
+}
+
+@keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .block-button.style-outline .saas-link-btn {

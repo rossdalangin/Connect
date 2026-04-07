@@ -1,0 +1,43 @@
+/*
+SaaS Admin - Vibrant & Modern UI
+*/
+
+.wrap h1 {
+    font-weight: 800;
+    color: #2d3436;
+    margin-bottom: 30px;
+    background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#saas_settings .form-table th {
+    font-weight: 700;
+    color: #636e72;
+}
+
+#saas_settings input[type="text"], #saas_settings input[type="color"] {
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #dfe6e9;
+}
+
+#saas_settings .button-primary {
+    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%) !important;
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 10px 30px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3) !important;
+}
+
+.saas-admin-card {
+    border: none !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%) !important;
+    border-left: 5px solid #6c5ce7 !important;
+}
+
+.saas-admin-card div strong {
+    color: #6c5ce7;
+}

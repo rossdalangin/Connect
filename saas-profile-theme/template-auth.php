@@ -9,7 +9,14 @@ get_header(); ?>
     <div class="auth-card" style="width: 100%; max-width: 400px; background: #fff; padding: 40px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center;">
         <div class="auth-logo" style="margin-bottom: 30px;">
             <?php if ( has_custom_logo() ) : the_custom_logo(); else: ?>
-                <h2 style="font-weight: 800;"><?php bloginfo('name'); ?></h2>
+                <?php
+                $login_title = get_option('saas_login_title') ?: get_the_title();
+                $register_title = get_option('saas_register_title') ?: 'Join Us Today';
+                $is_register = strpos($_SERVER['REQUEST_URI'], 'register') !== false;
+                ?>
+                <h2 style="font-weight: 800; background: linear-gradient(90deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    <?php echo esc_html($is_register ? $register_title : $login_title); ?>
+                </h2>
             <?php endif; ?>
         </div>
 
