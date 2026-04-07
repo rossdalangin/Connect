@@ -144,6 +144,16 @@ class Saas_Dashboard {
                         <label>Background Color / Gradient CSS</label>
                         <input type="text" name="bg_value" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_bg_color', true)); ?>" placeholder="#ffffff or linear-gradient(...)">
                     </div>
+                    <div class="field">
+                        <label>Apply Template</label>
+                        <select id="saas-apply-template">
+                            <option value="">Select Template...</option>
+                            <option value="coach">Coach Funnel</option>
+                            <option value="freelancer">Freelancer Portfolio</option>
+                            <option value="realtor">Real Estate / Local Biz</option>
+                        </select>
+                        <button type="button" id="saas-btn-apply-template" class="button button-secondary">Apply & Reset Blocks</button>
+                    </div>
                     <button type="submit">Save Changes</button>
                 </form>
             </div>
@@ -197,6 +207,15 @@ class Saas_Dashboard {
                         <div class="value"><?php echo ($stats['views'] > 0) ? round(($stats['clicks'] / $stats['views']) * 100, 1) : 0; ?>%</div>
                     </div>
                 </div>
+
+                <h4>Top Traffic Sources</h4>
+                <ul class="saas-analytics-list">
+                    <?php if ($stats['referrers']) : foreach ($stats['referrers'] as $ref) : ?>
+                        <li><strong><?php echo esc_html($ref->referrer); ?>:</strong> <?php echo $ref->count; ?> visits</li>
+                    <?php endforeach; else: ?>
+                        <li>No traffic sources recorded yet.</li>
+                    <?php endif; ?>
+                </ul>
             </div>
             <div id="tab-billing" class="saas-tab-content">
                 <h3>Choose Your Plan</h3>

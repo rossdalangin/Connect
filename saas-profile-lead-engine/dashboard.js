@@ -131,6 +131,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 5.5 Apply Template Handling
+    const applyTemplateBtn = document.getElementById('saas-btn-apply-template');
+    if (applyTemplateBtn) {
+        applyTemplateBtn.addEventListener('click', () => {
+            const template = document.getElementById('saas-apply-template').value;
+            if (!template || !confirm('This will delete all current blocks and reset to template. Continue?')) return;
+
+            fetch(saas_dashboard_data.ajax_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    action: 'saas_apply_template',
+                    security: saas_dashboard_data.nonce,
+                    template: template
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.data);
+                location.reload();
+            });
+        });
+    }
+
     // 6. Checkout Handling
     document.querySelectorAll('.checkout-form').forEach(form => {
         form.addEventListener('submit', function(e) {

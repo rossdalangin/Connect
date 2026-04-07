@@ -133,6 +133,16 @@ include __DIR__ . '/header.php';
                             <iframe src="<?php echo esc_url($url); ?>" width="100%" height="400" frameborder="0"></iframe>
                         </div>
                     </div>
+                <?php elseif ($type === 'social_icons') : ?>
+                    <div class="social-icons-block">
+                        <?php
+                        $socials = get_post_meta($block->ID, '_saas_social_data', true) ?: [];
+                        foreach ($socials as $platform => $p_url) : ?>
+                            <a href="<?php echo esc_url($p_url); ?>" class="social-icon" target="_blank">
+                                <span><?php echo esc_html(ucfirst($platform)); ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>

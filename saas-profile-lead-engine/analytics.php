@@ -36,9 +36,12 @@ class Saas_Analytics {
         $views  = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'view'", $user_id ) );
         $clicks = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'click'", $user_id ) );
 
+        $referrers = $wpdb->get_results( $wpdb->prepare( "SELECT referrer, COUNT(*) as count FROM {$this->table_name} WHERE user_id = %d AND referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 5", $user_id ) );
+
         return [
             'views'  => $views ?: 0,
             'clicks' => $clicks ?: 0,
+            'referrers' => $referrers ?: [],
         ];
     }
 

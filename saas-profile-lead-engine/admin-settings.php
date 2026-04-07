@@ -109,6 +109,22 @@ class Saas_Admin_Settings {
         );
 
         add_settings_section(
+            'saas_branding_section',
+            'Global Branding',
+            null,
+            'saas_settings'
+        );
+
+        add_settings_field(
+            'global_logo',
+            'SaaS Logo URL',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_branding_section',
+            [ 'id' => 'saas_global_logo' ]
+        );
+
+        add_settings_section(
             'saas_license_section',
             'License Management',
             null,

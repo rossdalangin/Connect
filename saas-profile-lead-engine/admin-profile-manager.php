@@ -56,6 +56,13 @@ class Saas_Admin_Profile_Manager {
             <input type="text" name="saas_bg_value" value="<?php echo esc_attr($bg_value); ?>" placeholder="#ffffff or linear-gradient(...)">
         </p>
         <hr>
+        <h4>License Details</h4>
+        <p>
+            <label>License Key:</label><br>
+            <input type="text" name="saas_license_key" value="<?php echo esc_attr(get_post_meta($post->ID, '_saas_license_key', true)); ?>" class="widefat">
+            <small>Assign a valid system license to this profile.</small>
+        </p>
+        <hr>
         <h4>Block & Font Styling</h4>
         <p>
             <label>Button Shape:</label>
@@ -87,6 +94,7 @@ class Saas_Admin_Profile_Manager {
         update_post_meta( $post_id, '_saas_bg_color', sanitize_text_field( $_POST['saas_bg_value'] ) );
         update_post_meta( $post_id, '_saas_btn_shape', sanitize_text_field( $_POST['saas_btn_shape'] ) );
         update_post_meta( $post_id, '_saas_font_family', sanitize_text_field( $_POST['saas_font_family'] ) );
+        update_post_meta( $post_id, '_saas_license_key', sanitize_text_field( $_POST['saas_license_key'] ) );
     }
 
     public function add_links_column( $columns ) {

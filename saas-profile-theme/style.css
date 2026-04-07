@@ -232,6 +232,43 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
+.social-icons-block {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.social-icon:hover {
+    transform: translateY(-3px);
+    color: var(--primary-color);
+}
+
+.social-icon[href*="instagram.com"] { background: #E1306C; color: #fff; }
+.social-icon[href*="facebook.com"] { background: #1877F2; color: #fff; }
+.social-icon[href*="twitter.com"], .social-icon[href*="x.com"] { background: #000; color: #fff; }
+.social-icon[href*="linkedin.com"] { background: #0A66C2; color: #fff; }
+.social-icon[href*="whatsapp.com"] { background: #25D366; color: #fff; }
+.social-icon[href*="youtube.com"] { background: #FF0000; color: #fff; }
+
 .lead-form-section {
     width: 100%;
     margin-top: 40px;

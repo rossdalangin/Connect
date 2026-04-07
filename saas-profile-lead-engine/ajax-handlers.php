@@ -122,6 +122,49 @@ function saas_ajax_delete_link() {
     }
 }
 
+// 6. AJAX: Apply Template
+add_action( 'wp_ajax_saas_apply_template', 'saas_ajax_apply_template' );
+function saas_ajax_apply_template() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $template = sanitize_text_field( $_POST['template'] );
+    $user_id = get_current_user_id();
+
+    // 1. Delete existing blocks
+    $old_blocks = get_posts(['post_type' => 'saas_link', 'author' => $user_id, 'numberposts' => -1]);
+    foreach ($old_blocks as $ob) wp_delete_post($ob->ID, true);
+
+    // 2. Define Template Sets
+    $sets = [
+        'coach' => [
+            ['title' => 'Watch Intro Video', 'url' => 'https://youtube.com', 'type' => 'video'],
+            ['title' => 'Apply for Coaching', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+            ['title' => 'Client Success', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Alex helped me double my revenue!'],
+        ],
+        'freelancer' => [
+            ['title' => 'My Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/300\nhttps://via.placeholder.com/301"],
+            ['title' => 'Hire Me', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+        ]
+    ];
+
+    if ( isset($sets[$template]) ) {
+        foreach ( $sets[$template] as $index => $b ) {
+            $link_id = wp_insert_post(['post_type' => 'saas_link', 'post_title' => $b['title'], 'post_status' => 'publish', 'post_author' => $user_id]);
+            update_post_meta($link_id, '_saas_block_type', $b['type']);
+            update_post_meta($link_id, '_saas_link_url', $b['url']);
+            update_post_meta($link_id, '_saas_priority', $index);
+            if (isset($b['style'])) update_post_meta($link_id, '_saas_block_style', $b['style']);
+            if (isset($b['extra'])) {
+                if ($b['type'] === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $b['extra']);
+                if ($b['type'] === 'image_gallery') update_post_meta($link_id, '_saas_gallery_images', explode("\n", $b['extra']));
+            }
+        }
+        wp_send_json_success('Template applied');
+    }
+
+    wp_send_json_error('Invalid template');
+}
+
 // 5. AJAX: Export Leads CSV
 add_action( 'wp_ajax_saas_export_leads', 'saas_ajax_export_leads' );
 function saas_ajax_export_leads() {

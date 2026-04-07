@@ -75,3 +75,21 @@ function saas_get_profile_by_slug( $slug ) {
     ]);
     return $posts ? $posts[0] : null;
 }
+
+/**
+ * License Validation Helper
+ */
+function saas_is_profile_licensed( $profile_id ) {
+    $license_key = get_post_meta( $profile_id, '_saas_license_key', true );
+    if ( ! $license_key ) return false;
+
+    // Verify if license key exists in saas_license CPT
+    $licenses = get_posts([
+        'post_type'  => 'saas_license',
+        'title'      => $license_key,
+        'post_status' => 'publish',
+        'numberposts' => 1
+    ]);
+
+    return ! empty($licenses);
+}

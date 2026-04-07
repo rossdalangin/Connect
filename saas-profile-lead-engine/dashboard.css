@@ -177,6 +177,21 @@ SaaS Dashboard - Modern Interface Styles
     margin-top: 8px;
 }
 
+.saas-analytics-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.saas-analytics-list li {
+    background: #f9f9f9;
+    padding: 12px 20px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
 /* Pricing Plans */
 .saas-plans-grid {
     display: grid;
