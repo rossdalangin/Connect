@@ -315,3 +315,77 @@ SaaS Dashboard - Modern Interface Styles
     font-weight: 700;
 }
 .saas-admin-dark .saas-dark-toggle { background: #4d4d4d; color: #fff; }
+
+/* Feature Gating */
+.picker-item.pro-locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+    overflow: hidden;
+}
+.picker-item.pro-locked::after {
+    content: "PRO";
+    position: absolute;
+    top: 5px;
+    right: -15px;
+    background: #39e09b;
+    color: #1e2329;
+    font-size: 10px;
+    padding: 2px 15px;
+    transform: rotate(45deg);
+    font-weight: 800;
+}
+
+.pro-gated {
+    position: relative;
+    filter: blur(2px);
+    pointer-events: none;
+    user-select: none;
+}
+
+.pro-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.7);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
+}
+.pro-overlay button {
+    background: #6c5ce7;
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+}
+
+.saas-admin-dark .pro-overlay {
+    background: rgba(0,0,0,0.7);
+}
+
+.pro-gated-inline {
+    opacity: 0.5;
+    position: relative;
+}
+.pro-gated-inline::after {
+    content: "PRO FEATURE";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #6c5ce7;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+}

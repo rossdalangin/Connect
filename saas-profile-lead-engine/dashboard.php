@@ -12,14 +12,17 @@ class Saas_Dashboard {
     }
 
     public function enqueue_dashboard_scripts() {
+        // Enqueue WP Media
+        wp_enqueue_media();
+
         // Only enqueue on pages where the dashboard shortcode is present
-        wp_enqueue_style( 'saas-dashboard-css', plugin_dir_url( __FILE__ ) . 'dashboard.css', [], '1.0' );
+        wp_enqueue_style( 'saas-dashboard-css', plugin_dir_url( __FILE__ ) . 'dashboard.css', [], '1.2' );
 
         // Enqueue Scripts
         wp_enqueue_script( 'sortable-js', 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js', [], '1.15.0', true );
         wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', [], '4.0.0', true );
 
-        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'sortable-js', 'chart-js' ], '1.0', true );
+        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'sortable-js', 'chart-js' ], '1.2', true );
         wp_localize_script( 'saas-dashboard-js', 'saas_dashboard_data', [
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'saas_dashboard_nonce' )
@@ -53,6 +56,9 @@ class Saas_Dashboard {
         }
 
         $meta = saas_get_profile_meta( $profile_id );
+        $payments = new Saas_Payments();
+        $is_pro = $payments->is_pro_user($user_id);
+
         $links = get_posts([
             'post_type'   => 'saas_link',
             'post_author' => $user_id,
@@ -71,7 +77,7 @@ class Saas_Dashboard {
                 <div style="display:flex; gap:20px; font-size:0.9rem;">
                     <span>[<?php echo $meta['bio'] ? '✓' : ' '; ?>] Bio</span>
                     <span>[<?php echo count($links) > 0 ? '✓' : ' '; ?>] Blocks</span>
-                    <span>[ ] Social Links</span>
+                    <span>[<?php echo $is_pro ? '✓' : ' '; ?>] Pro Upgrade</span>
                 </div>
             </div>
 
@@ -86,6 +92,7 @@ class Saas_Dashboard {
                 <button class="active" data-tab="links">Links</button>
                 <button data-tab="profile">Profile</button>
                 <button data-tab="branding">Branding</button>
+                <button data-tab="share">Share & QR</button>
                 <button data-tab="automation">Lead Setup</button>
                 <button data-tab="leads">Leads</button>
                 <button data-tab="analytics">Analytics</button>
@@ -95,19 +102,23 @@ class Saas_Dashboard {
             <!-- Links Tab -->
             <div id="tab-links" class="saas-tab-content active">
                 <h3>Manage Blocks</h3>
+
+                <!-- Visual Block Picker -->
+                <div class="saas-block-picker" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom: 30px;">
+                    <div class="picker-item active" data-type="button"><span>🔗</span> Button</div>
+                    <div class="picker-item" data-type="video"><span>🎬</span> Video</div>
+                    <div class="picker-item" data-type="testimonial"><span>⭐</span> Testim</div>
+                    <div class="picker-item" data-type="faq"><span>❓</span> FAQ</div>
+                    <div class="picker-item" data-type="pricing"><span>💰</span> Price</div>
+                    <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="image_gallery"><span>🖼️</span> Gal <?php if(!$is_pro) echo '🔒'; ?></div>
+                    <div class="picker-item" data-type="social_icons"><span>📱</span> Social</div>
+                    <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="countdown"><span>⏳</span> Count <?php if(!$is_pro) echo '🔒'; ?></div>
+                    <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="newsletter"><span>📧</span> Mail <?php if(!$is_pro) echo '🔒'; ?></div>
+                    <div class="picker-item" data-type="milestone"><span>📊</span> Stats</div>
+                </div>
+
                 <form id="saas-add-link-form">
-                    <select name="block_type" id="saas-block-type">
-                        <option value="button">Button Link</option>
-                        <option value="video">Video Embed</option>
-                        <option value="testimonial">Testimonial</option>
-                        <option value="faq">FAQ Item</option>
-                        <option value="pricing">Pricing Table</option>
-                        <option value="image_gallery">Image Gallery</option>
-                        <option value="calendar">Calendar Embed</option>
-                        <option value="social_icons">Social Icons Row</option>
-                        <option value="countdown">Countdown Timer</option>
-                        <option value="newsletter">Newsletter Form</option>
-                    </select>
+                    <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
                     <select name="block_style" id="saas-block-style">
                         <option value="regular">Regular Style</option>
                         <option value="featured">Featured (Pulse)</option>
@@ -131,7 +142,11 @@ class Saas_Dashboard {
                         $s_date = get_post_meta($link->ID, '_saas_start_date', true);
                         $e_date = get_post_meta($link->ID, '_saas_end_date', true);
                         ?>
-                        <li data-id="<?php echo $link->ID; ?>" data-start="<?php echo esc_attr($s_date); ?>" data-end="<?php echo esc_attr($e_date); ?>">
+                        <li data-id="<?php echo $link->ID; ?>"
+                            data-start="<?php echo esc_attr($s_date); ?>"
+                            data-end="<?php echo esc_attr($e_date); ?>"
+                            data-custom-bg="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_bg', true)); ?>"
+                            data-custom-text="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_text', true)); ?>">
                             <span class="handle">:::</span>
                             <strong><?php echo esc_html( $link->post_title ); ?></strong>
                             <span><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ); ?></span>
@@ -149,6 +164,36 @@ class Saas_Dashboard {
                 <h3>Profile Settings</h3>
                 <form id="saas-profile-form">
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+
+                    <div class="field-row" style="display:flex; gap:20px; margin-bottom: 20px;">
+                        <div class="field profile-image-field" style="flex:1;">
+                            <label>Profile Image</label>
+                            <div id="profile-image-preview" class="thumb-preview">
+                                <?php if ( has_post_thumbnail($profile_id) ) : ?>
+                                    <?php echo get_the_post_thumbnail($profile_id, 'thumbnail'); ?>
+                                <?php else : ?>
+                                    <div class="image-placeholder">No image</div>
+                                <?php endif; ?>
+                            </div>
+                            <input type="hidden" name="profile_image_id" id="profile-image-id" value="<?php echo get_post_thumbnail_id($profile_id); ?>">
+                            <button type="button" class="upload-btn button" id="profile-image-upload">Upload Photo</button>
+                        </div>
+                        <div class="field cover-image-field" style="flex:2;">
+                            <label>Cover Banner</label>
+                            <div id="cover-image-preview" class="cover-preview">
+                                <?php
+                                $cover_id = get_post_meta($profile_id, '_saas_cover_id', true);
+                                if ( $cover_id ) : ?>
+                                    <?php echo wp_get_attachment_image($cover_id, 'medium'); ?>
+                                <?php else : ?>
+                                    <div class="image-placeholder">No banner selected</div>
+                                <?php endif; ?>
+                            </div>
+                            <input type="hidden" name="cover_image_id" id="cover-image-id" value="<?php echo esc_attr($cover_id); ?>">
+                            <button type="button" class="upload-btn button" id="cover-image-upload">Upload Banner</button>
+                        </div>
+                    </div>
+
                     <div class="field">
                         <label>Headline</label>
                         <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>">
@@ -168,7 +213,8 @@ class Saas_Dashboard {
             <!-- Automation / Lead Setup Tab -->
             <div id="tab-automation" class="saas-tab-content">
                 <h3>Lead Automation Settings</h3>
-                <form id="saas-automation-form">
+                <div style="position:relative;">
+                <form id="saas-automation-form" class="<?php echo $is_pro ? '' : 'pro-gated'; ?>">
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
                     <div class="field">
                         <label>Lead Magnet URL (Automatic Download)</label>
@@ -186,8 +232,41 @@ class Saas_Dashboard {
                         <label>Custom Success Message</label>
                         <input type="text" name="lead_success_msg" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_lead_success_msg', true)); ?>" placeholder="Thank you! We will contact you soon.">
                     </div>
+                    <div class="field">
+                        <label>Enabled Form Fields</label>
+                        <label><input type="checkbox" name="form_field_phone" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_phone', true), 1); ?>> Phone Number</label>
+                        <label><input type="checkbox" name="form_field_msg" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_msg', true), 1); ?>> Message/Comments</label>
+                    </div>
                     <button type="submit">Save Automation</button>
                 </form>
+                <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to access Automations</button></div><?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Share & QR Tab -->
+            <div id="tab-share" class="saas-tab-content">
+                <h3>Share Your Profile</h3>
+                <div class="saas-share-card" style="display:flex; gap:40px; background:#f9f9f9; padding:30px; border-radius:16px;">
+                    <div class="qr-section" style="text-align:center;">
+                        <h4>Your QR Code</h4>
+                        <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name); ?>" alt="QR Code" style="background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                        <p><small>Scan to view profile</small></p>
+                        <a href="<?php echo saas_get_profile_qr_url($profile_obj->post_name); ?>" download="qr-code.png" class="button">Download PNG</a>
+                    </div>
+                    <div class="links-section" style="flex:1;">
+                        <h4>Direct Link</h4>
+                        <div class="saas-share-bar" style="margin-bottom:20px;">
+                            <input type="text" value="<?php echo home_url('/' . $profile_obj->post_name); ?>" readonly style="width:100%; margin-bottom:10px;">
+                            <button class="button saas-copy-btn">Copy Link</button>
+                        </div>
+                        <h4>Social Share</h4>
+                        <div style="display:flex; gap:10px;">
+                            <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(home_url($profile_obj->post_name)); ?>" target="_blank" class="button">𝕏 Share</a>
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo urlencode(home_url($profile_obj->post_name)); ?>" target="_blank" class="button">LinkedIn</a>
+                            <a href="https://wa.me/?text=<?php echo urlencode(home_url($profile_obj->post_name)); ?>" target="_blank" class="button">WhatsApp</a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Branding Tab -->
@@ -224,6 +303,8 @@ class Saas_Dashboard {
                             <option value="'Inter', sans-serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Inter', sans-serif"); ?>>Inter (Modern)</option>
                             <option value="'Roboto', sans-serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Roboto', sans-serif"); ?>>Roboto (Classic)</option>
                             <option value="'Georgia', serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Georgia', serif"); ?>>Georgia (Elegant)</option>
+                            <option value="'Montserrat', sans-serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Montserrat', sans-serif"); ?>>Montserrat (Geometric)</option>
+                            <option value="'Playfair Display', serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Playfair Display', serif"); ?>>Playfair (Luxury)</option>
                         </select>
                     </div>
                     <div class="field">
@@ -233,6 +314,7 @@ class Saas_Dashboard {
                             <option value="coach">Coach Funnel</option>
                             <option value="freelancer">Freelancer Portfolio</option>
                             <option value="realtor">Real Estate / Local Biz</option>
+                            <option value="elite_card">Elite Digital Card</option>
                         </select>
                         <button type="button" id="saas-btn-apply-template" class="button button-secondary">Apply & Reset Blocks</button>
                     </div>
@@ -269,7 +351,8 @@ class Saas_Dashboard {
                                 </td>
                                 <td data-label="Date"><?php echo get_the_date('', $lead->ID); ?></td>
                                 <td data-label="Actions">
-                                    <button class="view-lead-btn" data-id="<?php echo $lead->ID; ?>">View Details</button>
+                                    <button class="view-lead-btn" data-id="<?php echo $lead->ID; ?>">View</button>
+                                    <button class="delete-lead-btn" data-id="<?php echo $lead->ID; ?>" style="color:#ff7675; border:none; background:none; cursor:pointer;">Delete</button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -303,14 +386,26 @@ class Saas_Dashboard {
                     </div>
                 </div>
 
-                <h4>Top Traffic Sources</h4>
-                <ul class="saas-analytics-list">
-                    <?php if ($stats['referrers']) : foreach ($stats['referrers'] as $ref) : ?>
-                        <li><strong><?php echo esc_html($ref->referrer); ?>:</strong> <?php echo $ref->count; ?> visits</li>
-                    <?php endforeach; else: ?>
-                        <li>No traffic sources recorded yet.</li>
-                    <?php endif; ?>
-                </ul>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:30px;">
+                    <div>
+                        <h4>Top Traffic Sources</h4>
+                        <ul class="saas-analytics-list">
+                            <?php if ($stats['referrers']) : foreach ($stats['referrers'] as $ref) : ?>
+                                <li><strong><?php echo esc_html($ref->referrer); ?>:</strong> <?php echo $ref->count; ?> visits</li>
+                            <?php endforeach; else: ?>
+                                <li>No traffic sources recorded yet.</li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Device Breakdown</h4>
+                        <ul class="saas-analytics-list">
+                            <?php foreach ($stats['devices'] as $dev) : ?>
+                                <li><strong><?php echo esc_html($dev->label); ?>:</strong> <?php echo $dev->count; ?> views</li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div id="tab-billing" class="saas-tab-content">
                 <h3>Choose Your Plan</h3>
@@ -372,6 +467,16 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>URL / Embed</label>
                         <input type="url" name="url" id="edit-link-url" required>
+                    </div>
+                    <div class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="display:flex; gap:10px;">
+                        <div class="field">
+                            <label>Custom BG Color <?php if(!$is_pro) echo '🔒'; ?></label>
+                            <input type="color" name="custom_bg" id="edit-link-bg" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+                        <div class="field">
+                            <label>Custom Text Color <?php if(!$is_pro) echo '🔒'; ?></label>
+                            <input type="color" name="custom_text" id="edit-link-text" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
                     </div>
                     <div class="field">
                         <label>Extra Data</label>

@@ -6,8 +6,8 @@ The system is built as a WordPress-based SaaS. It uses a **Theme** for the publi
 ### Core Components:
 - **Public Profile (Theme):** Fast, mobile-first page at `yourdomain.com/username`.
 - **User Dashboard (Plugin):** Where users manage their links, profile, leads, and analytics.
-- **Admin Panel (WP Admin):** Global settings, user management, and payment configuration.
-- **Data Layer:** Uses WordPress Custom Post Types (CPT) and custom tables for analytics.
+- **Admin Panel (WP Admin):** Global settings, user management, payment configuration, and User Plan oversight.
+- **Data Layer:** Uses WordPress Custom Post Types (CPT) and custom tables for analytics. Supports Media Library integration for photos/banners.
 
 ## 2. Component Relationships
 ```text
@@ -48,20 +48,24 @@ The system is built as a WordPress-based SaaS. It uses a **Theme** for the publi
 +-----------------------+
 ```
 
-### B. User Dashboard
+### B. User Dashboard (Modern UI)
 ```text
-+-----------------------+
-| [ Links ] [ Profile ] |
-| [ Leads ] [ Analytics]|
-+-----------------------+
-| Add New Link:         |
-| [ Title ] [ URL ]     |
-| [ ( + ) ADD ]         |
-+-----------------------+
-| Current Links:        |
-| :: [ My Website ] [X] |
-| :: [ LinkedIn ]   [X] |
-+-----------------------+
++---------------------------------------+
+| Welcome, User      [🌙 Dark Mode]     |
+| [ My link: domain.com/user ] [ Copy ] |
++---------------------------------------+
+| [ Links ] [ Profile ] [ Branding ]    |
+| [ Share ] [ Leads ]   [ Analytics ]   |
++---------------------------------------+
+| [ BLOCK PICKER: 🔗 🎬 ⭐ ❓ 💰 🖼️ ... ] |
++---------------------------------------+
+| Add New Block:                        |
+| [ Title ] [ URL ] [ ( + ) ADD ]       |
++---------------------------------------+
+| Manage CRM (Leads):                   |
+| | Name   | Email | Status | Actions | |
+| | John D | j@d.c | [NEW]  | [View]  | |
++---------------------------------------+
 ```
 
 ## 4. Logic Flows

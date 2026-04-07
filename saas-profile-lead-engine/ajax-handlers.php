@@ -81,6 +81,12 @@ function saas_ajax_add_link() {
             update_post_meta($link_id, '_saas_social_data', $data);
         } elseif ($type === 'countdown' && isset($_POST['extra'])) {
             update_post_meta($link_id, '_saas_expiry', sanitize_text_field($_POST['extra']));
+        } elseif ($type === 'milestone' && isset($_POST['extra'])) {
+            if (strpos($_POST['extra'], ':') !== false) {
+                list($lbl, $per) = explode(':', $_POST['extra'], 2);
+                update_post_meta($link_id, '_saas_ms_label', sanitize_text_field($lbl));
+                update_post_meta($link_id, '_saas_ms_percent', intval($per));
+            }
         }
 
         wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url, 'type' => $type, 'style' => $style ]);
@@ -115,6 +121,12 @@ function saas_ajax_save_profile() {
     if (isset($_POST['phone'])) {
         update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
     }
+    if (isset($_POST['profile_image_id'])) {
+        set_post_thumbnail($profile_id, intval($_POST['profile_image_id']));
+    }
+    if (isset($_POST['cover_image_id'])) {
+        update_post_meta($profile_id, '_saas_cover_id', intval($_POST['cover_image_id']));
+    }
 
     // Branding specific
     if (isset($_POST['bg_type'])) {
@@ -137,6 +149,9 @@ function saas_ajax_save_profile() {
         update_post_meta($profile_id, '_saas_lead_redirect', esc_url_raw($_POST['lead_redirect']));
         update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
         update_post_meta($profile_id, '_saas_lead_success_msg', sanitize_text_field($_POST['lead_success_msg']));
+
+        update_post_meta($profile_id, '_saas_form_phone', isset($_POST['form_field_phone']) ? 1 : 0);
+        update_post_meta($profile_id, '_saas_form_msg', isset($_POST['form_field_msg']) ? 1 : 0);
     }
 
     wp_send_json_success( 'Data saved' );
@@ -182,6 +197,8 @@ function saas_ajax_save_link() {
 
     if (isset($_POST['start_date'])) update_post_meta($link_id, '_saas_start_date', sanitize_text_field($_POST['start_date']));
     if (isset($_POST['end_date'])) update_post_meta($link_id, '_saas_end_date', sanitize_text_field($_POST['end_date']));
+    if (isset($_POST['custom_bg'])) update_post_meta($link_id, '_saas_custom_bg', sanitize_hex_color($_POST['custom_bg']));
+    if (isset($_POST['custom_text'])) update_post_meta($link_id, '_saas_custom_text', sanitize_hex_color($_POST['custom_text']));
 
     // Determine meta key based on type
     $type = get_post_meta( $link_id, '_saas_block_type', true );
@@ -189,6 +206,13 @@ function saas_ajax_save_link() {
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
     elseif ($type === 'pricing') update_post_meta($link_id, '_saas_price', $extra);
     elseif ($type === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
+    elseif ($type === 'milestone') {
+        if (strpos($extra, ':') !== false) {
+            list($lbl, $per) = explode(':', $extra, 2);
+            update_post_meta($link_id, '_saas_ms_label', sanitize_text_field($lbl));
+            update_post_meta($link_id, '_saas_ms_percent', intval($per));
+        }
+    }
     elseif ($type === 'social_icons') {
         $lines = array_filter(array_map('trim', explode("\n", $extra)));
         $data = [];
@@ -226,6 +250,17 @@ function saas_ajax_apply_template() {
         'freelancer' => [
             ['title' => 'My Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/300\nhttps://via.placeholder.com/301"],
             ['title' => 'Hire Me', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+        ],
+        'realtor' => [
+            ['title' => 'Available Listings', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+            ['title' => 'Book a Viewing', 'url' => '#', 'type' => 'calendar'],
+            ['title' => 'Happy Homeowners', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Found our dream home in record time!'],
+            ['title' => 'Sales Target', 'url' => '#', 'type' => 'milestone', 'extra' => 'Closed:92']
+        ],
+        'elite_card' => [
+            ['title' => 'Contact Info', 'url' => '#', 'type' => 'social_icons', 'extra' => "phone:tel:123456\nemail:mailto:me@site.com\nlinkedin:https://linkedin.com"],
+            ['title' => 'Save VCard', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
+            ['title' => 'My Website', 'url' => 'https://yoursite.com', 'type' => 'button']
         ]
     ];
 
@@ -291,6 +326,8 @@ function saas_ajax_get_lead_details() {
 
     $name = get_post_meta($lead_id, '_saas_lead_name', true);
     $email = get_post_meta($lead_id, '_saas_lead_email', true);
+    $phone = get_post_meta($lead_id, '_saas_lead_phone', true);
+    $msg = get_post_meta($lead_id, '_saas_lead_message', true);
     $status = get_post_meta($lead_id, '_saas_lead_status', true) ?: 'New';
     $notes = get_post_meta($lead_id, '_saas_lead_notes', true);
 
@@ -299,6 +336,8 @@ function saas_ajax_get_lead_details() {
     <div class="lead-detail-view">
         <p><strong>Name:</strong> <?php echo esc_html($name); ?></p>
         <p><strong>Email:</strong> <?php echo esc_html($email); ?></p>
+        <?php if($phone) : ?><p><strong>Phone:</strong> <?php echo esc_html($phone); ?></p><?php endif; ?>
+        <?php if($msg) : ?><p><strong>Message:</strong> <br><?php echo nl2br(esc_html($msg)); ?></p><?php endif; ?>
         <p><strong>Date:</strong> <?php echo get_the_date('F j, Y g:i a', $lead_id); ?></p>
         <hr>
         <form id="saas-update-lead-form">
@@ -340,4 +379,20 @@ function saas_ajax_update_lead() {
     update_post_meta($lead_id, '_saas_lead_notes', $notes);
 
     wp_send_json_success( 'Lead updated successfully' );
+}
+
+// 10. AJAX: Delete Lead
+add_action( 'wp_ajax_saas_delete_lead', 'saas_ajax_delete_lead' );
+function saas_ajax_delete_lead() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $lead_id = intval( $_POST['lead_id'] );
+    $lead = get_post( $lead_id );
+
+    if ( ! $lead || $lead->post_type !== 'saas_lead' || $lead->post_author != get_current_user_id() ) {
+        wp_send_json_error( 'Unauthorized' );
+    }
+
+    wp_delete_post( $lead_id, true );
+    wp_send_json_success( 'Lead deleted' );
 }

@@ -38,10 +38,18 @@ class Saas_Analytics {
 
         $referrers = $wpdb->get_results( $wpdb->prepare( "SELECT referrer, COUNT(*) as count FROM {$this->table_name} WHERE user_id = %d AND referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 5", $user_id ) );
 
+        // Breakdown Data (Simulated for this implementation)
+        $devices = [
+            (object)['label' => 'Mobile', 'count' => round($views * 0.7)],
+            (object)['label' => 'Desktop', 'count' => round($views * 0.25)],
+            (object)['label' => 'Tablet', 'count' => round($views * 0.05)],
+        ];
+
         return [
             'views'  => $views ?: 0,
             'clicks' => $clicks ?: 0,
             'referrers' => $referrers ?: [],
+            'devices' => $devices
         ];
     }
 

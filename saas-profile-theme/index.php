@@ -87,8 +87,17 @@ include __DIR__ . '/header.php';
 </style>
 
 <div id="profile-container">
+    <!-- Cover Banner -->
+    <?php
+    $cover_id = get_post_meta($profile_id, '_saas_cover_id', true);
+    if ($cover_id) : ?>
+        <div class="profile-cover">
+            <?php echo wp_get_attachment_image($cover_id, 'large'); ?>
+        </div>
+    <?php endif; ?>
+
     <!-- Header Block -->
-    <header class="profile-header">
+    <header class="profile-header <?php echo $cover_id ? 'has-cover' : ''; ?>">
         <?php if ( has_post_thumbnail( $profile_id ) ) : ?>
             <?php echo get_the_post_thumbnail( $profile_id, 'thumbnail' ); ?>
         <?php else : ?>
@@ -107,6 +116,11 @@ include __DIR__ . '/header.php';
             $animation = get_post_meta($block->ID, '_saas_block_animation', true) ?: 'fadeinup';
             $base_url = get_post_meta( $block->ID, '_saas_link_url', true );
             $url = saas_get_effective_url( $block->ID, $base_url ); // Device/Geo Routing
+            $custom_bg = get_post_meta($block->ID, '_saas_custom_bg', true);
+            $custom_text = get_post_meta($block->ID, '_saas_custom_text', true);
+            $block_style_attr = '';
+            if ($custom_bg) $block_style_attr .= "background-color: $custom_bg; ";
+            if ($custom_text) $block_style_attr .= "color: $custom_text; ";
 
             // Scheduling Check
             $start_date = get_post_meta($block->ID, '_saas_start_date', true);
@@ -115,10 +129,11 @@ include __DIR__ . '/header.php';
             if ($start_date && strtotime($start_date) > $now) continue;
             if ($end_date && strtotime($end_date) < $now) continue;
             ?>
-            <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" style="animation-delay: <?php echo $index * 0.1; ?>s;">
+            <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" style="animation-delay: <?php echo $index * 0.1; ?>s; <?php echo $block_style_attr; ?>">
                 <?php if ($type === 'button') : ?>
                     <a href="<?php echo esc_url( $url ); ?>"
                        class="saas-link-btn"
+                       style="<?php echo $block_style_attr; ?>"
                        data-link-id="<?php echo $block->ID; ?>"
                        onclick="saasTrackClick(<?php echo $block->ID; ?>)">
                         <?php echo esc_html( $block->post_title ); ?>
@@ -224,6 +239,16 @@ include __DIR__ . '/header.php';
             <div class="input-group">
                 <input type="email" name="email" placeholder="Your Email" required>
             </div>
+            <?php if (get_post_meta($profile_id, '_saas_form_phone', true)) : ?>
+                <div class="input-group">
+                    <input type="text" name="phone" placeholder="Your Phone Number">
+                </div>
+            <?php endif; ?>
+            <?php if (get_post_meta($profile_id, '_saas_form_msg', true)) : ?>
+                <div class="input-group">
+                    <textarea name="message" placeholder="How can I help you?" rows="3"></textarea>
+                </div>
+            <?php endif; ?>
             <button type="submit">Submit Request</button>
         </form>
         <div id="lead-feedback"></div>
@@ -250,6 +275,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const eventType = urlParams.get('src') === 'nfc' ? 'nfc_tap' : 'view';
     saasTrackEvent(eventType, <?php echo $profile_id; ?>);
+
+    // Instant vCard Logic (for NFC/Premium users)
+    if (urlParams.get('action') === 'vcard_auto' || urlParams.get('src') === 'nfc') {
+        setTimeout(() => {
+            window.location.href = '<?php echo home_url('/?saas_action=vcard&profile=' . $profile_id); ?>';
+        }, 2000);
+    }
 });
 
 // Analytics tracking
@@ -331,6 +363,23 @@ document.querySelectorAll('.newsletter-form').forEach(form => {
             }
         });
     });
+});
+
+// Real-Time Preview PostMessage Listener
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'live_update') {
+        const { key, value } = event.data;
+        if (key === 'cover_update') {
+            location.reload(); // Hard refresh for new images in preview
+        }
+        if (key === 'headline') document.querySelector('.profile-header h1').innerText = value;
+        if (key === 'bio') document.querySelector('.profile-header .bio').innerText = value;
+        if (key === 'theme_color') document.documentElement.style.setProperty('--primary-color', value);
+        if (key === 'bg_value') {
+            if (value.includes('gradient')) document.body.style.background = value;
+            else document.body.style.backgroundColor = value;
+        }
+    }
 });
 
 // Lead form handling via AJAX

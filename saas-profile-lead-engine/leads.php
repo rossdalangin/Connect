@@ -42,6 +42,8 @@ function saas_ajax_submit_lead() {
     if ( ! is_wp_error( $lead_id ) ) {
         update_post_meta( $lead_id, '_saas_lead_name', $name );
         update_post_meta( $lead_id, '_saas_lead_email', $email );
+        if (isset($_POST['phone'])) update_post_meta($lead_id, '_saas_lead_phone', sanitize_text_field($_POST['phone']));
+        if (isset($_POST['message'])) update_post_meta($lead_id, '_saas_lead_message', sanitize_textarea_field($_POST['message']));
         update_post_meta( $lead_id, '_saas_lead_source_id', $profile_id );
 
         // Basic Tagging System
@@ -57,6 +59,12 @@ function saas_ajax_submit_lead() {
                 'body' => [ 'name' => $name, 'email' => $email, 'profile' => $profile_id ]
             ]);
         }
+
+        // Email Notification Mockup
+        $owner_email = get_the_author_meta('user_email', $owner_id);
+        $subject = "New Lead Captured: $name";
+        $body = "You have a new lead from your SaaS profile!\n\nName: $name\nEmail: $email\n\nView details in your dashboard.";
+        // wp_mail($owner_email, $subject, $body);
 
         // Lead Magnet Delivery (Simulated)
         $lead_magnet_url = get_post_meta( $profile_id, '_saas_lead_magnet_url', true );

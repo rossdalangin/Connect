@@ -8,6 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Saas_Admin_Settings {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
+        add_filter( 'manage_users_columns', [ $this, 'add_user_columns' ] );
+        add_filter( 'manage_users_custom_column', [ $this, 'render_user_columns' ], 10, 3 );
         add_action( 'admin_init', [ $this, 'settings_init' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ] );
         add_action( 'wp_dashboard_setup', [ $this, 'add_dashboard_widget' ] );
@@ -296,6 +298,20 @@ class Saas_Admin_Settings {
     public function text_render( $args ) {
         $value = get_option( $args['id'] );
         echo '<input type="text" name="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function add_user_columns( $columns ) {
+        $columns['saas_plan'] = 'SaaS Plan';
+        return $columns;
+    }
+
+    public function render_user_columns( $val, $column, $user_id ) {
+        if ( $column === 'saas_plan' ) {
+            $plan = get_user_meta($user_id, '_saas_subscription_plan', true) ?: 'Free';
+            $color = ($plan === 'pro') ? '#39e09b' : '#666';
+            return '<strong style="color:'.$color.';">'.strtoupper($plan).'</strong>';
+        }
+        return $val;
     }
 
     public function settings_page_html() {
