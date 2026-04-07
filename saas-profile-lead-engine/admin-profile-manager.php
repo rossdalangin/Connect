@@ -95,6 +95,7 @@ class Saas_Admin_Profile_Manager {
         update_post_meta( $post_id, '_saas_btn_shape', sanitize_text_field( $_POST['saas_btn_shape'] ) );
         update_post_meta( $post_id, '_saas_font_family', sanitize_text_field( $_POST['saas_font_family'] ) );
         update_post_meta( $post_id, '_saas_license_key', sanitize_text_field( $_POST['saas_license_key'] ) );
+        update_post_meta( $post_id, '_saas_container_shadow', sanitize_text_field( $_POST['saas_container_shadow'] ) );
     }
 
     public function add_links_column( $columns ) {

@@ -66,6 +66,19 @@ function saas_ajax_add_link() {
         } elseif ($type === 'image_gallery' && isset($_POST['extra'])) {
             $urls = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
             update_post_meta($link_id, '_saas_gallery_images', $urls);
+        } elseif ($type === 'social_icons' && isset($_POST['extra'])) {
+            // extra: platform:url newline separated
+            $lines = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
+            $data = [];
+            foreach ($lines as $l) {
+                if (strpos($l, ':') !== false) {
+                    list($p, $u) = explode(':', $l, 2);
+                    $data[trim($p)] = trim($u);
+                }
+            }
+            update_post_meta($link_id, '_saas_social_data', $data);
+        } elseif ($type === 'countdown' && isset($_POST['extra'])) {
+            update_post_meta($link_id, '_saas_expiry', sanitize_text_field($_POST['extra']));
         }
 
         wp_send_json_success([ 'id' => $link_id, 'title' => $title, 'url' => $url, 'type' => $type, 'style' => $style ]);
@@ -149,6 +162,18 @@ function saas_ajax_save_link() {
     if ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
     elseif ($type === 'pricing') update_post_meta($link_id, '_saas_price', $extra);
+    elseif ($type === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
+    elseif ($type === 'social_icons') {
+        $lines = array_filter(array_map('trim', explode("\n", $extra)));
+        $data = [];
+        foreach ($lines as $l) {
+            if (strpos($l, ':') !== false) {
+                list($p, $u) = explode(':', $l, 2);
+                $data[trim($p)] = trim($u);
+            }
+        }
+        update_post_meta($link_id, '_saas_social_data', $data);
+    }
 
     wp_send_json_success( 'Link updated' );
 }

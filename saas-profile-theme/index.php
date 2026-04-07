@@ -42,6 +42,7 @@ $bg_color = get_post_meta( $profile_id, '_saas_bg_color', true ) ?: '#f3f3f1';
 $gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
 $btn_shape = get_post_meta( $profile_id, '_saas_btn_shape', true ) ?: 'pill';
 $font_family = get_post_meta( $profile_id, '_saas_font_family', true ) ?: "'Inter', sans-serif";
+$shadow_style = get_post_meta( $profile_id, '_saas_container_shadow', true ) ?: 'soft';
 
 // Fetch Links (Modular Blocks)
 $blocks = get_posts([
@@ -68,6 +69,11 @@ include __DIR__ . '/header.php';
             else echo '0px';
         ?>;
         --font-family: <?php echo $font_family; ?>;
+        --shadow-style: <?php
+            if ($shadow_style === 'soft') echo '0 10px 30px rgba(0,0,0,0.05)';
+            elseif ($shadow_style === 'hard') echo '8px 8px 0px #333';
+            else echo 'none';
+        ?>;
     }
     body {
         <?php if ($bg_type === 'gradient' && $gradient) : ?>
@@ -161,6 +167,19 @@ include __DIR__ . '/header.php';
                                 <span><?php echo esc_html(ucfirst($platform)); ?></span>
                             </a>
                         <?php endforeach; ?>
+                    </div>
+                <?php elseif ($type === 'countdown') : ?>
+                    <div class="countdown-block" data-expiry="<?php echo esc_attr(get_post_meta($block->ID, '_saas_expiry', true)); ?>">
+                        <div class="timer-title"><?php echo esc_html($block->post_title); ?></div>
+                        <div class="timer-display">00:00:00:00</div>
+                    </div>
+                <?php elseif ($type === 'newsletter') : ?>
+                    <div class="newsletter-block">
+                        <h3><?php echo esc_html($block->post_title); ?></h3>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Email Address" required>
+                            <button type="submit">Join</button>
+                        </form>
                     </div>
                 <?php endif; ?>
             </div>

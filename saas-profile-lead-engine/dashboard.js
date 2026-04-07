@@ -4,6 +4,24 @@
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    // 0.0 Analytics Chart Integration
+    const chartCtx = document.getElementById('saas-analytics-chart');
+    if (chartCtx && typeof Chart !== 'undefined') {
+        new Chart(chartCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Page Views',
+                    data: [12, 19, 3, 5, 2, 3, 10], // Simulated daily data
+                    borderColor: '#6c5ce7',
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
     // 0. Copy Link Handling
     const copyBtn = document.getElementById('saas-copy-btn');
     if (copyBtn) {
@@ -27,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 'faq': 'Enter FAQ Answer...',
                 'pricing': 'Enter Price (e.g. $19/mo)...',
                 'image_gallery': 'Enter Image URLs (one per line)...',
+                'social_icons': 'Enter platform:url (e.g. instagram:https://...) one per line',
+                'countdown': 'Enter Expiry Date (YYYY-MM-DD HH:MM)',
                 'button': 'Extra info (optional)...',
                 'video': 'Extra info (optional)...',
                 'calendar': 'Extra info (optional)...'

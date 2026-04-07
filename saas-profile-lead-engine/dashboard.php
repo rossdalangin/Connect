@@ -15,10 +15,11 @@ class Saas_Dashboard {
         // Only enqueue on pages where the dashboard shortcode is present
         wp_enqueue_style( 'saas-dashboard-css', plugin_dir_url( __FILE__ ) . 'dashboard.css', [], '1.0' );
 
-        // Enqueue Sortable.js
+        // Enqueue Scripts
         wp_enqueue_script( 'sortable-js', 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js', [], '1.15.0', true );
+        wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', [], '4.0.0', true );
 
-        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'sortable-js' ], '1.0', true );
+        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'sortable-js', 'chart-js' ], '1.0', true );
         wp_localize_script( 'saas-dashboard-js', 'saas_dashboard_data', [
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'saas_dashboard_nonce' )
@@ -64,6 +65,16 @@ class Saas_Dashboard {
         ob_start();
         ?>
         <div id="saas-dashboard">
+            <!-- Onboarding Checklist -->
+            <div class="saas-onboarding-card">
+                <h4>🚀 Get Started Checklist</h4>
+                <div style="display:flex; gap:20px; font-size:0.9rem;">
+                    <span>[<?php echo $meta['bio'] ? '✓' : ' '; ?>] Bio</span>
+                    <span>[<?php echo count($links) > 0 ? '✓' : ' '; ?>] Blocks</span>
+                    <span>[ ] Social Links</span>
+                </div>
+            </div>
+
             <div class="saas-dashboard-header">
                 <h2>Welcome, <?php echo esc_html(wp_get_current_user()->display_name); ?></h2>
                 <div class="saas-share-bar">
@@ -91,6 +102,9 @@ class Saas_Dashboard {
                         <option value="pricing">Pricing Table</option>
                         <option value="image_gallery">Image Gallery</option>
                         <option value="calendar">Calendar Embed</option>
+                        <option value="social_icons">Social Icons Row</option>
+                        <option value="countdown">Countdown Timer</option>
+                        <option value="newsletter">Newsletter Form</option>
                     </select>
                     <select name="block_style" id="saas-block-style">
                         <option value="regular">Regular Style</option>
@@ -197,6 +211,9 @@ class Saas_Dashboard {
                 $user_analytics = new Saas_Analytics();
                 $stats = $user_analytics->get_user_summary($user_id);
                 ?>
+                <div style="margin-bottom:40px;">
+                    <canvas id="saas-analytics-chart" height="150"></canvas>
+                </div>
                 <div class="saas-stats-grid">
                     <div class="stat-card">
                         <label>Total Views</label>
