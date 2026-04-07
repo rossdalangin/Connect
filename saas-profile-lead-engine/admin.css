@@ -41,3 +41,28 @@ SaaS Admin - Vibrant & Modern UI
 .saas-admin-card div strong {
     color: #6c5ce7;
 }
+
+.saas-admin-wrapper {
+    display: flex;
+    gap: 40px;
+    margin-top: 30px;
+}
+
+.saas-admin-sidebar {
+    width: 250px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    height: fit-content;
+}
+
+.saas-admin-sidebar h3 { margin-top: 0; color: #6c5ce7; }
+.saas-admin-sidebar ul { list-style: none; padding: 0; }
+.saas-admin-sidebar li { margin-bottom: 15px; }
+.saas-admin-sidebar a { text-decoration: none; color: #636e72; font-weight: 600; font-size: 1rem; }
+.saas-admin-sidebar a:hover { color: #6c5ce7; }
+
+.saas-admin-main {
+    flex: 1;
+}

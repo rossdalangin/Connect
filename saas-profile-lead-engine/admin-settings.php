@@ -86,6 +86,8 @@ class Saas_Admin_Settings {
         register_setting( 'saas_settings_group', 'saas_home_title' );
         register_setting( 'saas_settings_group', 'saas_home_hero' );
         register_setting( 'saas_settings_group', 'saas_home_cta' );
+        register_setting( 'saas_settings_group', 'saas_home_image' );
+        register_setting( 'saas_settings_group', 'saas_home_faq' );
         register_setting( 'saas_settings_group', 'saas_login_title' );
         register_setting( 'saas_settings_group', 'saas_register_title' );
 
@@ -165,6 +167,24 @@ class Saas_Admin_Settings {
         );
 
         add_settings_field(
+            'home_image',
+            'Hero Image URL',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_image' ]
+        );
+
+        add_settings_field(
+            'home_faq',
+            'Homepage FAQ (JSON)',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_faq' ]
+        );
+
+        add_settings_field(
             'login_title',
             'Login Page Title',
             [ $this, 'text_render' ],
@@ -214,7 +234,16 @@ class Saas_Admin_Settings {
         $analytics = new Saas_Analytics();
         $summary = $analytics->get_global_summary();
         ?>
-        <div class="wrap">
+        <div class="wrap saas-admin-wrapper">
+            <div class="saas-admin-sidebar">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_profile'); ?>">Profiles</a></li>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_lead'); ?>">Captured Leads</a></li>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_license'); ?>">System Licenses</a></li>
+                </ul>
+            </div>
+            <div class="saas-admin-main">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
             <!-- Global Analytics Dashboard Card -->
@@ -247,6 +276,7 @@ class Saas_Admin_Settings {
                     <li><strong>User:</strong> Set up your profile (username, bio, links).</li>
                     <li><strong>User:</strong> Share your unique link (domain.com/username).</li>
                 </ol>
+            </div>
             </div>
         </div>
         <?php

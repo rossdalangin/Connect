@@ -12,10 +12,11 @@ Version: 1.0
     --text-light: #636e72;
     --bg-color: #f8f9fa;
     --link-bg: #ffffff;
-    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-bg: rgba(255, 255, 255, 0.7);
     --border-radius-lg: 32px;
     --border-radius-md: 16px;
     --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Base Styles Improvement */
@@ -91,16 +92,24 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--link-bg);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: #1e2329;
-    padding: 20px 24px;
+    padding: 22px 28px;
     text-decoration: none;
     border-radius: var(--btn-radius, 50px);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1.1rem;
-    transition: all 0.25s cubic-bezier(0.075, 0.82, 0.165, 1);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
-    border: 2px solid transparent;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.saas-link-btn:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    background: #fff;
 }
 
 .saas-link-btn:hover {

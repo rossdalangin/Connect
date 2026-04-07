@@ -9,8 +9,9 @@ get_header(); ?>
 $h_title = get_option('saas_home_title') ?: get_the_title();
 $h_hero  = get_option('saas_home_hero');
 $h_cta   = get_option('saas_home_cta') ?: 'Get Started Free';
+$h_img   = get_option('saas_home_image');
 ?>
-<main id="landing-page" class="site-main" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 100px 20px; background: #fff; position:relative; overflow:hidden;">
+<main id="landing-page" class="site-main" style="min-height: 100vh; display: flex; flex-direction:column; align-items: center; justify-content: center; padding: 120px 20px; background: #fff; position:relative; overflow:hidden;">
     <!-- Animated Gradient Background -->
     <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.1;">
         <div style="position:absolute; width:150%; height:150%; background:radial-gradient(circle, #6e45e2 0%, transparent 50%); top:-25%; left:-25%; animation: rotate 20s linear infinite;"></div>
@@ -18,14 +19,20 @@ $h_cta   = get_option('saas_home_cta') ?: 'Get Started Free';
     <style> @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style>
 
     <div class="landing-content" style="max-width: 800px; text-align: center;">
-        <header class="landing-header" style="margin-bottom: 40px;">
-            <h1 style="font-size: 4rem; font-weight: 800; line-height: 1.1; background: linear-gradient(90deg, #6e45e2, #88d3ce); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        <header class="landing-header" style="margin-bottom: 60px; max-width:900px;">
+            <h1 style="font-size: 5rem; font-weight: 900; line-height: 1; margin-bottom:30px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px;">
                 <?php echo esc_html($h_title); ?>
             </h1>
             <?php if ($h_hero) : ?>
-                <p style="font-size: 1.5rem; color: #666; margin-top: 20px;"><?php echo esc_html($h_hero); ?></p>
+                <p style="font-size: 1.75rem; color: #636e72; font-weight: 500;"><?php echo esc_html($h_hero); ?></p>
             <?php endif; ?>
         </header>
+
+        <?php if ($h_img) : ?>
+            <div class="hero-image-container" style="margin: 40px 0; transform: perspective(1000px) rotateX(5deg);">
+                <img src="<?php echo esc_url($h_img); ?>" alt="SaaS Preview" style="max-width: 80%; border-radius: 24px; box-shadow: 0 50px 100px rgba(0,0,0,0.1);">
+            </div>
+        <?php endif; ?>
 
         <div class="landing-body" style="font-size: 1.25rem; color: #666;">
             <?php while ( have_posts() ) : the_post(); the_content(); endwhile; ?>
