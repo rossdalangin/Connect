@@ -85,6 +85,7 @@ class Saas_Dashboard {
             <nav class="saas-tabs">
                 <button class="active" data-tab="links">Links</button>
                 <button data-tab="profile">Profile</button>
+                <button data-tab="branding">Branding</button>
                 <button data-tab="leads">Leads</button>
                 <button data-tab="analytics">Analytics</button>
                 <button data-tab="billing">Billing</button>
@@ -153,6 +154,19 @@ class Saas_Dashboard {
                         <textarea name="bio"><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
                     </div>
                     <div class="field">
+                        <label>Phone Number (vCard)</label>
+                        <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>">
+                    </div>
+                    <button type="submit">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- Branding Tab -->
+            <div id="tab-branding" class="saas-tab-content">
+                <h3>Branding & Styling</h3>
+                <form id="saas-branding-form">
+                    <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                    <div class="field">
                         <label>Theme Primary Color</label>
                         <input type="color" name="theme_color" value="<?php echo esc_attr( $meta['theme_color'] ); ?>">
                     </div>
@@ -168,6 +182,22 @@ class Saas_Dashboard {
                         <input type="text" name="bg_value" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_bg_color', true)); ?>" placeholder="#ffffff or linear-gradient(...)">
                     </div>
                     <div class="field">
+                        <label>Button Shape</label>
+                        <select name="btn_shape">
+                            <option value="pill" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'pill'); ?>>Pill (Modern)</option>
+                            <option value="rounded" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'rounded'); ?>>Rounded (Soft)</option>
+                            <option value="square" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'square'); ?>>Square (Sharp)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Font Family</label>
+                        <select name="font_family">
+                            <option value="'Inter', sans-serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Inter', sans-serif"); ?>>Inter (Modern)</option>
+                            <option value="'Roboto', sans-serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Roboto', sans-serif"); ?>>Roboto (Classic)</option>
+                            <option value="'Georgia', serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Georgia', serif"); ?>>Georgia (Elegant)</option>
+                        </select>
+                    </div>
+                    <div class="field">
                         <label>Apply Template</label>
                         <select id="saas-apply-template">
                             <option value="">Select Template...</option>
@@ -177,7 +207,7 @@ class Saas_Dashboard {
                         </select>
                         <button type="button" id="saas-btn-apply-template" class="button button-secondary">Apply & Reset Blocks</button>
                     </div>
-                    <button type="submit">Save Changes</button>
+                    <button type="submit">Save Branding</button>
                 </form>
             </div>
 

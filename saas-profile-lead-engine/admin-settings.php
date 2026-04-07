@@ -89,6 +89,8 @@ class Saas_Admin_Settings {
         register_setting( 'saas_settings_group', 'saas_home_image' );
         register_setting( 'saas_settings_group', 'saas_home_faq' );
         register_setting( 'saas_settings_group', 'saas_home_testimonials' );
+        register_setting( 'saas_settings_group', 'saas_home_trusted_logos' );
+        register_setting( 'saas_settings_group', 'saas_home_benefits' );
         register_setting( 'saas_settings_group', 'saas_login_title' );
         register_setting( 'saas_settings_group', 'saas_register_title' );
         register_setting( 'saas_settings_group', 'saas_about_vision' );
@@ -196,6 +198,24 @@ class Saas_Admin_Settings {
             'saas_settings',
             'saas_homepage_section',
             [ 'id' => 'saas_home_testimonials' ]
+        );
+
+        add_settings_field(
+            'home_trusted_logos',
+            'Trusted Logos (JSON URL List)',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_trusted_logos' ]
+        );
+
+        add_settings_field(
+            'home_benefits',
+            'Homepage Benefits (JSON)',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_benefits' ]
         );
 
         add_settings_field(

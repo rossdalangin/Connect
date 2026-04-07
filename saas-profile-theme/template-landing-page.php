@@ -28,6 +28,23 @@ $h_img   = get_option('saas_home_image');
             <?php endif; ?>
         </header>
 
+        <!-- Social Proof Logos -->
+        <div class="trusted-by" style="margin-bottom: 60px;">
+            <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; color: #a0a0a0; margin-bottom: 20px;">Trusted by innovators at</p>
+            <div style="display: flex; justify-content: center; gap: 40px; filter: grayscale(1); opacity: 0.5;">
+                <?php
+                $logos_json = get_option('saas_home_trusted_logos');
+                $logos = json_decode($logos_json, true) ?: [
+                    'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
+                    'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
+                    'https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg'
+                ];
+                foreach ($logos as $logo_url) : ?>
+                    <img src="<?php echo esc_url($logo_url); ?>" style="height: 24px;">
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <?php if ($h_img) : ?>
             <div class="hero-image-container" style="margin: 40px 0; transform: perspective(1000px) rotateX(5deg);">
                 <img src="<?php echo esc_url($h_img); ?>" alt="SaaS Preview" style="max-width: 80%; border-radius: 24px; box-shadow: 0 50px 100px rgba(0,0,0,0.1);">
@@ -42,6 +59,41 @@ $h_img   = get_option('saas_home_image');
         </div>
     </div>
 </main>
+
+<!-- Benefits Section -->
+<section style="padding: 100px 20px; background: #fff;">
+    <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 60px;">
+        <div style="flex: 1; min-width: 300px;">
+            <h2 style="font-size: 3rem; margin-bottom: 30px;">Stop losing traffic. Start building your list.</h2>
+            <ul style="list-style: none; padding: 0; font-size: 1.2rem; color: #555;">
+                <?php
+                $benefits = json_decode(get_option('saas_home_benefits'), true) ?: [
+                    'One link to rule them all',
+                    'Capture leads even while you sleep',
+                    'Instant vCard exchange for networking',
+                    'Beautiful, mobile-first design'
+                ];
+                foreach ($benefits as $b) : ?>
+                    <li style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
+                        <span style="color: #6c5ce7; font-weight: 900;">✓</span> <?php echo esc_html($b); ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <div style="flex: 1; min-width: 300px; background: #f8f9fa; padding: 40px; border-radius: 40px; border: 1px solid #eee;">
+            <h4 style="margin-top: 0;">Try the Live Demo</h4>
+            <p>See how your profile looks on mobile instantly.</p>
+            <div style="width: 100%; height: 300px; background: #fff; border-radius: 20px; border: 8px solid #333; overflow: hidden;">
+                <div style="padding: 20px; text-align: center;">
+                    <div style="width: 50px; height: 50px; background: #eee; border-radius: 50%; margin: 0 auto 10px;"></div>
+                    <div style="width: 100px; height: 10px; background: #eee; margin: 0 auto 10px;"></div>
+                    <div style="width: 100%; height: 40px; background: #6c5ce7; border-radius: 50px; margin-bottom: 10px;"></div>
+                    <div style="width: 100%; height: 40px; background: #eee; border-radius: 50px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <!-- Features Grid -->
 <section class="features-section" style="padding: 120px 20px; background: #f8f9fa; border-top: 1px solid #eee;">
@@ -88,6 +140,37 @@ $h_img   = get_option('saas_home_image');
                     <strong><?php echo esc_html($t['name']); ?></strong> - <small><?php echo esc_html($t['role']); ?></small>
                 </div>
             <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section style="padding: 100px 20px; background: #fff;">
+    <div style="max-width: 1000px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 60px;">Choose your plan</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <div style="padding: 40px; border-radius: 32px; border: 1px solid #eee; background: #fff;">
+                <h3>Free</h3>
+                <div style="font-size: 3rem; font-weight: 800; margin: 20px 0;">$0</div>
+                <ul style="list-style: none; padding: 0; margin-bottom: 30px; color: #666;">
+                    <li>Basic Link Hub</li>
+                    <li>Standard Analytics</li>
+                    <li>Community Support</li>
+                </ul>
+                <a href="<?php echo home_url('/register'); ?>" style="display: block; padding: 15px; border: 2px solid #6c5ce7; border-radius: 50px; color: #6c5ce7; text-decoration: none; font-weight: 700;">Join for Free</a>
+            </div>
+            <div style="padding: 40px; border-radius: 32px; background: #6c5ce7; color: #fff; position: relative; transform: scale(1.05); box-shadow: 0 20px 50px rgba(108, 92, 231, 0.2);">
+                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #39e09b; padding: 5px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; color: #1e2329;">MOST POPULAR</div>
+                <h3>Pro</h3>
+                <div style="font-size: 3rem; font-weight: 800; margin: 20px 0;">$19<small>/mo</small></div>
+                <ul style="list-style: none; padding: 0; margin-bottom: 30px; color: rgba(255,255,255,0.8);">
+                    <li>Everything in Free</li>
+                    <li><strong>Unlimited Premium Blocks</strong></li>
+                    <li><strong>Lead Generation Forms</strong></li>
+                    <li>Custom Branding & Fonts</li>
+                </ul>
+                <a href="<?php echo home_url('/register?plan=pro'); ?>" style="display: block; padding: 15px; background: #fff; border-radius: 50px; color: #6c5ce7; text-decoration: none; font-weight: 700;">Upgrade to Pro</a>
+            </div>
         </div>
     </div>
 </section>

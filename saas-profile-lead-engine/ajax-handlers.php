@@ -104,21 +104,34 @@ function saas_ajax_save_profile() {
     }
 
     $data = [
-        'bio'         => $_POST['bio'],
-        'headline'    => $_POST['headline'],
-        'theme_color' => $_POST['theme_color'],
+        'bio'         => $_POST['bio'] ?? '',
+        'headline'    => $_POST['headline'] ?? '',
+        'theme_color' => $_POST['theme_color'] ?? '',
     ];
 
     saas_update_profile_meta( $profile_id, $data );
 
-    // Additional profile meta
-    update_post_meta($profile_id, '_saas_bg_type', sanitize_text_field($_POST['bg_type']));
-    update_post_meta($profile_id, '_saas_bg_color', sanitize_text_field($_POST['bg_value']));
-    if ($_POST['bg_type'] === 'gradient') {
-        update_post_meta($profile_id, '_saas_bg_gradient', sanitize_text_field($_POST['bg_value']));
+    // Profile specific
+    if (isset($_POST['phone'])) {
+        update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
     }
 
-    wp_send_json_success( 'Profile saved' );
+    // Branding specific
+    if (isset($_POST['bg_type'])) {
+        update_post_meta($profile_id, '_saas_bg_type', sanitize_text_field( $_POST['bg_type'] ) );
+        update_post_meta($profile_id, '_saas_bg_color', sanitize_text_field( $_POST['bg_value'] ) );
+        if ($_POST['bg_type'] === 'gradient') {
+            update_post_meta($profile_id, '_saas_bg_gradient', sanitize_text_field( $_POST['bg_value'] ) );
+        }
+    }
+    if (isset($_POST['btn_shape'])) {
+        update_post_meta($profile_id, '_saas_btn_shape', sanitize_text_field($_POST['btn_shape']));
+    }
+    if (isset($_POST['font_family'])) {
+        update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
+    }
+
+    wp_send_json_success( 'Data saved' );
 }
 
 // 4. AJAX: Delete Link

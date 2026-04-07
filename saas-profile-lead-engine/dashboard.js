@@ -103,27 +103,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 3. Profile Form Handling
-    const profileForm = document.getElementById('saas-profile-form');
-    if (profileForm) {
-        profileForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            formData.append('action', 'saas_save_profile');
-            formData.append('security', saas_dashboard_data.nonce);
+    // 3. Form Handling (Profile & Branding)
+    const genericFormHandler = function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        formData.append('action', 'saas_save_profile');
+        formData.append('security', saas_dashboard_data.nonce);
 
-            fetch(saas_dashboard_data.ajax_url, {
-                method: 'POST',
-                body: formData
-            })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.data);
-                // Refresh preview
-                document.getElementById('saas-preview-frame').contentWindow.location.reload();
-            });
+        fetch(saas_dashboard_data.ajax_url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            alert(data.data);
+            // Refresh preview
+            document.getElementById('saas-preview-frame').contentWindow.location.reload();
         });
-    }
+    };
+
+    const profileForm = document.getElementById('saas-profile-form');
+    if (profileForm) profileForm.addEventListener('submit', genericFormHandler);
+
+    const brandingForm = document.getElementById('saas-branding-form');
+    if (brandingForm) brandingForm.addEventListener('submit', genericFormHandler);
 
     // 4. Edit & Delete Link Handling (Event Delegation)
     document.addEventListener('click', function(e) {
