@@ -25,6 +25,9 @@ class Saas_Admin_Settings {
             'Dashboard' => '[saas_dashboard]',
             'Login'     => '[saas_login_form]',
             'Register'  => '[saas_register_form]',
+            'Pricing'   => 'Check our plans',
+            'Contact'   => 'Get in touch',
+            'About'     => 'Learn about us',
         ];
 
         foreach ( $pages as $title => $content ) {

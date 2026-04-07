@@ -6,12 +6,21 @@ Version: 1.0
 */
 
 :root {
-    --primary-color: #39e09b; /* Linktree Green */
-    --text-color: #1e2329;
-    --bg-color: #f3f3f1;
-    --link-bg: #fff;
-    --glass-bg: rgba(255, 255, 255, 0.7);
+    --primary-color: #6c5ce7; /* Professional Purple */
+    --accent-color: #39e09b;
+    --text-color: #2d3436;
+    --text-light: #636e72;
+    --bg-color: #f8f9fa;
+    --link-bg: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --border-radius-lg: 32px;
+    --border-radius-md: 16px;
+    --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
 }
+
+/* Base Styles Improvement */
+h1, h2, h3, h4 { font-weight: 800; line-height: 1.2; color: var(--text-color); }
+p { line-height: 1.6; color: var(--text-light); }
 
 body {
     margin: 0;

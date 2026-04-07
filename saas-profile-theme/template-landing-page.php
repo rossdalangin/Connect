@@ -36,6 +36,30 @@ $h_cta   = get_option('saas_home_cta') ?: 'Get Started Free';
     </div>
 </main>
 
+<!-- Features Grid -->
+<section class="features-section" style="padding: 100px 20px; background: #fff;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 60px;">Everything you need to grow online</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+            <div>
+                <div style="font-size: 3rem; margin-bottom: 20px;">🚀</div>
+                <h3>Fast Setup</h3>
+                <p>Launch your profile in under 60 seconds with our pro templates.</p>
+            </div>
+            <div>
+                <div style="font-size: 3rem; margin-bottom: 20px;">📊</div>
+                <h3>Smart Analytics</h3>
+                <p>Track every click and view with high-performance tracking.</p>
+            </div>
+            <div>
+                <div style="font-size: 3rem; margin-bottom: 20px;">🎯</div>
+                <h3>Lead Capture</h3>
+                <p>Convert your social traffic into real customers with built-in forms.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <style>
     .saas-cta-btn-vibrant {
         display: inline-block;

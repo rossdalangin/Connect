@@ -62,6 +62,19 @@ function saas_register_post_types() {
 add_action( 'init', 'saas_register_post_types' );
 
 /**
+ * Data Isolation: Ensure users only see their own data
+ */
+function saas_enforce_data_isolation( $query ) {
+    if ( is_admin() && ! current_user_can( 'manage_options' ) && $query->is_main_query() ) {
+        $post_types = ['saas_profile', 'saas_link', 'saas_lead'];
+        if ( in_array( $query->get( 'post_type' ), $post_types ) ) {
+            $query->set( 'author', get_current_user_id() );
+        }
+    }
+}
+add_action( 'pre_get_posts', 'saas_enforce_data_isolation' );
+
+/**
  * Custom Routing for Top-Level Slugs (yourdomain.com/username)
  * Using a more resilient approach to avoid hijacking homepage/admin/existing pages.
  */

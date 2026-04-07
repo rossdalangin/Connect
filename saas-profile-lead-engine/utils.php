@@ -20,6 +20,9 @@ function saas_handle_vcard_download() {
         $vcard .= "VERSION:3.0\n";
         $vcard .= "FN:" . $profile->post_title . "\n";
         $vcard .= "TITLE:" . $meta['headline'] . "\n";
+        $vcard .= "TEL;TYPE=CELL:" . get_post_meta($profile_id, '_saas_phone', true) . "\n";
+        $vcard .= "EMAIL;TYPE=INTERNET:" . get_the_author_meta('user_email', $profile->post_author) . "\n";
+        $vcard .= "URL:" . home_url('/' . $profile->post_name) . "\n";
         $vcard .= "NOTE:" . str_replace("\n", "\\n", $meta['bio']) . "\n";
         $vcard .= "END:VCARD";
 
