@@ -36,6 +36,7 @@ class Saas_Analytics {
         $views  = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'view'", $user_id ) );
         $clicks = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'click'", $user_id ) );
         $leads  = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'lead_conversion'", $user_id ) );
+        $nfc    = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND event_type = 'nfc_tap'", $user_id ) );
 
         $referrers = $wpdb->get_results( $wpdb->prepare( "SELECT referrer, COUNT(*) as count FROM {$this->table_name} WHERE user_id = %d AND referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 5", $user_id ) );
 
@@ -50,6 +51,7 @@ class Saas_Analytics {
             'views'  => $views ?: 0,
             'clicks' => $clicks ?: 0,
             'leads'  => $leads ?: 0,
+            'nfc'    => $nfc ?: 0,
             'referrers' => $referrers ?: [],
             'devices' => $devices
         ];
@@ -84,6 +86,39 @@ class Saas_Analytics {
             ORDER BY created_at ASC
         " );
         return $results ?: [];
+    }
+
+    /**
+     * Get Recent Social Proof (Leads) for FOMO popups
+     */
+    public function get_recent_leads( $profile_id, $limit = 5 ) {
+        $leads = get_posts([
+            'post_type'  => 'saas_lead',
+            'meta_query' => [
+                ['key' => '_saas_lead_source_id', 'value' => $profile_id]
+            ],
+            'numberposts' => $limit,
+            'orderby'     => 'date',
+            'order'       => 'DESC'
+        ]);
+
+        $data = [];
+        foreach ($leads as $l) {
+            $name = get_post_meta($l->ID, '_saas_lead_name', true);
+            $data[] = [
+                'name' => $this->mask_name($name),
+                'time' => human_time_diff(get_the_time('U', $l->ID), current_time('timestamp')) . ' ago'
+            ];
+        }
+        return $data;
+    }
+
+    private function mask_name($name) {
+        $parts = explode(' ', $name);
+        if (count($parts) > 1) {
+            return $parts[0] . ' ' . substr($parts[1], 0, 1) . '.';
+        }
+        return $name;
     }
 
     /**

@@ -34,6 +34,7 @@ function saas_ajax_add_link() {
 
     $title = sanitize_text_field( $_POST['title'] );
     $url   = esc_url_raw( $_POST['url'] );
+    $profile_id = intval( $_POST['profile_id'] );
     $type  = sanitize_text_field( $_POST['block_type'] );
     $style = sanitize_text_field( $_POST['block_style'] );
     $animation = sanitize_text_field( $_POST['block_animation'] );
@@ -50,6 +51,7 @@ function saas_ajax_add_link() {
     ]);
 
     if ( ! is_wp_error( $link_id ) ) {
+        update_post_meta( $link_id, '_saas_profile_id', $profile_id );
         update_post_meta( $link_id, '_saas_block_type', $type );
         update_post_meta( $link_id, '_saas_block_style', $style );
         update_post_meta( $link_id, '_saas_block_animation', $animation );
@@ -121,6 +123,9 @@ function saas_ajax_save_profile() {
     // Profile specific
     if (isset($_POST['phone'])) {
         update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
+    }
+    if (isset($_POST['company'])) {
+        update_post_meta($profile_id, '_saas_company', sanitize_text_field($_POST['company']));
     }
     if (isset($_POST['profile_image_id'])) {
         set_post_thumbnail($profile_id, intval($_POST['profile_image_id']));
@@ -562,6 +567,7 @@ function saas_ajax_get_lead_details() {
     $notes = get_post_meta($lead_id, '_saas_lead_notes', true);
     $tags = get_post_meta($lead_id, '_saas_lead_tags', true);
     if (is_array($tags)) $tags = implode(', ', $tags);
+    $log = get_post_meta($lead_id, '_saas_lead_log', true) ?: [];
 
     ob_start();
     ?>
@@ -595,6 +601,17 @@ function saas_ajax_get_lead_details() {
             </div>
             <button type="submit" class="button button-primary">Update Lead</button>
         </form>
+        <hr>
+        <h4>Lead Activity History</h4>
+        <div class="lead-history" style="font-size:0.8rem; background:#f9f9f9; padding:15px; border-radius:10px; max-height:150px; overflow-y:auto;">
+            <?php if ($log) : foreach (array_reverse($log) as $entry) : ?>
+                <div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    <strong><?php echo $entry['time']; ?>:</strong> <?php echo esc_html($entry['msg']); ?>
+                </div>
+            <?php endforeach; else : ?>
+                <p>No activity recorded yet.</p>
+            <?php endif; ?>
+        </div>
     </div>
     <?php
     wp_send_json_success( ob_get_clean() );
@@ -618,6 +635,14 @@ function saas_ajax_update_lead() {
     update_post_meta($lead_id, '_saas_lead_status', $status);
     update_post_meta($lead_id, '_saas_lead_notes', $notes);
     update_post_meta($lead_id, '_saas_lead_tags', $tags);
+
+    // Activity Logging
+    $log = get_post_meta($lead_id, '_saas_lead_log', true) ?: [];
+    $log[] = [
+        'time' => current_time('mysql'),
+        'msg'  => "Lead updated to $status status. Notes saved."
+    ];
+    update_post_meta($lead_id, '_saas_lead_log', array_slice($log, -10)); // Keep last 10
 
     wp_send_json_success( 'Lead updated successfully' );
 }
@@ -861,4 +886,70 @@ function saas_ajax_check_integration() {
     // if the user has provided any value in the dashboard fields.
 
     wp_send_json_success( "Connection to " . ucfirst($platform) . " verified! leads will sync automatically. 🚀" );
+}
+
+// 18. AJAX: Clone Profile
+add_action( 'wp_ajax_saas_clone_profile', 'saas_ajax_clone_profile' );
+function saas_ajax_clone_profile() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+    $user_id = get_current_user_id();
+    $profile_id = intval( $_POST['profile_id'] );
+
+    $profile = get_post( $profile_id );
+    if ( ! $profile || $profile->post_author != $user_id ) wp_send_json_error( 'Unauthorized' );
+
+    // 1. Limit Check
+    $payments = new Saas_Payments();
+    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'numberposts' => -1]);
+    if ( count($existing) >= 1 && !$payments->is_pro_user($user_id) ) {
+        wp_send_json_error( 'Free users are limited to 1 profile. Upgrade to Pro to clone.' );
+    }
+
+    // 2. Clone Profile Post
+    $new_profile_id = wp_insert_post([
+        'post_type'   => 'saas_profile',
+        'post_title'  => $profile->post_title . ' (Copy)',
+        'post_status' => 'publish',
+        'post_author' => $user_id,
+    ]);
+
+    if ( is_wp_error($new_profile_id) ) wp_send_json_error( 'Clone failed' );
+
+    // 3. Copy Meta
+    $meta_keys = [
+        '_saas_bio', '_saas_headline', '_saas_theme_color', '_saas_bg_type',
+        '_saas_bg_color', '_saas_bg_gradient', '_saas_btn_shape', '_saas_font_family',
+        '_saas_container_shadow', '_saas_profile_theme', '_saas_seo_title', '_saas_seo_desc'
+    ];
+    foreach ($meta_keys as $key) {
+        update_post_meta($new_profile_id, $key, get_post_meta($profile_id, $key, true));
+    }
+
+    // 4. Clone Associated Links
+    $links = get_posts([
+        'post_type'  => 'saas_link',
+        'meta_query' => [['key' => '_saas_profile_id', 'value' => $profile_id]],
+        'numberposts' => -1
+    ]);
+
+    foreach ($links as $l) {
+        $new_link_id = wp_insert_post([
+            'post_type'   => 'saas_link',
+            'post_title'  => $l->post_title,
+            'post_status' => 'publish',
+            'post_author' => $user_id,
+        ]);
+
+        // Copy all meta for the link
+        $link_meta = get_post_custom($l->ID);
+        foreach ($link_meta as $key => $values) {
+            foreach ($values as $value) {
+                update_post_meta($new_link_id, $key, maybe_unserialize($value));
+            }
+        }
+        // Update to point to the NEW profile
+        update_post_meta($new_link_id, '_saas_profile_id', $new_profile_id);
+    }
+
+    wp_send_json_success([ 'id' => $new_profile_id ]);
 }

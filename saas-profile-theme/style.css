@@ -562,6 +562,48 @@ body {
 }
 .btn-label { flex: 1; text-align: center; }
 
+/* FOMO Popups */
+#saas-fomo-popup {
+    position: fixed;
+    bottom: 100px;
+    left: 20px;
+    background: #fff;
+    padding: 15px 25px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    z-index: 9999;
+    border: 1px solid #eee;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.fomo-hidden { opacity: 0; transform: translateY(50px) scale(0.8); pointer-events: none; }
+.fomo-visible { opacity: 1; transform: translateY(0) scale(1); }
+.fomo-icon { font-size: 1.5rem; }
+.fomo-content p { margin: 0; font-size: 0.85rem; color: #333; }
+.fomo-content small { font-size: 0.7rem; color: #888; }
+
+/* Elite Background Effects */
+.mesh-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+    background-color: #6c5ce7;
+    background-image:
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    filter: blur(100px);
+    animation: mesh-move 15s ease infinite alternate;
+}
+@keyframes mesh-move {
+    from { transform: scale(1) translate(0,0); }
+    to { transform: scale(1.2) translate(5%,5%); }
+}
+
+#particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
 /* Standard Page Layout (Elite SaaS aesthetic) */
 .standard-page-container {
     width: 100%;

@@ -57,7 +57,9 @@ $profile_theme = get_post_meta($profile_id, '_saas_profile_theme', true) ?: 'lig
 // Fetch Links (Modular Blocks)
 $blocks = get_posts([
     'post_type'   => 'saas_link',
-    'post_author' => $user_id,
+    'meta_query' => [
+        ['key' => '_saas_profile_id', 'value' => $profile_id]
+    ],
     'orderby'     => 'meta_value_num',
     'meta_key'    => '_saas_priority',
     'order'       => 'ASC',
@@ -98,6 +100,19 @@ include __DIR__ . '/header.php';
         <?php endif; ?>
     }
 </style>
+
+<?php if ($is_pro && $bg_type === 'mesh') : ?>
+    <div class="mesh-bg"></div>
+<?php elseif ($is_pro && $bg_type === 'particles') : ?>
+    <div id="particles-js"></div>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            "particles": { "number": { "value": 80 }, "color": { "value": "#ffffff" }, "opacity": { "value": 0.5 }, "size": { "value": 3 }, "line_linked": { "enable": true, "color": "#ffffff" }, "move": { "enable": true, "speed": 2 } },
+            "interactivity": { "events": { "onhover": { "enable": true, "mode": "repulse" } } }
+        });
+    </script>
+<?php endif; ?>
 
 <div id="profile-container">
     <!-- Cover Banner -->
@@ -350,6 +365,47 @@ include __DIR__ . '/header.php';
             💾 Save Contact Info
         </a>
     </div>
+
+    <!-- FOMO Activity Popups (Elite Pro) -->
+    <?php
+    $fomo_enabled = get_post_meta($profile_id, '_saas_fomo_popups', true);
+    if ($is_pro && $fomo_enabled) :
+        $analytics = new Saas_Analytics();
+        $recent_leads = $analytics->get_recent_leads($profile_id);
+        if ($recent_leads) :
+        ?>
+        <div id="saas-fomo-popup" class="fomo-hidden">
+            <div class="fomo-icon">🚀</div>
+            <div class="fomo-content">
+                <p id="fomo-text"></p>
+                <small id="fomo-time"></small>
+            </div>
+        </div>
+        <script>
+            const recentLeads = <?php echo json_encode($recent_leads); ?>;
+            let currentLeadIdx = 0;
+            const popup = document.getElementById('saas-fomo-popup');
+            const pText = document.getElementById('fomo-text');
+            const pTime = document.getElementById('fomo-time');
+
+            function showNextFomo() {
+                const lead = recentLeads[currentLeadIdx];
+                pText.innerHTML = `<strong>${lead.name}</strong> just inquired!`;
+                pTime.innerText = lead.time;
+                popup.classList.remove('fomo-hidden');
+                popup.classList.add('fomo-visible');
+
+                setTimeout(() => {
+                    popup.classList.remove('fomo-visible');
+                    popup.classList.add('fomo-hidden');
+                    currentLeadIdx = (currentLeadIdx + 1) % recentLeads.length;
+                    setTimeout(showNextFomo, 5000);
+                }, 4000);
+            }
+            setTimeout(showNextFomo, 3000);
+        </script>
+        <?php endif; ?>
+    <?php endif; ?>
 
     <!-- Growth Branding (Hide for Pro) -->
     <?php

@@ -26,6 +26,7 @@ function saas_handle_vcard_download() {
         $vcard = "BEGIN:VCARD\n";
         $vcard .= "VERSION:3.0\n";
         $vcard .= "FN:" . $profile->post_title . "\n";
+        $vcard .= "ORG:" . (get_post_meta($profile_id, '_saas_company', true) ?: '') . "\n";
         $vcard .= "TITLE:" . $meta['headline'] . "\n";
         $vcard .= "TEL;TYPE=CELL:" . ($meta['phone'] ?: '') . "\n";
         $vcard .= "EMAIL;TYPE=INTERNET:" . get_the_author_meta('user_email', $profile->post_author) . "\n";

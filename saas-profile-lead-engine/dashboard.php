@@ -78,7 +78,9 @@ class Saas_Dashboard {
 
         $links = get_posts([
             'post_type'   => 'saas_link',
-            'post_author' => $user_id,
+            'meta_query' => [
+                ['key' => '_saas_profile_id', 'value' => $profile_id]
+            ],
             'orderby'     => 'meta_value_num',
             'meta_key'    => '_saas_priority',
             'order'       => 'ASC',
@@ -109,9 +111,12 @@ class Saas_Dashboard {
                         <h2 class="profile-title"><?php echo esc_html($profile_obj->post_title); ?> <span class="chevron">▾</span></h2>
                         <div class="profile-dropdown">
                             <?php foreach($all_user_profiles as $up) : ?>
-                                <a href="?profile_id=<?php echo $up->ID; ?>" class="dropdown-item <?php echo ($up->ID == $active_profile_id) ? 'active' : ''; ?>">
-                                    <?php echo esc_html($up->post_title); ?>
-                                </a>
+                                <div class="dropdown-item-wrapper <?php echo ($up->ID == $active_profile_id) ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                    <a href="?profile_id=<?php echo $up->ID; ?>" class="dropdown-item" style="flex:1;">
+                                        <?php echo esc_html($up->post_title); ?>
+                                    </a>
+                                    <button class="clone-profile-btn" data-id="<?php echo $up->ID; ?>" title="Clone Profile" style="background:none; border:none; cursor:pointer; font-size:1.1rem; padding:5px;">📋</button>
+                                </div>
                             <?php endforeach; ?>
                             <div class="dropdown-divider"></div>
                             <button id="saas-add-profile-trigger" class="add-profile-btn">+ New Profile</button>
@@ -136,6 +141,8 @@ class Saas_Dashboard {
                 <button data-tab="leads">Leads</button>
                 <button data-tab="analytics">Analytics</button>
                 <button data-tab="integrations">Integrations</button>
+                <button data-tab="referrals">Referrals</button>
+                <button data-tab="support">Support</button>
                 <button data-tab="billing">Billing</button>
             </nav>
 
@@ -161,6 +168,7 @@ class Saas_Dashboard {
                 </div>
 
                 <form id="saas-add-link-form">
+                    <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
                     <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
                     <div class="field-row" style="display:flex; gap:10px; grid-column: 1/-1;">
                         <select name="block_style" id="saas-block-style" style="flex:1;">
@@ -273,6 +281,10 @@ class Saas_Dashboard {
                         </div>
                     </div>
 
+                    <div class="field">
+                        <label>Company / Organization</label>
+                        <input type="text" name="company" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_company', true)); ?>" placeholder="e.g. Elite Marketing Agency">
+                    </div>
                     <div class="field">
                         <label>Headline</label>
                         <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" placeholder="e.g. Helping 7-figure founders scale impact 🚀">
@@ -501,6 +513,8 @@ class Saas_Dashboard {
                         <select name="bg_type">
                             <option value="flat" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'flat'); ?>>Flat Color</option>
                             <option value="gradient" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'gradient'); ?>>Modern Gradient</option>
+                            <option value="mesh" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'mesh'); ?>>Elite Mesh (Animated)</option>
+                            <option value="particles" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'particles'); ?>>Particles (Interactive)</option>
                         </select>
                     </div>
                     <div class="field">
@@ -554,6 +568,10 @@ class Saas_Dashboard {
                     <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                         <label><input type="checkbox" name="social_proof" value="1" <?php checked(get_post_meta($profile_id, '_saas_social_proof', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Enable Social Proof Pulse <?php if(!$is_pro) echo '🔒'; ?></label>
                         <small>Shows a live view count bubble on your profile to build trust.</small>
+                    </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label><input type="checkbox" name="fomo_popups" value="1" <?php checked(get_post_meta($profile_id, '_saas_fomo_popups', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Enable Activity Popups (FOMO) <?php if(!$is_pro) echo '🔒'; ?></label>
+                        <small>Display small notifications when someone new signs up or visits.</small>
                     </div>
                     <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                         <label><input type="checkbox" name="hide_branding" value="1" <?php checked(get_post_meta($profile_id, '_saas_hide_branding', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Hide "Powered by" Branding <?php if(!$is_pro) echo '🔒'; ?></label>
@@ -688,6 +706,10 @@ class Saas_Dashboard {
                         <label>Conversion Rate</label>
                         <div class="value"><?php echo ($stats['views'] > 0) ? round(($stats['leads'] / $stats['views']) * 100, 1) : 0; ?>%</div>
                     </div>
+                    <div class="stat-card">
+                        <label>NFC Taps</label>
+                        <div class="value"><?php echo number_format($stats['nfc']); ?></div>
+                    </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:30px;">
@@ -789,6 +811,41 @@ class Saas_Dashboard {
                         <button type="submit" style="margin-top:20px;">Save Integrations</button>
                     </form>
                     <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to unlock Integrations</button></div><?php endif; ?>
+                </div>
+            </div>
+
+            <div id="tab-referrals" class="saas-tab-content">
+                <h3>Referral Program</h3>
+                <div style="position:relative;">
+                    <div class="integration-card <?php echo $is_pro ? '' : 'pro-gated'; ?>" style="background:linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); color:#fff; padding:40px; border-radius:24px; text-align:center;">
+                        <h2 style="color:#fff;">Earn 30% Recurring Commission</h2>
+                        <p>Share your love for our platform and get paid for every professional you bring in.</p>
+                        <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:12px; margin:20px 0; border:1px dashed rgba(255,255,255,0.3);">
+                            <code style="font-size:1.2rem;"><?php echo home_url('/?ref=' . wp_get_current_user()->user_login); ?></code>
+                        </div>
+                        <button class="button button-secondary saas-copy-btn" data-clipboard-text="<?php echo home_url('/?ref=' . wp_get_current_user()->user_login); ?>">Copy Referral Link</button>
+                    </div>
+                    <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to join the Referral Program</button></div><?php endif; ?>
+                </div>
+            </div>
+
+            <div id="tab-support" class="saas-tab-content">
+                <h3>Support & Resources</h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+                    <div style="background:#f8f9fa; padding:30px; border-radius:24px; border:1px solid #eee;">
+                        <h4>Knowledge Base</h4>
+                        <ul style="list-style:none; padding:0; line-height:2;">
+                            <li><a href="#">📖 How to set up your first profile</a></li>
+                            <li><a href="#">📸 Best practices for profile photos</a></li>
+                            <li><a href="#">🎯 Increasing your lead conversion rate</a></li>
+                            <li><a href="#">📳 Using NFC with your digital card</a></li>
+                        </ul>
+                    </div>
+                    <div style="background:#f8f9fa; padding:30px; border-radius:24px; border:1px solid #eee;">
+                        <h4>Direct Support</h4>
+                        <p>Need elite help? Our team is standing by to assist with your SaaS setup.</p>
+                        <a href="mailto:support@yourdomain.com" class="button button-primary">Email Support Team</a>
+                    </div>
                 </div>
             </div>
 

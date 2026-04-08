@@ -205,6 +205,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Clone Profile
+    document.querySelectorAll('.clone-profile-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const profileId = this.dataset.id;
+            if (!confirm('Clone this profile and all its links?')) return;
+
+            const btnEl = this;
+            btnEl.innerText = '⏳';
+
+            fetch(saas_dashboard_data.ajax_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    action: 'saas_clone_profile',
+                    security: saas_dashboard_data.nonce,
+                    profile_id: profileId
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `?profile_id=${data.data.id}`;
+                } else {
+                    alert(data.data);
+                    btnEl.innerText = '📋';
+                }
+            });
+        });
+    });
+
     // 2. Add New Link Handling
     const addLinkForm = document.getElementById('saas-add-link-form');
     if (addLinkForm) {
