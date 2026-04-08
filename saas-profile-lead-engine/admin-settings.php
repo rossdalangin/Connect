@@ -471,6 +471,33 @@ class Saas_Admin_Settings {
             <a href="<?php echo admin_url('admin-post.php?action=saas_generate_pages'); ?>" class="button button-primary">Generate System Pages</a>
 
             <hr>
+            <h2>Sample Data Generator</h2>
+            <p>Generate 5+ sample profiles (Coach, Realtor, Influencer) to test the system and demo to clients.</p>
+            <button id="saas-generate-samples-btn" class="button button-secondary">Generate Sample Profiles</button>
+
+            <script>
+            document.getElementById('saas-generate-samples-btn')?.addEventListener('click', function() {
+                if (!confirm('This will create new sample profiles and links. Continue?')) return;
+                const btn = this;
+                btn.disabled = true;
+                btn.innerText = 'Generating...';
+
+                fetch(ajaxurl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        action: 'saas_generate_samples'
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.data);
+                    location.reload();
+                });
+            });
+            </script>
+
+            <hr>
             <h2>User Level Setup Guide</h2>
             <div style="background:#f9f9f9; padding:20px; border-radius:8px; border-left:4px solid #0073aa;">
                 <ol>

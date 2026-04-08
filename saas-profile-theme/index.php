@@ -44,9 +44,8 @@ $profile_id = $profile->ID;
 $user_id = $profile->post_author;
 $meta = saas_get_profile_meta( $profile_id );
 
-// Check Pro Status
-$payments = new Saas_Payments();
-$is_pro = $payments->is_pro_user($user_id);
+// Check Pro Status (Unified License Check)
+$is_pro = saas_is_profile_licensed($profile_id);
 $bg_type = get_post_meta( $profile_id, '_saas_bg_type', true ) ?: 'flat';
 $bg_color = get_post_meta( $profile_id, '_saas_bg_color', true ) ?: '#f3f3f1';
 $gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
@@ -519,6 +518,16 @@ window.addEventListener('message', function(event) {
         if (key === 'bg_value') {
             if (value.includes('gradient')) document.body.style.background = value;
             else document.body.style.backgroundColor = value;
+        }
+        if (key === 'profile_theme') {
+            document.body.classList.remove('theme-light', 'theme-dark', 'theme-vibrant');
+            document.body.classList.add('theme-' + value);
+        }
+        if (key === 'container_shadow') {
+            let shadow = 'none';
+            if (value === 'soft') shadow = '0 10px 30px rgba(0,0,0,0.05)';
+            else if (value === 'hard') shadow = '8px 8px 0px #333';
+            document.documentElement.style.setProperty('--shadow-style', shadow);
         }
     }
 });

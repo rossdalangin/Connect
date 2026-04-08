@@ -3,13 +3,13 @@ SaaS Dashboard - Modern Interface Styles
 */
 
 #saas-dashboard {
-    max-width: 1000px;
-    margin: 40px auto;
+    max-width: 1200px;
+    margin: 60px auto;
     background: #fff;
-    padding: 32px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 48px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .saas-onboarding-card {
@@ -92,6 +92,7 @@ SaaS Dashboard - Modern Interface Styles
 
 .saas-tab-content {
     display: none;
+    padding: 20px 0;
 }
 
 .saas-tab-content.active {
@@ -121,13 +122,21 @@ SaaS Dashboard - Modern Interface Styles
 }
 
 #saas-links-list li {
-    background: #f9f9f9;
-    padding: 16px;
-    margin-bottom: 12px;
-    border-radius: 8px;
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 16px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    transition: transform 0.2s;
+}
+
+#saas-links-list li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
 
 #saas-links-list .handle {

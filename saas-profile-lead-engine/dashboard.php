@@ -72,8 +72,7 @@ class Saas_Dashboard {
         }
 
         $meta = saas_get_profile_meta( $profile_id );
-        $payments = new Saas_Payments();
-        $is_pro = $payments->is_pro_user($user_id);
+        $is_pro = saas_is_profile_licensed($profile_id);
         $analytics = new Saas_Analytics();
         $link_stats = $analytics->get_user_link_stats($user_id);
 
@@ -248,15 +247,18 @@ class Saas_Dashboard {
 
                     <div class="field">
                         <label>Headline</label>
-                        <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>">
+                        <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" placeholder="e.g. Digital Marketing Consultant">
+                        <small class="helper-note">A short, catchy headline that describes what you do. (Max 60 chars recommended)</small>
                     </div>
                     <div class="field">
                         <label>Bio</label>
-                        <textarea name="bio"><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
+                        <textarea name="bio" placeholder="e.g. Helping businesses scale through high-performance ads."><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
+                        <small class="helper-note">Tell your story. Keep it brief and focused on how you help your audience.</small>
                     </div>
                     <div class="field">
                         <label>Phone Number (vCard)</label>
-                        <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>">
+                        <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>" placeholder="+1 234 567 890">
+                        <small class="helper-note">This number will be included when people click "Save Contact".</small>
                     </div>
                     <button type="submit">Save Changes</button>
                 </form>
@@ -285,6 +287,7 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>Webhook URL (Zapier/Make)</label>
                         <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" placeholder="https://hooks.zapier.com/...">
+                        <small class="helper-note">Automatically send your leads to other apps like Google Sheets or Slack. Paste your automation webhook here.</small>
                     </div>
                     <div class="field">
                         <label>Custom Success Message</label>
@@ -375,11 +378,13 @@ class Saas_Dashboard {
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
                     <div class="field">
                         <label>Meta Title Tag</label>
-                        <input type="text" name="meta_title" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_seo_title', true)); ?>" placeholder="Page title for Google">
+                        <input type="text" name="meta_title" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_seo_title', true)); ?>" placeholder="e.g. Alex Coach | High-Performance Coaching">
+                        <small class="helper-note">This title appears in browser tabs and Google search results. Keep it relevant to your name and service.</small>
                     </div>
                     <div class="field">
                         <label>Meta Description</label>
                         <textarea name="meta_desc" rows="3" placeholder="Page description for Google"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_seo_desc', true)); ?></textarea>
+                        <small class="helper-note">A brief summary of your profile (150-160 chars). This is what people see under your link in Google.</small>
                     </div>
                     <div class="field">
                         <label>Custom Favicon</label>
@@ -423,6 +428,7 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>Theme Primary Color</label>
                         <input type="color" name="theme_color" value="<?php echo esc_attr( $meta['theme_color'] ); ?>">
+                        <small class="helper-note">Choose a color that matches your personal brand or logo.</small>
                     </div>
                     <div class="field">
                         <label>Background Type</label>

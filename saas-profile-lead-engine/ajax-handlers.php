@@ -550,6 +550,110 @@ function saas_ajax_create_profile() {
     }
 }
 
+// 14. AJAX: Generate Sample Data
+add_action( 'wp_ajax_saas_generate_samples', 'saas_ajax_generate_samples' );
+function saas_ajax_generate_samples() {
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error('Unauthorized');
+
+    $user_id = get_current_user_id();
+    $samples = [
+        [
+            'title' => 'Alex Coach',
+            'headline' => 'Helping you double your revenue in 90 days.',
+            'bio' => 'Certified high-performance coach. I work with CEOs and founders to scale their impact.',
+            'color' => '#6c5ce7',
+            'theme' => 'light',
+            'shadow' => 'soft',
+            'links' => [
+                ['t' => '👉 Free Strategy Session', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['t' => 'Watch Case Study', 'u' => 'https://youtube.com', 'type' => 'video'],
+                ['t' => 'Client Feedback', 'u' => '#', 'type' => 'testimonial', 'extra' => 'Alex changed my life!']
+            ]
+        ],
+        [
+            'title' => 'Tiktok Affiliate',
+            'headline' => 'Daily Amazon Finds & Discounts 🛍️',
+            'bio' => 'I find the best deals so you don\'t have to. Check out my latest favorites below.',
+            'color' => '#E1306C',
+            'theme' => 'vibrant',
+            'shadow' => 'hard',
+            'links' => [
+                ['t' => 'My Amazon Storefront', 'u' => 'https://amazon.com', 'type' => 'button', 'style' => 'rainbow'],
+                ['t' => 'Limited Time Deal ⏳', 'u' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+2 days'))],
+                ['t' => 'Join my Telegram Group', 'u' => '#', 'type' => 'button', 'style' => 'glow']
+            ]
+        ],
+        [
+            'title' => 'Elite Realtor',
+            'headline' => 'Modern Homes for Modern Families.',
+            'bio' => 'Helping buyers find their dream home in the luxury market. Top 1% agent.',
+            'color' => '#2d3436',
+            'theme' => 'dark',
+            'shadow' => 'none',
+            'links' => [
+                ['t' => 'New Listings - June', 'u' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/300\nhttps://via.placeholder.com/301"],
+                ['t' => 'Book a Home Viewing', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['t' => 'Sales Target', 'u' => '#', 'type' => 'milestone', 'extra' => 'Closed:85']
+            ]
+        ],
+        [
+            'title' => 'Lifestyle Influencer',
+            'headline' => 'Fashion, Travel & Aesthetic Vibes ✨',
+            'bio' => 'Creating beauty in the everyday. 500k+ on TikTok. Work with me for collabs!',
+            'color' => '#f093fb',
+            'theme' => 'vibrant',
+            'shadow' => 'soft',
+            'links' => [
+                ['t' => 'Shop My Closet (20% Off)', 'u' => 'https://poshmark.com', 'type' => 'button', 'style' => 'glow'],
+                ['t' => 'Watch My Latest VLOG', 'u' => 'https://youtube.com', 'type' => 'video'],
+                ['t' => 'Brand Collabs Inquiry', 'u' => '#', 'type' => 'lead_form']
+            ]
+        ],
+        [
+            'title' => 'Business Consultant',
+            'headline' => 'Strategic Advisory for Scaling Startups.',
+            'bio' => 'Former Fortune 500 exec helping you optimize operations and maximize profit.',
+            'color' => '#0073aa',
+            'theme' => 'light',
+            'shadow' => 'hard',
+            'links' => [
+                ['t' => 'Download Whitepaper', 'u' => '#', 'type' => 'button', 'style' => 'outline'],
+                ['t' => 'Book Audit Call', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['t' => 'Our Core Services', 'u' => '#', 'type' => 'pricing', 'extra' => '$5000/mo']
+            ]
+        ]
+    ];
+
+    foreach ($samples as $s) {
+        $p_id = wp_insert_post(['post_type' => 'saas_profile', 'post_title' => $s['title'], 'post_status' => 'publish', 'post_author' => $user_id]);
+        update_post_meta($p_id, '_saas_headline', $s['headline']);
+        update_post_meta($p_id, '_saas_bio', $s['bio']);
+        update_post_meta($p_id, '_saas_theme_color', $s['color']);
+        update_post_meta($p_id, '_saas_profile_theme', $s['theme']);
+        update_post_meta($p_id, '_saas_container_shadow', $s['shadow']);
+
+        foreach ($s['links'] as $idx => $l) {
+            $l_id = wp_insert_post(['post_type' => 'saas_link', 'post_title' => $l['t'], 'post_status' => 'publish', 'post_author' => $user_id]);
+            update_post_meta($l_id, '_saas_link_url', $l['u']);
+            update_post_meta($l_id, '_saas_block_type', $l['type']);
+            update_post_meta($l_id, '_saas_priority', $idx);
+            if (isset($l['style'])) update_post_meta($l_id, '_saas_block_style', $l['style']);
+            if (isset($l['extra'])) {
+                if ($l['type'] === 'testimonial') update_post_meta($l_id, '_saas_testimonial_text', $l['extra']);
+                if ($l['type'] === 'image_gallery') update_post_meta($l_id, '_saas_gallery_images', explode("\n", $l['extra']));
+                if ($l['type'] === 'countdown') update_post_meta($l_id, '_saas_expiry', $l['extra']);
+                if ($l['type'] === 'milestone') {
+                    list($lbl, $per) = explode(':', $l['extra']);
+                    update_post_meta($l_id, '_saas_ms_label', $lbl);
+                    update_post_meta($l_id, '_saas_ms_percent', intval($per));
+                }
+            }
+        }
+    }
+
+    wp_send_json_success('Sample profiles created successfully!');
+}
+
 // 11. AJAX: Verify Link Password (Secure)
 add_action( 'wp_ajax_saas_verify_link_password', 'saas_ajax_verify_link_password' );
 add_action( 'wp_ajax_nopriv_saas_verify_link_password', 'saas_ajax_verify_link_password' );

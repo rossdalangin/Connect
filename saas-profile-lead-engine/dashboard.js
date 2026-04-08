@@ -241,13 +241,16 @@ document.addEventListener('DOMContentLoaded', function() {
         { selector: 'input[name="headline"]', key: 'headline' },
         { selector: 'textarea[name="bio"]', key: 'bio' },
         { selector: 'input[name="theme_color"]', key: 'theme_color' },
-        { selector: 'input[name="bg_value"]', key: 'bg_value' }
+        { selector: 'input[name="bg_value"]', key: 'bg_value' },
+        { selector: 'select[name="profile_theme"]', key: 'profile_theme' },
+        { selector: 'select[name="container_shadow"]', key: 'container_shadow' }
     ];
 
     liveFields.forEach(field => {
         const el = document.querySelector(field.selector);
         if (el) {
-            el.addEventListener('input', (e) => {
+            const eventType = el.tagName === 'SELECT' ? 'change' : 'input';
+            el.addEventListener(eventType, (e) => {
                 updatePreview({ type: 'live_update', key: field.key, value: e.target.value });
             });
         }

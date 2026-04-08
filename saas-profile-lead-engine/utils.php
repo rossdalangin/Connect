@@ -108,18 +108,35 @@ function saas_get_profile_by_slug( $slug ) {
 
 /**
  * License Validation Helper
+ * Combined logic for direct user subscription AND profile-level license keys
  */
 function saas_is_profile_licensed( $profile_id ) {
+    $author_id = get_post_field( 'post_author', $profile_id );
+
+    // 1. Check if user is a PRO subscriber
+    $payments = new Saas_Payments();
+    if ( $payments->is_pro_user( $author_id ) ) {
+        return true;
+    }
+
+    // 2. Check if specific profile has a valid license key
     $license_key = get_post_meta( $profile_id, '_saas_license_key', true );
-    if ( ! $license_key ) return false;
+    if ( ! empty($license_key) ) {
+        $licenses = get_posts([
+            'post_type'   => 'saas_license',
+            'title'       => $license_key,
+            'post_status' => 'publish',
+            'numberposts' => 1
+        ]);
 
-    // Verify if license key exists in saas_license CPT
-    $licenses = get_posts([
-        'post_type'  => 'saas_license',
-        'title'      => $license_key,
-        'post_status' => 'publish',
-        'numberposts' => 1
-    ]);
+        if ( ! empty($licenses) ) {
+            // Optional: Check license expiry (stored as meta on saas_license)
+            $expiry = get_post_meta( $licenses[0]->ID, '_saas_license_expiry', true );
+            if ( ! $expiry || $expiry > time() ) {
+                return true;
+            }
+        }
+    }
 
-    return ! empty($licenses);
+    return false;
 }
