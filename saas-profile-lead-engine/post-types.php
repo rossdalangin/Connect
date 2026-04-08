@@ -128,18 +128,25 @@ add_filter( 'template_include', 'saas_template_redirect' );
 /**
  * Meta Field Helpers
  */
-function saas_get_profile_meta( $profile_id ) {
-    return [
-        'bio'          => get_post_meta( $profile_id, '_saas_bio', true ),
-        'headline'     => get_post_meta( $profile_id, '_saas_headline', true ),
-        'theme_color'  => get_post_meta( $profile_id, '_saas_theme_color', true ) ?: '#0073aa',
-        'social_links' => get_post_meta( $profile_id, '_saas_social_links', true ) ?: [],
-    ];
+if ( ! function_exists( 'saas_get_profile_meta' ) ) {
+    function saas_get_profile_meta( $profile_id ) {
+        return [
+            'bio'          => get_post_meta( $profile_id, '_saas_bio', true ),
+            'headline'     => get_post_meta( $profile_id, '_saas_headline', true ),
+            'theme_color'  => get_post_meta( $profile_id, '_saas_theme_color', true ) ?: '#0073aa',
+            'social_links' => get_post_meta( $profile_id, '_saas_social_links', true ) ?: [],
+            'phone'        => get_post_meta( $profile_id, '_saas_phone', true ),
+            'avatar_id'    => get_post_thumbnail_id( $profile_id ),
+            'cover_id'     => get_post_meta( $profile_id, '_saas_cover_id', true ),
+        ];
+    }
 }
 
-function saas_update_profile_meta( $profile_id, $data ) {
-    if ( isset( $data['bio'] ) ) update_post_meta( $profile_id, '_saas_bio', sanitize_textarea_field( $data['bio'] ) );
-    if ( isset( $data['headline'] ) ) update_post_meta( $profile_id, '_saas_headline', sanitize_text_field( $data['headline'] ) );
-    if ( isset( $data['theme_color'] ) ) update_post_meta( $profile_id, '_saas_theme_color', sanitize_hex_color( $data['theme_color'] ) );
-    if ( isset( $data['social_links'] ) ) update_post_meta( $profile_id, '_saas_social_links', $data['social_links'] );
+if ( ! function_exists( 'saas_update_profile_meta' ) ) {
+    function saas_update_profile_meta( $profile_id, $data ) {
+        if ( isset( $data['bio'] ) ) update_post_meta( $profile_id, '_saas_bio', sanitize_textarea_field( $data['bio'] ) );
+        if ( isset( $data['headline'] ) ) update_post_meta( $profile_id, '_saas_headline', sanitize_text_field( $data['headline'] ) );
+        if ( isset( $data['theme_color'] ) ) update_post_meta( $profile_id, '_saas_theme_color', sanitize_hex_color( $data['theme_color'] ) );
+        if ( isset( $data['social_links'] ) ) update_post_meta( $profile_id, '_saas_social_links', $data['social_links'] );
+    }
 }

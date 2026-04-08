@@ -157,7 +157,7 @@ include __DIR__ . '/header.php';
                         if ($thumb_id) : ?>
                             <img src="<?php echo esc_url(wp_get_attachment_thumb_url($thumb_id)); ?>" class="btn-thumb">
                         <?php endif; ?>
-                        <span class="btn-label"><?php echo esc_html( $block->post_title ); ?> <?php if($link_pass) echo '🔒'; ?></span>
+                        <span class="btn-label"><?php echo esc_html( $block->post_title ); ?> <?php if($has_pass) echo '🔒'; ?></span>
                     </a>
                 <?php elseif ($type === 'video') : ?>
                     <div class="video-embed">

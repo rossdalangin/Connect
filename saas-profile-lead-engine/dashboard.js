@@ -581,6 +581,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (applyTemplateBtn) {
         applyTemplateBtn.addEventListener('click', () => {
             const template = document.getElementById('saas-apply-template').value;
+            const profileId = document.querySelector('input[name="profile_id"]')?.value;
+
             if (!template || !confirm('This will delete all current blocks and reset to template. Continue?')) return;
 
             fetch(saas_dashboard_data.ajax_url, {
@@ -589,7 +591,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: new URLSearchParams({
                     action: 'saas_apply_template',
                     security: saas_dashboard_data.nonce,
-                    template: template
+                    template: template,
+                    profile_id: profileId
                 })
             })
             .then(r => r.json())

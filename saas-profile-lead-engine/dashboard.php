@@ -90,40 +90,40 @@ class Saas_Dashboard {
         <div id="saas-dashboard">
             <!-- Onboarding Checklist -->
             <div class="saas-onboarding-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="onboarding-flex">
                     <div>
                         <h4>🚀 Get Started Checklist</h4>
-                        <div style="display:flex; gap:20px; font-size:0.9rem;">
-                            <span>[<?php echo $meta['bio'] ? '✓' : ' '; ?>] Bio</span>
-                            <span>[<?php echo count($links) > 0 ? '✓' : ' '; ?>] Blocks</span>
-                            <span>[<?php echo $is_pro ? '✓' : ' '; ?>] Pro Upgrade</span>
+                        <div class="checklist-items">
+                            <span class="check-item <?php echo $meta['bio'] ? 'completed' : ''; ?>"><?php echo $meta['bio'] ? '✓' : '○'; ?> Bio</span>
+                            <span class="check-item <?php echo count($links) > 0 ? 'completed' : ''; ?>"><?php echo count($links) > 0 ? '✓' : '○'; ?> Blocks</span>
+                            <span class="check-item <?php echo $is_pro ? 'completed' : ''; ?>"><?php echo $is_pro ? '✓' : '○'; ?> Pro Upgrade</span>
                         </div>
                     </div>
-                    <button id="saas-start-wizard" class="button button-primary" style="background:#fff; color:#6c5ce7; border:none; font-weight:800;">Launch Setup Wizard</button>
+                    <button id="saas-start-wizard" class="wizard-trigger-btn">Launch Setup Wizard</button>
                 </div>
             </div>
 
             <div class="saas-dashboard-header">
-                <div style="display:flex; align-items:center; gap:20px;">
-                    <div class="profile-switcher-wrapper" style="position:relative;">
-                        <h2 style="margin:0;">Profile: <?php echo esc_html($profile_obj->post_title); ?> ▾</h2>
-                        <div class="profile-dropdown" style="display:none; position:absolute; top:100%; left:0; background:#fff; box-shadow:0 10px 20px rgba(0,0,0,0.1); border-radius:12px; z-index:1001; min-width:200px; padding:10px;">
+                <div class="header-left">
+                    <div class="profile-switcher-wrapper">
+                        <h2 class="profile-title"><?php echo esc_html($profile_obj->post_title); ?> <span class="chevron">▾</span></h2>
+                        <div class="profile-dropdown">
                             <?php foreach($all_user_profiles as $up) : ?>
-                                <a href="?profile_id=<?php echo $up->ID; ?>" style="display:block; padding:10px; text-decoration:none; color:<?php echo ($up->ID == $active_profile_id) ? '#6c5ce7' : '#333'; ?>; font-weight:<?php echo ($up->ID == $active_profile_id) ? '800' : '400'; ?>;">
+                                <a href="?profile_id=<?php echo $up->ID; ?>" class="dropdown-item <?php echo ($up->ID == $active_profile_id) ? 'active' : ''; ?>">
                                     <?php echo esc_html($up->post_title); ?>
                                 </a>
                             <?php endforeach; ?>
-                            <hr>
-                            <button id="saas-add-profile-trigger" style="width:100%; border:none; background:none; padding:10px; cursor:pointer; color:#6c5ce7; font-weight:800;">+ New Profile</button>
+                            <div class="dropdown-divider"></div>
+                            <button id="saas-add-profile-trigger" class="add-profile-btn">+ New Profile</button>
                         </div>
                     </div>
-                    <div class="saas-notification-bell" id="saas-notif-trigger" style="cursor:pointer; position:relative; font-size:1.5rem;">
-                        🔔<span id="notif-count" style="position:absolute; top:-5px; right:-5px; background:red; color:#fff; font-size:0.7rem; padding:2px 5px; border-radius:50%; display:none;">0</span>
+                    <div class="saas-notification-bell" id="saas-notif-trigger">
+                        🔔<span id="notif-count">0</span>
                     </div>
                 </div>
                 <div class="saas-share-bar">
                     <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile_obj->post_name); ?>" readonly>
-                    <button id="saas-copy-btn">Copy My Link</button>
+                    <button id="saas-copy-btn">Copy Link</button>
                 </div>
             </div>
             <nav class="saas-tabs">
@@ -140,10 +140,10 @@ class Saas_Dashboard {
 
             <!-- Links Tab -->
             <div id="tab-links" class="saas-tab-content active">
-                <h3>Manage Blocks</h3>
+                <h3 class="tab-title">Manage Blocks</h3>
 
                 <!-- Visual Block Picker -->
-                <div class="saas-block-picker" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom: 30px;">
+                <div class="saas-block-picker">
                     <div class="picker-item active" data-type="button"><span>🔗</span> Button</div>
                     <div class="picker-item" data-type="video"><span>🎬</span> Video</div>
                     <div class="picker-item" data-type="testimonial"><span>⭐</span> Testim</div>
@@ -161,21 +161,32 @@ class Saas_Dashboard {
 
                 <form id="saas-add-link-form">
                     <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
-                    <select name="block_style" id="saas-block-style">
-                        <option value="regular">Regular Style</option>
-                        <option value="featured">Featured (Pulse)</option>
-                        <option value="rainbow">Rainbow Glow</option>
-                        <option value="outline">Outline Only</option>
-                        <option value="glow">Glow Effect</option>
-                    </select>
-                    <select name="block_animation" id="saas-block-animation">
-                        <option value="fadeinup">Fade In Up</option>
-                        <option value="bouncein">Bounce In</option>
-                        <option value="none">No Animation</option>
-                    </select>
-                    <input type="text" name="title" placeholder="Block Title (e.g. FAQ Question)" required>
-                    <input type="url" name="url" placeholder="URL / Embed Link" required>
-                    <textarea name="extra" placeholder="Extra content (e.g. FAQ Answer, Price, or Testimonial text)"></textarea>
+                    <div class="field-row" style="display:flex; gap:10px; grid-column: 1/-1;">
+                        <select name="block_style" id="saas-block-style" style="flex:1;">
+                            <option value="regular">Regular Style</option>
+                            <option value="featured">Featured (Pulse)</option>
+                            <option value="rainbow">Rainbow Glow</option>
+                            <option value="outline">Outline Only</option>
+                            <option value="glow">Glow Effect</option>
+                        </select>
+                        <select name="block_animation" id="saas-block-animation" style="flex:1;">
+                            <option value="fadeinup">Fade In Up</option>
+                            <option value="bouncein">Bounce In</option>
+                            <option value="none">No Animation</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <input type="text" name="title" placeholder="Block Title (e.g. Book a Consultation)" required>
+                        <small class="helper-note"><strong>Pro Tip:</strong> Use "Action Verbs" like <i>Grab, Join,</i> or <i>Book</i> to increase clicks by 25%.</small>
+                    </div>
+                    <div class="field">
+                        <input type="url" name="url" placeholder="URL (e.g. https://calendly.com/yourname)" required>
+                        <small class="helper-note"><strong>Pro Tip:</strong> Double check your link works before saving!</small>
+                    </div>
+                    <div class="field" style="grid-column: 1/-1;">
+                        <textarea name="extra" placeholder="Extra content (e.g. FAQ Answer, Price, or Testimonial text)"></textarea>
+                        <small class="helper-note">Use this for secondary text, pricing details, or FAQ answers.</small>
+                    </div>
                     <button type="submit">Add Block</button>
                 </form>
 
@@ -195,15 +206,24 @@ class Saas_Dashboard {
                             data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>"
                             data-image-id="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_image_id', true)); ?>"
                             data-image-url="<?php echo esc_url(wp_get_attachment_thumb_url(get_post_meta($link->ID, '_saas_link_image_id', true))); ?>">
-                            <span class="handle">:::</span>
-                            <strong><?php echo esc_html( $link->post_title ); ?></strong>
-                            <span><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ); ?></span>
-                            <span class="click-counter" style="background:#e3f2fd; color:#1976d2; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; margin-left:10px;" title="Total Clicks">
-                                🖱️ <?php echo isset($link_stats[$link->ID]) ? $link_stats[$link->ID]->clicks : 0; ?>
+                            <span class="handle">⠿</span>
+                            <?php
+                            $thumb_id = get_post_meta($link->ID, '_saas_link_image_id', true);
+                            if($thumb_id): ?>
+                                <img src="<?php echo esc_url(wp_get_attachment_thumb_url($thumb_id)); ?>" class="link-thumb-small">
+                            <?php else: ?>
+                                <div class="link-thumb-small" style="display:flex; align-items:center; justify-content:center; background:#f8f9fa; font-size:1.2rem;">🔗</div>
+                            <?php endif; ?>
+                            <div class="link-info">
+                                <strong class="link-title"><?php echo esc_html( $link->post_title ); ?></strong>
+                                <span class="link-url"><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ); ?></span>
+                            </div>
+                            <span class="click-counter" title="Total Clicks">
+                                📊 <?php echo isset($link_stats[$link->ID]) ? $link_stats[$link->ID]->clicks : 0; ?>
                             </span>
                             <div class="block-actions">
-                                <button class="edit-link button-secondary">Edit</button>
-                                <button class="delete-link button-link-delete">Delete</button>
+                                <button class="edit-link">Edit</button>
+                                <button class="delete-link">Delete</button>
                             </div>
                         </li>
                     <?php endforeach; ?>
@@ -247,18 +267,18 @@ class Saas_Dashboard {
 
                     <div class="field">
                         <label>Headline</label>
-                        <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" placeholder="e.g. Digital Marketing Consultant">
-                        <small class="helper-note">A short, catchy headline that describes what you do. (Max 60 chars recommended)</small>
+                        <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" placeholder="e.g. Helping 7-figure founders scale impact 🚀">
+                        <small class="helper-note"><strong>Best Practice:</strong> Use an "Outcome-Based" headline. Instead of "I am a Coach", use "Helping [Niche] achieve [Result]". Max 60 chars recommended.</small>
                     </div>
                     <div class="field">
                         <label>Bio</label>
-                        <textarea name="bio" placeholder="e.g. Helping businesses scale through high-performance ads."><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
-                        <small class="helper-note">Tell your story. Keep it brief and focused on how you help your audience.</small>
+                        <textarea name="bio" placeholder="e.g. Ex-Google Exec turned Strategic Coach. I work with CEOs to automate acquisition and double profit margins."><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
+                        <small class="helper-note"><strong>Best Practice:</strong> Establish authority in the first sentence, then provide a clear Call to Action. Keep it under 160 characters for best mobile visibility.</small>
                     </div>
                     <div class="field">
                         <label>Phone Number (vCard)</label>
-                        <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>" placeholder="+1 234 567 890">
-                        <small class="helper-note">This number will be included when people click "Save Contact".</small>
+                        <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>" placeholder="e.g. +1 (555) 000-1234">
+                        <small class="helper-note"><strong>Best Practice:</strong> Use international format (+1...) to ensure "Save Contact" works globally. This enables the 1-tap networking feature.</small>
                     </div>
                     <button type="submit">Save Changes</button>
                 </form>
@@ -612,38 +632,83 @@ class Saas_Dashboard {
                 </div>
             </div>
             <div id="tab-billing" class="saas-tab-content">
-                <h3>Choose Your Plan</h3>
+                <div class="billing-header" style="text-align:center; margin-bottom:40px;">
+                    <h3 style="font-size:2rem; margin-bottom:10px;">Upgrade Your Potential</h3>
+                    <p style="color:var(--text-muted);">Join 10,000+ professionals using Pro features to scale.</p>
+                </div>
+
                 <div class="saas-plans-grid">
-                    <div class="plan-card">
-                        <h4>Free</h4>
-                        <div class="price">$0/mo</div>
-                        <p>Basic Link Hub</p>
-                        <button disabled>Current Plan</button>
+                    <div class="plan-card <?php echo !$is_pro ? 'active-plan' : ''; ?>">
+                        <div class="plan-header">
+                            <h4>Basic</h4>
+                            <div class="price">$0<span>/mo</span></div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><span class="check">✓</span> 1 Profile</li>
+                            <li><span class="check">✓</span> Unlimited Basic Links</li>
+                            <li><span class="check">✓</span> Standard QR Code</li>
+                            <li class="disabled">✕ Advanced Lead CRM</li>
+                            <li class="disabled">✕ Whitelabel (No Branding)</li>
+                            <li class="disabled">✕ Custom Tracking Pixels</li>
+                        </ul>
+                        <button disabled><?php echo !$is_pro ? 'Current Plan' : 'Free Tier'; ?></button>
                     </div>
-                    <div class="plan-card featured">
-                        <h4>Pro</h4>
-                        <div class="price">$19/mo</div>
-                        <p>Unlimited Blocks + Lead Gen</p>
-                        <form class="checkout-form">
-                            <input type="hidden" name="plan_id" value="pro">
-                            <?php
-                            $gateway_logic = $payments->get_active_gateway();
-                            if ($gateway_logic === 'user_select') : ?>
-                                <select name="gateway" style="margin-bottom:15px; width:100%; padding:10px; border-radius:8px;">
-                                    <option value="stripe">Pay with Card (Stripe)</option>
-                                    <option value="paypal">Pay with PayPal</option>
-                                </select>
-                            <?php elseif ($gateway_logic === 'stripe') : ?>
-                                <input type="hidden" name="gateway" value="stripe">
-                                <p style="font-size:0.8rem; color:#888; margin-bottom:15px;">Secure Payment via Stripe</p>
-                            <?php elseif ($gateway_logic === 'paypal') : ?>
-                                <input type="hidden" name="gateway" value="paypal">
-                                <p style="font-size:0.8rem; color:#888; margin-bottom:15px;">Secure Payment via PayPal</p>
-                            <?php else : ?>
-                                <p style="color:red; font-size:0.8rem;">Payments are currently disabled.</p>
-                            <?php endif; ?>
-                            <button type="submit" <?php if($gateway_logic === 'none') echo 'disabled'; ?>>Upgrade Now</button>
-                        </form>
+
+                    <div class="plan-card featured <?php echo $is_pro ? 'active-plan' : ''; ?>">
+                        <div class="popular-tag">MOST POPULAR</div>
+                        <div class="plan-header">
+                            <h4>Elite Pro</h4>
+                            <div class="price">$19<span>/mo</span></div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><span class="check">✓</span> 10+ Profiles</li>
+                            <li><span class="check">✓</span> <strong>All Premium Blocks</strong></li>
+                            <li><span class="check">✓</span> Lead CRM & Automations</li>
+                            <li><span class="check">✓</span> Webhook Integrations</li>
+                            <li><span class="check">✓</span> Whitelabeling</li>
+                            <li><span class="check">✓</span> Priority Support</li>
+                        </ul>
+
+                        <?php if ( $is_pro ) : ?>
+                            <div class="active-status">
+                                <p><strong>Plan Active:</strong> Elite Pro Subscription</p>
+                                <button class="button button-secondary" onclick="alert('Redirecting to Billing Portal...')">Manage Subscription</button>
+                            </div>
+                        <?php else : ?>
+                            <form class="checkout-form">
+                                <input type="hidden" name="plan_id" value="pro">
+                                <?php
+                                $gateway_logic = $payments->get_active_gateway();
+                                if ($gateway_logic === 'user_select') : ?>
+                                    <select name="gateway" style="margin-bottom:15px; width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; font-weight:600;">
+                                        <option value="stripe">Pay with Card (Stripe)</option>
+                                        <option value="paypal">Pay with PayPal</option>
+                                    </select>
+                                <?php elseif ($gateway_logic === 'stripe') : ?>
+                                    <input type="hidden" name="gateway" value="stripe">
+                                    <p style="font-size:0.8rem; color:#888; margin-bottom:15px; text-align:center;">Secure Payment via Stripe</p>
+                                <?php elseif ($gateway_logic === 'paypal') : ?>
+                                    <input type="hidden" name="gateway" value="paypal">
+                                    <p style="font-size:0.8rem; color:#888; margin-bottom:15px; text-align:center;">Secure Payment via PayPal</p>
+                                <?php endif; ?>
+                                <button type="submit" class="cta-btn" <?php if($gateway_logic === 'none') echo 'disabled'; ?>>Unlock Everything Now</button>
+                            </form>
+                        <?php endif; ?>
+                        <p style="font-size:0.7rem; color:rgba(255,255,255,0.6); text-align:center; margin-top:15px;">30-Day Money Back Guarantee</p>
+                    </div>
+                </div>
+
+                <div class="billing-faq" style="margin-top:60px;">
+                    <h4 style="text-align:center; margin-bottom:30px;">Common Questions</h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+                        <div>
+                            <strong>Can I cancel anytime?</strong>
+                            <p style="font-size:0.85rem; color:var(--text-muted);">Yes, you can cancel your subscription from your dashboard at any time. No questions asked.</p>
+                        </div>
+                        <div>
+                            <strong>Do you offer refunds?</strong>
+                            <p style="font-size:0.85rem; color:var(--text-muted);">We offer a full 30-day money-back guarantee if you're not satisfied with the Pro features.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -780,6 +845,7 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>Title</label>
                         <input type="text" name="title" id="edit-link-title" required>
+                        <small class="helper-note">Keep it snappy and clear.</small>
                     </div>
                     <div class="field-row" style="display:flex; gap:10px;">
                         <div class="field" style="flex:1;">
@@ -792,12 +858,14 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>URL / Embed</label>
                         <input type="url" name="url" id="edit-link-url" required>
+                        <small class="helper-note">For videos, use the YouTube/Vimeo watch link.</small>
                     </div>
                     <div id="routing-settings" class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                         <h4>Conditional Routing <?php if(!$is_pro) echo '🔒'; ?></h4>
                         <div class="field">
                             <label>Mobile-only URL</label>
                             <input type="url" name="url_mobile" id="edit-link-mobile" placeholder="Leave empty for default" <?php if(!$is_pro) echo 'disabled'; ?>>
+                            <small class="helper-note">Send mobile users to a different destination (e.g. App Store).</small>
                         </div>
                         <div class="field">
                             <label>Geo-targeted URL</label>
@@ -806,6 +874,7 @@ class Saas_Dashboard {
                         <div class="field">
                             <label>Target Country Code (ISO, e.g. US)</label>
                             <input type="text" name="url_geo_country" id="edit-link-geo-country" placeholder="US" <?php if(!$is_pro) echo 'disabled'; ?>>
+                            <small class="helper-note">Enter 2-letter country code (US, UK, CA, etc.)</small>
                         </div>
                     </div>
                     <div class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="display:flex; gap:10px;">
@@ -821,6 +890,7 @@ class Saas_Dashboard {
                     <div class="field">
                         <label>Extra Content / Features (one per line for pricing)</label>
                         <textarea name="extra" id="edit-link-extra" rows="4"></textarea>
+                        <small class="helper-note">For Pricing blocks, put one feature per line.</small>
                     </div>
                     <div class="field-row" style="display:flex; gap:10px;">
                         <div class="field" style="flex:1;">
