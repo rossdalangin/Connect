@@ -123,6 +123,49 @@ $h_img   = get_option('saas_home_image');
     </div>
 </section>
 
+<!-- Featured Profiles Section -->
+<section style="padding: 120px 20px; background: #fff;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Join thousands of elite professionals</h2>
+        <p style="color: #636e72; font-size: 1.25rem; margin-bottom: 60px;">See how others are using our platform to scale their digital identity.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <?php
+            $featured_profiles = get_posts([
+                'post_type' => 'saas_profile',
+                'post_status' => 'publish',
+                'numberposts' => 3,
+                'orderby' => 'date',
+                'order' => 'DESC'
+            ]);
+
+            if ($featured_profiles) :
+                foreach ($featured_profiles as $fp) :
+                    $fp_meta = saas_get_profile_meta($fp->ID);
+                    $fp_url = home_url('/' . $fp->post_name);
+                    ?>
+                    <div style="background:#fff; border: 1px solid #eee; padding:40px; border-radius:32px; box-shadow:0 20px 40px rgba(0,0,0,0.03); text-align:center; transition: all 0.3s;" onmouseover="this.style.borderColor='#6c5ce7'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#eee'; this.style.transform='none'">
+                        <div style="width:100px; height:100px; margin:0 auto 20px; border-radius:50%; overflow:hidden; border:4px solid #f8f9fa;">
+                            <?php if (has_post_thumbnail($fp->ID)) : ?>
+                                <?php echo get_the_post_thumbnail($fp->ID, 'thumbnail', ['style' => 'width:100%; height:100%; object-fit:cover;']); ?>
+                            <?php else : ?>
+                                <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center; font-size:2rem;">👤</div>
+                            <?php endif; ?>
+                        </div>
+                        <h3 style="margin-bottom:5px;"><?php echo esc_html($fp->post_title); ?></h3>
+                        <p style="color:#6c5ce7; font-weight:700; font-size:0.9rem; margin-bottom:15px;"><?php echo esc_html($fp_meta['headline']); ?></p>
+                        <a href="<?php echo esc_url($fp_url); ?>" target="_blank" style="display:inline-block; padding:10px 24px; background:#f1f2f6; color:#2d3436; text-decoration:none; border-radius:50px; font-weight:700; font-size:0.85rem;">View Profile</a>
+                    </div>
+                <?php endforeach;
+            else: ?>
+                <div style="grid-column: 1/-1; padding:40px; background:#f8f9fa; border-radius:24px; color:#999;">
+                    Create the first profile to be featured here!
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
+
 <!-- Testimonials Section -->
 <section style="padding: 100px 20px; background: #fff;">
     <div style="max-width: 1000px; margin: 0 auto; text-align: center;">

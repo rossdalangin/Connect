@@ -256,6 +256,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 3.1 SEO Mockup Logic
+    const seoTitleInput = document.querySelector('input[name="meta_title"]');
+    const seoDescInput = document.querySelector('textarea[name="meta_desc"]');
+    const mockTitle = document.getElementById('seo-mock-title');
+    const mockDesc = document.getElementById('seo-mock-desc');
+
+    if (seoTitleInput && mockTitle) {
+        seoTitleInput.addEventListener('input', (e) => {
+            mockTitle.innerText = e.target.value || 'Your Profile Title | Digital Business Card';
+        });
+    }
+    if (seoDescInput && mockDesc) {
+        seoDescInput.addEventListener('input', (e) => {
+            mockDesc.innerText = e.target.value || 'Check out my professional profile and links. Contact me directly for inquiries.';
+        });
+    }
+
     // 3. Form Handling (Profile, Branding, Automation)
     const genericFormHandler = function(e) {
         e.preventDefault();
@@ -602,6 +619,32 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Webhook Test Button
+    document.getElementById('saas-test-webhook')?.addEventListener('click', function() {
+        const url = document.getElementById('lead-webhook-url').value;
+        if (!url) return alert('Please enter a Webhook URL first.');
+
+        const btn = this;
+        btn.innerText = 'Testing...';
+        btn.disabled = true;
+
+        fetch(saas_dashboard_data.ajax_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                action: 'saas_test_webhook',
+                security: saas_dashboard_data.nonce,
+                webhook_url: url
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            alert(data.data);
+            btn.innerText = 'Test Webhook';
+            btn.disabled = false;
+        });
+    });
 
     // Checkout
     document.querySelectorAll('.checkout-form').forEach(form => {

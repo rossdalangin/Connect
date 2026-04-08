@@ -12,6 +12,15 @@ add_action( 'wp_ajax_nopriv_saas_submit_lead', 'saas_ajax_submit_lead' );
 function saas_ajax_submit_lead() {
     check_ajax_referer( 'saas_lead_nonce', 'security' );
 
+    // 0. Rate Limiting (Spam Prevention)
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $transient_key = 'saas_lead_limit_' . md5($ip);
+    $attempts = get_transient($transient_key) ?: 0;
+
+    if ($attempts >= 3) {
+        wp_send_json_error( 'Too many requests. Please try again in 10 minutes.' );
+    }
+
     $profile_id = intval( $_POST['profile_id'] );
     $name       = sanitize_text_field( $_POST['name'] );
     $email      = sanitize_email( $_POST['email'] );
@@ -51,6 +60,10 @@ function saas_ajax_submit_lead() {
         $tags = get_post_meta( $profile_id, '_saas_lead_tags', true ) ?: [ 'New' ];
         update_post_meta( $lead_id, '_saas_lead_tags', $tags );
 
+        // 3. Track Conversion Event
+        $analytics = new Saas_Analytics();
+        $analytics->record_event($owner_id, 'lead_conversion', $profile_id);
+
         // Automation Hooks
         $redirect_url = get_post_meta( $profile_id, '_saas_lead_redirect', true );
         $webhook_url  = get_post_meta( $profile_id, '_saas_lead_webhook', true );
@@ -83,6 +96,9 @@ function saas_ajax_submit_lead() {
 
         // Lead Magnet Delivery (Simulated)
         $lead_magnet_url = get_post_meta( $profile_id, '_saas_lead_magnet_url', true );
+
+        // Increment rate limit attempts
+        set_transient($transient_key, $attempts + 1, 600); // 10 minutes
 
         wp_send_json_success([
             'message'  => 'Thank you! We will contact you soon.',

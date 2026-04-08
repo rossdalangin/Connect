@@ -275,10 +275,18 @@ class Saas_Dashboard {
                         <textarea name="bio" placeholder="e.g. Ex-Google Exec turned Strategic Coach. I work with CEOs to automate acquisition and double profit margins."><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
                         <small class="helper-note"><strong>Best Practice:</strong> Establish authority in the first sentence, then provide a clear Call to Action. Keep it under 160 characters for best mobile visibility.</small>
                     </div>
+                    <div class="saas-conversion-card" style="background:#fff9eb; padding:20px; border-radius:12px; border:1px solid #ffeaa7; margin-bottom:24px;">
+                        <h4 style="margin-top:0; color:#d6a317;">💡 Conversion Tip</h4>
+                        <p style="font-size:0.85rem; margin-bottom:0;">Profiles with a clear <strong>"I help [who] with [what]"</strong> structure see 45% higher lead capture rates. Avoid technical jargon and focus on the benefit to your visitor.</p>
+                    </div>
                     <div class="field">
                         <label>Phone Number (vCard)</label>
                         <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>" placeholder="e.g. +1 (555) 000-1234">
                         <small class="helper-note"><strong>Best Practice:</strong> Use international format (+1...) to ensure "Save Contact" works globally. This enables the 1-tap networking feature.</small>
+                    </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label><input type="checkbox" name="verified_badge" value="1" <?php checked(get_post_meta($profile_id, '_saas_verified_badge', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Show Verified Badge ✅ <?php if(!$is_pro) echo '🔒'; ?></label>
+                        <small>Adds a blue verification checkmark next to your name to build elite authority.</small>
                     </div>
                     <button type="submit">Save Changes</button>
                 </form>
@@ -306,7 +314,10 @@ class Saas_Dashboard {
                     </div>
                     <div class="field">
                         <label>Webhook URL (Zapier/Make)</label>
-                        <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" placeholder="https://hooks.zapier.com/...">
+                        <div style="display:flex; gap:10px;">
+                            <input type="url" name="lead_webhook" id="lead-webhook-url" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" placeholder="https://hooks.zapier.com/..." style="flex:1;">
+                            <button type="button" id="saas-test-webhook" class="button">Test Webhook</button>
+                        </div>
                         <small class="helper-note">Automatically send your leads to other apps like Google Sheets or Slack. Paste your automation webhook here.</small>
                     </div>
                     <div class="field">
@@ -403,9 +414,26 @@ class Saas_Dashboard {
                     </div>
                     <div class="field">
                         <label>Meta Description</label>
-                        <textarea name="meta_desc" rows="3" placeholder="Page description for Google"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_seo_desc', true)); ?></textarea>
+                        <textarea name="meta_desc" id="seo-meta-desc" rows="3" placeholder="Page description for Google"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_seo_desc', true)); ?></textarea>
                         <small class="helper-note">A brief summary of your profile (150-160 chars). This is what people see under your link in Google.</small>
                     </div>
+
+                    <div class="seo-preview-wrapper" style="background:#fff; border:1px solid #eee; padding:20px; border-radius:12px; margin-bottom:24px;">
+                        <h4 style="margin-top:0; font-size:0.8rem; color:#888; text-transform:uppercase;">Google Search Preview</h4>
+                        <div class="google-mockup" style="font-family: arial, sans-serif; max-width: 600px;">
+                            <div class="mock-url" style="color: #202124; font-size: 14px; margin-bottom: 4px; display:flex; align-items:center; gap:8px;">
+                                <div style="background:#f1f3f4; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:10px;">🌎</div>
+                                <span><?php echo home_url('/' . $profile_obj->post_name); ?></span>
+                            </div>
+                            <div class="mock-title" id="seo-mock-title" style="color: #1a0dab; font-size: 20px; line-height: 1.3; margin-bottom: 3px; cursor: pointer; text-decoration: none;">
+                                <?php echo esc_html(get_post_meta($profile_id, '_saas_seo_title', true) ?: $profile_obj->post_title . ' | Digital Business Card'); ?>
+                            </div>
+                            <div class="mock-desc" id="seo-mock-desc" style="color: #4d5156; font-size: 14px; line-height: 1.58;">
+                                <?php echo esc_html(get_post_meta($profile_id, '_saas_seo_desc', true) ?: 'Check out my professional profile and links. Contact me directly for inquiries.'); ?>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="field">
                         <label>Custom Favicon</label>
                         <div id="favicon-preview" style="margin-bottom:10px;">
@@ -512,6 +540,21 @@ class Saas_Dashboard {
                         <label><input type="checkbox" name="hide_branding" value="1" <?php checked(get_post_meta($profile_id, '_saas_hide_branding', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Hide "Powered by" Branding <?php if(!$is_pro) echo '🔒'; ?></label>
                         <small>Whitelabel your profile by removing our platform links.</small>
                     </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label>Custom Footer Text (Pro Only)</label>
+                        <input type="text" name="footer_text" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_footer_text', true)); ?>" placeholder="e.g. © 2024 Your Agency Name" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        <small>Replace our branding with your own custom footer text.</small>
+                    </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label>Profile Access Password <?php if(!$is_pro) echo '🔒'; ?></label>
+                        <input type="text" name="profile_password" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_profile_password', true)); ?>" placeholder="Leave empty for public access" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        <small>Lock your entire profile behind a password. Perfect for private portfolios or client-only assets.</small>
+                    </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label>Custom CSS (Pro Only) <?php if(!$is_pro) echo '🔒'; ?></label>
+                        <textarea name="custom_css" rows="5" placeholder=".saas-link-btn { border: 2px solid gold; }" <?php if(!$is_pro) echo 'disabled'; ?>><?php echo esc_textarea(get_post_meta($profile_id, '_saas_custom_css', true)); ?></textarea>
+                        <small>Add custom styles to your profile page.</small>
+                    </div>
                     <div class="field">
                         <label>Apply Page Template</label>
                         <select id="saas-apply-template">
@@ -522,6 +565,8 @@ class Saas_Dashboard {
                             <option value="business">Business Page</option>
                             <option value="politician">Politician / Public Service</option>
                             <option value="elite_card">Elite Digital Card</option>
+                            <option value="tiktok">TikTok / Affiliate Pro</option>
+                            <option value="consultant">Expert Consultant</option>
                         </select>
                         <button type="button" id="saas-btn-apply-template" class="button button-secondary">Apply & Reset Blocks</button>
                     </div>
@@ -556,10 +601,12 @@ class Saas_Dashboard {
                 ]);
                 if ($leads) : ?>
                     <table class="saas-table">
-                        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Source</th><th>Date</th><th>Actions</th></tr></thead>
                         <tbody>
                         <?php foreach ($leads as $lead) :
                             $status = get_post_meta($lead->ID, '_saas_lead_status', true) ?: 'New';
+                            $source_id = get_post_meta($lead->ID, '_saas_lead_source_id', true);
+                            $source_name = $source_id ? get_the_title($source_id) : 'Direct';
                             ?>
                             <tr class="lead-row-<?php echo esc_attr(strtolower($status)); ?>">
                                 <td data-label="Name"><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_name', true)); ?></td>
@@ -567,6 +614,7 @@ class Saas_Dashboard {
                                 <td data-label="Status">
                                     <span class="status-badge <?php echo esc_attr(strtolower($status)); ?>"><?php echo esc_html($status); ?></span>
                                 </td>
+                                <td data-label="Source"><small><?php echo esc_html($source_name); ?></small></td>
                                 <td data-label="Date"><?php echo get_the_date('', $lead->ID); ?></td>
                                 <td data-label="Actions">
                                     <div style="display:flex; gap:10px;">
@@ -605,8 +653,12 @@ class Saas_Dashboard {
                         <div class="value"><?php echo number_format($stats['clicks']); ?></div>
                     </div>
                     <div class="stat-card">
-                        <label>Click-Through Rate</label>
-                        <div class="value"><?php echo ($stats['views'] > 0) ? round(($stats['clicks'] / $stats['views']) * 100, 1) : 0; ?>%</div>
+                        <label>Leads Captured</label>
+                        <div class="value"><?php echo number_format($stats['leads']); ?></div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Conversion Rate</label>
+                        <div class="value"><?php echo ($stats['views'] > 0) ? round(($stats['leads'] / $stats['views']) * 100, 1) : 0; ?>%</div>
                     </div>
                 </div>
 

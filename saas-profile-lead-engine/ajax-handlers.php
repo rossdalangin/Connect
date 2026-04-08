@@ -367,6 +367,32 @@ function saas_ajax_apply_template() {
                 ['title' => 'Save VCard', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
                 ['title' => 'My Website', 'url' => 'https://yoursite.com', 'type' => 'button']
             ]
+        ],
+        'tiktok' => [
+            'headline' => 'Daily Tech & Setup Inspo ⚡️',
+            'bio' => 'Building the ultimate home office. Shop my setup below!',
+            'color' => '#ff0050',
+            'theme' => 'vibrant',
+            'shadow' => 'hard',
+            'links' => [
+                ['title' => 'My Amazon Storefront', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                ['title' => 'Flash Sale Ending Soon! ⏳', 'url' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+12 hours'))],
+                ['title' => 'Join My Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                ['title' => 'Latest Setup Tour', 'url' => '#', 'type' => 'video']
+            ]
+        ],
+        'consultant' => [
+            'headline' => 'Operational Efficiency for Modern SaaS.',
+            'bio' => 'I help seed-stage startups optimize their unit economics and reduce churn.',
+            'color' => '#2c3e50',
+            'theme' => 'dark',
+            'shadow' => 'none',
+            'links' => [
+                ['title' => 'Book an Audit', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['title' => 'Contact Details', 'url' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:consult@site.com\nlinkedin:https://linkedin.com"],
+                ['title' => 'Save to Contacts', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
+                ['title' => 'Q4 Availability', 'url' => '#', 'type' => 'milestone', 'extra' => 'Booked:85']
+            ]
         ]
     ];
 
@@ -750,4 +776,28 @@ function saas_ajax_verify_link_password() {
     } else {
         wp_send_json_error( 'Incorrect password' );
     }
+}
+
+// 15. AJAX: Test Webhook
+add_action( 'wp_ajax_saas_test_webhook', 'saas_ajax_test_webhook' );
+function saas_ajax_test_webhook() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $webhook_url = esc_url_raw( $_POST['webhook_url'] );
+    if ( ! $webhook_url ) wp_send_json_error( 'Missing URL' );
+
+    $response = wp_remote_post( $webhook_url, [
+        'body' => [
+            'test' => true,
+            'message' => 'SaaS Webhook Test Success 🚀',
+            'name' => 'John Doe (Test)',
+            'email' => 'test@site.com'
+        ]
+    ]);
+
+    if ( is_wp_error($response) ) {
+        wp_send_json_error( 'Webhook Failed: ' . $response->get_error_message() );
+    }
+
+    wp_send_json_success( 'Webhook Triggered Successfully!' );
 }

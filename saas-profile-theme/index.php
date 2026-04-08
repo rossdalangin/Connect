@@ -86,6 +86,10 @@ include __DIR__ . '/header.php';
             else echo 'none';
         ?>;
     }
+    <?php
+    $custom_css = get_post_meta($profile_id, '_saas_custom_css', true);
+    if ($is_pro && $custom_css) echo $custom_css;
+    ?>
     body {
         <?php if ($bg_type === 'gradient' && $gradient) : ?>
             background: <?php echo esc_attr($gradient); ?>;
@@ -112,7 +116,12 @@ include __DIR__ . '/header.php';
         <?php else : ?>
             <img src="https://via.placeholder.com/150" alt="Avatar">
         <?php endif; ?>
-        <h1><?php echo esc_html( $profile->post_title ); ?></h1>
+        <h1>
+            <?php echo esc_html( $profile->post_title ); ?>
+            <?php if ($is_pro && get_post_meta($profile_id, '_saas_verified_badge', true)) : ?>
+                <span class="verified-badge" title="Verified Professional" style="color:#1d9bf0; font-size:0.8em; margin-left:5px;">✅</span>
+            <?php endif; ?>
+        </h1>
         <p class="headline"><?php echo esc_html( $meta['headline'] ); ?></p>
         <p class="bio"><?php echo nl2br( esc_html( $meta['bio'] ) ); ?></p>
     </header>
@@ -322,14 +331,18 @@ include __DIR__ . '/header.php';
     <!-- Growth Branding (Hide for Pro) -->
     <?php
     $hide_branding = get_post_meta($profile_id, '_saas_hide_branding', true);
-    if (!$is_pro || !$hide_branding) : ?>
+    $footer_text   = get_post_meta($profile_id, '_saas_footer_text', true);
+
+    if ($is_pro && $hide_branding) : ?>
+        <div class="saas-growth-branding" style="margin-top:40px; padding-bottom:120px; opacity:0.6; font-size:0.8rem;">
+            <?php echo esc_html($footer_text ?: ''); ?>
+        </div>
+    <?php else : ?>
         <div class="saas-growth-branding" style="margin-top:40px; padding-bottom:120px; opacity:0.6; font-size:0.8rem;">
             <a href="<?php echo home_url('/?ref=' . $slug); ?>" style="text-decoration:none; color:inherit; font-weight:800;">
                 Powered by <?php echo get_bloginfo('name'); ?> 🚀
             </a>
         </div>
-    <?php else : ?>
-        <div style="padding-bottom:120px;"></div>
     <?php endif; ?>
 
     <!-- Mobile Navigation Bar -->
@@ -355,6 +368,37 @@ include __DIR__ . '/header.php';
         </div>
     </div>
 </div>
+
+<?php
+// Profile Password Protection Logic
+$profile_pass = get_post_meta($profile_id, '_saas_profile_password', true);
+if ($is_pro && $profile_pass) : ?>
+    <div id="profile-gate" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:99999; display:flex; align-items:center; justify-content:center; text-align:center;">
+        <div style="max-width:400px; padding:40px;">
+            <div style="font-size:4rem; margin-bottom:20px;">🔐</div>
+            <h2>Private Profile</h2>
+            <p>Please enter the password to view this digital identity.</p>
+            <form id="profile-gate-form">
+                <input type="password" id="gate-pass" placeholder="Password" required style="width:100%; padding:15px; border-radius:12px; border:1px solid #ddd; margin-bottom:15px;">
+                <button type="submit" style="width:100%; padding:15px; background:var(--primary-color); color:#fff; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">Unlock Profile</button>
+            </form>
+            <div id="gate-error" style="color:red; margin-top:10px; display:none;">Incorrect password.</div>
+        </div>
+    </div>
+    <script>
+    document.getElementById('profile-gate-form').onsubmit = (e) => {
+        e.preventDefault();
+        const pass = document.getElementById('gate-pass').value;
+        if (pass === '<?php echo esc_js($profile_pass); ?>') {
+            document.getElementById('profile-gate').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        } else {
+            document.getElementById('gate-error').style.display = 'block';
+        }
+    };
+    document.body.style.overflow = 'hidden';
+    </script>
+<?php endif; ?>
 
 <script>
 // Track Profile View on Load
