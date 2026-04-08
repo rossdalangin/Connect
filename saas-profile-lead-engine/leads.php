@@ -109,6 +109,25 @@ function saas_ajax_submit_lead() {
         ";
         wp_mail($owner_email, $subject, $body, $headers);
 
+        // Elite Pro Auto-responder to Lead
+        $auto_respond = get_post_meta($profile_id, '_saas_lead_auto_respond', true);
+        if ($auto_respond) {
+            $auto_msg = get_post_meta($profile_id, '_saas_lead_auto_msg', true);
+            if ($auto_msg) {
+                $owner_name = get_the_title($profile_id);
+                $resp_subject = "RE: Your inquiry to $owner_name";
+                $resp_body = "
+                    <div style='font-family:sans-serif; max-width:600px; padding:20px; border-radius:12px; border:1px solid #eee;'>
+                        <p>Hi $name,</p>
+                        " . wpautop($auto_msg) . "
+                        <hr style='border:0; border-top:1px solid #eee; margin:20px 0;'>
+                        <p><small>Sent via $owner_name's digital profile.</small></p>
+                    </div>
+                ";
+                wp_mail($email, $resp_subject, $resp_body, $headers);
+            }
+        }
+
         // Lead Magnet Delivery (Simulated)
         $lead_magnet_url = get_post_meta( $profile_id, '_saas_lead_magnet_url', true );
 

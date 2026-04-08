@@ -40,6 +40,14 @@ class Saas_Analytics {
 
         $referrers = $wpdb->get_results( $wpdb->prepare( "SELECT referrer, COUNT(*) as count FROM {$this->table_name} WHERE user_id = %d AND referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 5", $user_id ) );
 
+        $countries = $wpdb->get_results( $wpdb->prepare( "
+            SELECT ip_address as country_code, COUNT(*) as count
+            FROM {$this->table_name}
+            WHERE user_id = %d AND event_type = 'view'
+            GROUP BY country_code ORDER BY count DESC LIMIT 5
+        ", $user_id ) );
+        // Note: In production, we'd use a GeoIP library. Here we simulate country codes stored in IP column for demo.
+
         // Breakdown Data (Simulated for this implementation)
         $devices = [
             (object)['label' => 'Mobile', 'count' => round($views * 0.7)],
@@ -53,6 +61,7 @@ class Saas_Analytics {
             'leads'  => $leads ?: 0,
             'nfc'    => $nfc ?: 0,
             'referrers' => $referrers ?: [],
+            'countries' => $countries ?: [],
             'devices' => $devices
         ];
     }

@@ -344,6 +344,13 @@ class Saas_Dashboard {
                         <label>Custom Success Message</label>
                         <input type="text" name="lead_success_msg" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_lead_success_msg', true)); ?>" placeholder="Thank you! We will contact you soon.">
                     </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label><input type="checkbox" name="lead_auto_respond" value="1" <?php checked(get_post_meta($profile_id, '_saas_lead_auto_respond', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Enable Lead Auto-responder (Email) <?php if(!$is_pro) echo '🔒'; ?></label>
+                    </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label>Auto-responder Message</label>
+                        <textarea name="lead_auto_msg" rows="4" placeholder="Hello! Thanks for your interest. Here's what happens next..." <?php if(!$is_pro) echo 'disabled'; ?>><?php echo esc_textarea(get_post_meta($profile_id, '_saas_lead_auto_msg', true)); ?></textarea>
+                    </div>
                     <div class="field">
                         <label>Lead Capture Form Builder</label>
                         <table class="saas-mini-table">
@@ -427,6 +434,30 @@ class Saas_Dashboard {
                             <p style="color:#666; font-size:0.9rem;">Ensure your clients can access you in one tap. Instruct them to follow these steps:</p>
                             <p style="font-size:0.8rem; margin:0;"><strong>iPhone:</strong> Tap 'Share' icon (square with arrow) -> 'Add to Home Screen'</p>
                             <p style="font-size:0.8rem; margin:0;"><strong>Android:</strong> Tap three-dot menu -> 'Add to Home Screen'</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="saas-story-card-gen" style="margin-top:20px; background:#fff; padding:30px; border-radius:16px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #eee;">
+                    <div style="display:flex; gap:30px; align-items:flex-start;">
+                        <div style="font-size:3rem;">📸</div>
+                        <div style="flex:1;">
+                            <h4>Social Story Card Generator</h4>
+                            <p style="color:#666; font-size:0.9rem;">Generate a high-converting image to share on Instagram or TikTok stories.</p>
+
+                            <div id="story-card-preview" style="width:200px; height:355px; background:linear-gradient(135deg, <?php echo $meta['theme_color']; ?>, #000); border-radius:20px; padding:20px; color:#fff; text-align:center; position:relative; overflow:hidden; margin:20px 0; border:1px solid #eee;">
+                                <div style="width:60px; height:60px; border-radius:50%; background:#fff; margin:0 auto 15px; overflow:hidden; border:2px solid #fff;">
+                                    <?php if(has_post_thumbnail($profile_id)) echo get_the_post_thumbnail($profile_id, 'thumbnail', ['style'=>'width:100%; height:100%; object-fit:cover;']); ?>
+                                </div>
+                                <h5 style="margin:0; font-size:0.9rem;"><?php echo esc_html($profile_obj->post_title); ?></h5>
+                                <p style="font-size:0.6rem; opacity:0.8;"><?php echo esc_html($meta['headline']); ?></p>
+                                <div style="background:#fff; padding:10px; border-radius:10px; width:100px; margin:20px auto;">
+                                    <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name, $qr_color); ?>" style="width:100%;">
+                                </div>
+                                <p style="font-size:0.7rem; font-weight:700;">SCAN TO CONNECT</p>
+                                <div style="position:absolute; bottom:20px; left:0; width:100%; font-size:0.5rem; opacity:0.5;"><?php echo home_url('/' . $profile_obj->post_name); ?></div>
+                            </div>
+                            <button class="button button-secondary" onclick="alert('Story Card Downloaded! (Simulated)')">Download Story Image</button>
                         </div>
                     </div>
                 </div>
@@ -720,6 +751,16 @@ class Saas_Dashboard {
                                 <li><strong><?php echo esc_html($ref->referrer); ?>:</strong> <?php echo $ref->count; ?> visits</li>
                             <?php endforeach; else: ?>
                                 <li>No traffic sources recorded yet.</li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Top Countries (Pro)</h4>
+                        <ul class="saas-analytics-list">
+                            <?php if ($is_pro && $stats['countries']) : foreach ($stats['countries'] as $c) : ?>
+                                <li><strong><?php echo esc_html($c->country_code); ?>:</strong> <?php echo $c->count; ?> views</li>
+                            <?php endforeach; else: ?>
+                                <li style="opacity:0.5;">Upgrade to Pro for Geo-insights.</li>
                             <?php endif; ?>
                         </ul>
                     </div>
