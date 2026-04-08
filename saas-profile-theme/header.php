@@ -22,8 +22,15 @@
             <meta property="og:type" content="profile">
             <meta property="og:url" content="<?php echo home_url('/' . $slug); ?>">
             <link rel="canonical" href="<?php echo home_url('/' . $slug); ?>">
-            <?php if (has_post_thumbnail($profile->ID)) : ?>
-                <meta property="og:image" content="<?php echo get_the_post_thumbnail_url($profile->ID, 'full'); ?>">
+            <?php
+            $og_image = get_the_post_thumbnail_url($profile->ID, 'full');
+            if (!$og_image) {
+                $cover_id = get_post_meta($profile->ID, '_saas_cover_id', true);
+                if ($cover_id) $og_image = wp_get_attachment_url($cover_id);
+            }
+            if ($og_image) : ?>
+                <meta property="og:image" content="<?php echo esc_url($og_image); ?>">
+                <meta name="twitter:image" content="<?php echo esc_url($og_image); ?>">
             <?php endif; ?>
         <?php endif;
     endif; ?>

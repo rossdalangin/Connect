@@ -183,6 +183,10 @@ function saas_ajax_save_profile() {
         update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
     }
 
+    if (isset($_POST['qr_color'])) {
+        update_post_meta($profile_id, '_saas_qr_color', sanitize_text_field($_POST['qr_color']));
+    }
+
     // Tracking specific
     if (isset($_POST['header_scripts'])) {
         update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);

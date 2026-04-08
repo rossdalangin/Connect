@@ -356,9 +356,19 @@ class Saas_Dashboard {
                 <div class="saas-share-card" style="display:flex; gap:40px; background:#f9f9f9; padding:30px; border-radius:16px;">
                     <div class="qr-section" style="text-align:center;">
                         <h4>Your QR Code</h4>
-                        <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name); ?>" alt="QR Code" style="background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                        <?php
+                        $qr_color = get_post_meta($profile_id, '_saas_qr_color', true) ?: '000000';
+                        $qr_url = saas_get_profile_qr_url($profile_obj->post_name, $qr_color);
+                        ?>
+                        <img id="saas-qr-preview" src="<?php echo $qr_url; ?>" alt="QR Code" style="background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
                         <p><small>Scan to view profile</small></p>
-                        <a href="<?php echo saas_get_profile_qr_url($profile_obj->post_name); ?>" download="qr-code.png" class="button">Download PNG</a>
+
+                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="margin-top:15px;">
+                            <label>QR Branding Color</label>
+                            <input type="color" id="qr-color-picker" value="#<?php echo $qr_color; ?>" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+
+                        <a id="saas-qr-download" href="<?php echo $qr_url; ?>" download="qr-code.png" class="button">Download PNG</a>
                     </div>
                     <div class="links-section" style="flex:1;">
                         <h4>Direct Link</h4>
@@ -546,6 +556,11 @@ class Saas_Dashboard {
                         <small>Replace our branding with your own custom footer text.</small>
                     </div>
                     <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label>Custom Domain <?php if(!$is_pro) echo '🔒'; ?></label>
+                        <input type="text" name="custom_domain" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_custom_domain', true)); ?>" placeholder="e.g. bio.yourname.com" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        <small>Point your CNAME record to our server IP to use your own domain.</small>
+                    </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                         <label>Profile Access Password <?php if(!$is_pro) echo '🔒'; ?></label>
                         <input type="text" name="profile_password" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_profile_password', true)); ?>" placeholder="Leave empty for public access" <?php if(!$is_pro) echo 'disabled'; ?>>
                         <small>Lock your entire profile behind a password. Perfect for private portfolios or client-only assets.</small>
@@ -681,6 +696,41 @@ class Saas_Dashboard {
                             <?php endforeach; ?>
                         </ul>
                     </div>
+                </div>
+
+                <div style="margin-top:50px; border-top: 2px solid #eee; padding-top:40px;">
+                    <h4>💰 Revenue & Orders</h4>
+                    <?php
+                    $orders = get_posts([
+                        'post_type' => 'saas_order',
+                        'post_author' => $user_id,
+                        'numberposts' => 10
+                    ]);
+                    $total_rev = 0;
+                    foreach($orders as $o) $total_rev += floatval(get_post_meta($o->ID, '_saas_order_amount', true));
+                    ?>
+                    <div class="stat-card" style="display:inline-block; margin-bottom:20px; text-align:left;">
+                        <label>Total Revenue Generated</label>
+                        <div class="value">$<?php echo number_format($total_rev, 2); ?></div>
+                    </div>
+
+                    <?php if ($orders) : ?>
+                        <table class="saas-table">
+                            <thead><tr><th>Item</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                            <tbody>
+                            <?php foreach ($orders as $order) : ?>
+                                <tr>
+                                    <td><?php echo esc_html($order->post_title); ?></td>
+                                    <td>$<?php echo number_format(get_post_meta($order->ID, '_saas_order_amount', true), 2); ?></td>
+                                    <td><span class="status-badge new"><?php echo esc_html(get_post_meta($order->ID, '_saas_order_status', true)); ?></span></td>
+                                    <td><?php echo get_the_date('', $order->ID); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php else : ?>
+                        <p>No transactions yet. Start selling products via your profile!</p>
+                    <?php endif; ?>
                 </div>
             </div>
             <div id="tab-billing" class="saas-tab-content">

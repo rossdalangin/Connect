@@ -58,6 +58,19 @@ function saas_register_post_types() {
         'supports' => [ 'title', 'editor' ],
         'show_in_rest' => true,
     ]);
+
+    // 5. Orders CPT (Revenue Tracking)
+    register_post_type( 'saas_order', [
+        'labels' => [
+            'name' => 'Orders',
+            'singular_name' => 'Order',
+        ],
+        'public' => false,
+        'show_ui' => true,
+        'menu_icon' => 'dashicons-cart',
+        'supports' => [ 'title', 'author' ],
+        'show_in_rest' => true,
+    ]);
 }
 add_action( 'init', 'saas_register_post_types' );
 
@@ -66,7 +79,7 @@ add_action( 'init', 'saas_register_post_types' );
  */
 function saas_enforce_data_isolation( $query ) {
     if ( is_admin() && ! current_user_can( 'manage_options' ) && $query->is_main_query() ) {
-        $post_types = ['saas_profile', 'saas_link', 'saas_lead'];
+        $post_types = ['saas_profile', 'saas_link', 'saas_lead', 'saas_order'];
         if ( in_array( $query->get( 'post_type' ), $post_types ) ) {
             $query->set( 'author', get_current_user_id() );
         }
@@ -98,6 +111,23 @@ add_filter( 'query_vars', 'saas_query_vars' );
 function saas_template_redirect( $template ) {
     // Never hijack admin
     if ( is_admin() ) return $template;
+
+    // 1. Resolve via Custom Domain (Elite Feature)
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ( $host && $host !== parse_url(home_url(), PHP_URL_HOST) ) {
+        $profile_by_domain = get_posts([
+            'post_type' => 'saas_profile',
+            'meta_key' => '_saas_custom_domain',
+            'meta_value' => $host,
+            'post_status' => 'publish',
+            'numberposts' => 1
+        ]);
+        if ( ! empty($profile_by_domain) ) {
+            set_query_var( 'saas_profile', $profile_by_domain[0]->post_name );
+            $custom_template = get_theme_root() . '/saas-profile-theme/index.php';
+            if ( file_exists($custom_template) ) return $custom_template;
+        }
+    }
 
     $profile_slug = get_query_var( 'saas_profile' );
 

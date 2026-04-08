@@ -51,6 +51,17 @@ class Saas_Payments {
             $secret_key = get_option('saas_stripe_secret_key');
             // Mock API call to Stripe
             $session = [ 'url' => 'https://checkout.stripe.com/pay/mock_session_id' ];
+
+            // For Pro Plan checkouts in this elite system, we create a pending order
+            $order_id = wp_insert_post([
+                'post_type' => 'saas_order',
+                'post_title' => 'Pending Order - ' . $plan_id,
+                'post_status' => 'publish',
+                'post_author' => get_current_user_id()
+            ]);
+            update_post_meta($order_id, '_saas_order_amount', $plan_id === 'pro' ? 19.00 : 49.00);
+            update_post_meta($order_id, '_saas_order_status', 'pending');
+
             wp_send_json_success([ 'redirect_url' => $session['url'] ]);
         } elseif ( $gateway === 'paypal' ) {
             $paypal_email = get_option('saas_paypal_email');

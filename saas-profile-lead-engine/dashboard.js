@@ -620,6 +620,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // QR Code Color Customization
+    const qrPicker = document.getElementById('qr-color-picker');
+    const qrPreview = document.getElementById('saas-qr-preview');
+    const qrDownload = document.getElementById('saas-qr-download');
+
+    if (qrPicker && qrPreview) {
+        qrPicker.addEventListener('change', (e) => {
+            const color = e.target.value.replace('#', '');
+            const baseUrl = qrPreview.src.split('&color=')[0];
+            const newUrl = `${baseUrl}&color=${color}`;
+
+            qrPreview.src = newUrl;
+            if (qrDownload) qrDownload.href = newUrl;
+
+            // Save to DB via AJAX
+            const formData = new FormData();
+            formData.append('action', 'saas_save_profile');
+            formData.append('security', saas_dashboard_data.nonce);
+            formData.append('profile_id', document.querySelector('input[name="profile_id"]').value);
+            formData.append('qr_color', color);
+            fetch(saas_dashboard_data.ajax_url, { method: 'POST', body: formData });
+        });
+    }
+
     // Webhook Test Button
     document.getElementById('saas-test-webhook')?.addEventListener('click', function() {
         const url = document.getElementById('lead-webhook-url').value;

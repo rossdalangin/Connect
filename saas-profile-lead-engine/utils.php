@@ -60,11 +60,12 @@ function saas_handle_vcard_download() {
 }
 
 /**
- * QR Code Generator Stub
+ * QR Code Generator Utility
  */
-function saas_get_profile_qr_url( $profile_slug ) {
+function saas_get_profile_qr_url( $profile_slug, $color = '000000' ) {
     $profile_url = home_url( '/' . $profile_slug );
-    return "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($profile_url);
+    $color = str_replace('#', '', $color);
+    return "https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=$color&data=" . urlencode($profile_url);
 }
 
 /**
