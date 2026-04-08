@@ -42,6 +42,7 @@ class Saas_Dashboard {
         ]);
 
         $active_profile_id = isset($_GET['profile_id']) ? intval($_GET['profile_id']) : 0;
+        $payments = new Saas_Payments();
 
         if ( empty( $all_user_profiles ) ) {
             // Auto-create profile if missing
@@ -81,8 +82,7 @@ class Saas_Dashboard {
             'meta_query' => [
                 ['key' => '_saas_profile_id', 'value' => $profile_id]
             ],
-            'orderby'     => 'meta_value_num',
-            'meta_key'    => '_saas_priority',
+            'orderby'     => 'menu_order',
             'order'       => 'ASC',
             'numberposts' => -1,
         ]);

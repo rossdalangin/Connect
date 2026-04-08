@@ -200,6 +200,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabContents = document.querySelectorAll('.saas-tab-content');
 
     function switchTab(target) {
+        if (!target) return;
+        const targetContent = document.getElementById(`tab-${target}`);
+        if (!targetContent) return;
+
         // Toggle buttons
         tabButtons.forEach(b => {
             if (b.dataset.tab === target) b.classList.add('active');
@@ -208,26 +212,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Toggle content
         tabContents.forEach(content => {
-            if (content.id === `tab-${target}`) {
-                content.classList.add('active');
-            } else {
-                content.classList.remove('active');
-            }
+            content.classList.remove('active');
         });
+        targetContent.classList.add('active');
 
-        // Sync URL for state persistence
+        // Sync URL for state persistence (avoid loops)
         const url = new URL(window.location);
-        url.searchParams.set('tab', target);
-        window.history.pushState({}, '', url);
+        if (url.searchParams.get('tab') !== target) {
+            url.searchParams.set('tab', target);
+            window.history.pushState({}, '', url);
+        }
     }
 
     tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            switchTab(this.dataset.tab);
+        });
     });
 
     // Check URL for initial tab
     const initialTab = new URLSearchParams(window.location.search).get('tab');
-    if (initialTab && document.getElementById(`tab-${initialTab}`)) {
+    if (initialTab) {
         switchTab(initialTab);
     }
 

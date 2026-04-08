@@ -60,8 +60,7 @@ $blocks = get_posts([
     'meta_query' => [
         ['key' => '_saas_profile_id', 'value' => $profile_id]
     ],
-    'orderby'     => 'meta_value_num',
-    'meta_key'    => '_saas_priority',
+    'orderby'     => 'menu_order',
     'order'       => 'ASC',
     'numberposts' => -1,
 ]);

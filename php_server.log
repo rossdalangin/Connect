@@ -1,0 +1,4 @@
+[Wed Apr  8 20:06:27 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Wed Apr  8 20:06:29 2026] [::1]:60082 Accepted
+[Wed Apr  8 20:06:29 2026] [::1]:60082 [404]: HEAD / - No such file or directory
+[Wed Apr  8 20:06:29 2026] [::1]:60082 Closing

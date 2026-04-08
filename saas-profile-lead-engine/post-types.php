@@ -18,7 +18,7 @@ function saas_register_post_types() {
         'public' => true,
         'has_archive' => false,
         'rewrite' => false, // We'll handle custom routing for top-level slugs
-        'supports' => [ 'title', 'editor', 'thumbnail', 'author', 'revisions' ],
+        'supports' => [ 'title', 'editor', 'thumbnail', 'author', 'revisions', 'page-attributes' ],
         'show_in_rest' => true,
     ]);
 
@@ -30,7 +30,7 @@ function saas_register_post_types() {
         ],
         'public' => false,
         'show_ui' => true,
-        'supports' => [ 'title', 'author' ],
+        'supports' => [ 'title', 'author', 'page-attributes' ],
         'show_in_rest' => true,
     ]);
 

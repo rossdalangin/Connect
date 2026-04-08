@@ -20,7 +20,10 @@ function saas_ajax_update_link_order() {
         // Ensure user owns the link
         $post = get_post( $id );
         if ( $post && $post->post_author == get_current_user_id() ) {
-            update_post_meta( $id, '_saas_priority', $index );
+            wp_update_post([
+                'ID'         => $id,
+                'menu_order' => $index
+            ]);
         }
     }
 
@@ -56,7 +59,6 @@ function saas_ajax_add_link() {
         update_post_meta( $link_id, '_saas_block_style', $style );
         update_post_meta( $link_id, '_saas_block_animation', $animation );
         update_post_meta( $link_id, '_saas_link_url', $url );
-        update_post_meta( $link_id, '_saas_priority', 0 );
 
         // Extended meta for complex blocks
         if ($type === 'testimonial' && isset($_POST['extra'])) {
@@ -794,11 +796,16 @@ function saas_ajax_generate_samples() {
         update_post_meta($p_id, '_saas_container_shadow', $s['shadow']);
 
         foreach ($s['links'] as $idx => $l) {
-            $l_id = wp_insert_post(['post_type' => 'saas_link', 'post_title' => $l['t'], 'post_status' => 'publish', 'post_author' => $user_id]);
+            $l_id = wp_insert_post([
+                'post_type'   => 'saas_link',
+                'post_title'  => $l['t'],
+                'post_status' => 'publish',
+                'post_author' => $user_id,
+                'menu_order'  => $idx
+            ]);
             update_post_meta($l_id, '_saas_profile_id', $p_id); // Critical: Associate with profile
             update_post_meta($l_id, '_saas_link_url', $l['u']);
             update_post_meta($l_id, '_saas_block_type', $l['type']);
-            update_post_meta($l_id, '_saas_priority', $idx);
             if (isset($l['style'])) update_post_meta($l_id, '_saas_block_style', $l['style']);
             if (isset($l['extra'])) {
                 if ($l['type'] === 'testimonial') update_post_meta($l_id, '_saas_testimonial_text', $l['extra']);
