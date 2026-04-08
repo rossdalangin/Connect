@@ -795,6 +795,7 @@ function saas_ajax_generate_samples() {
 
         foreach ($s['links'] as $idx => $l) {
             $l_id = wp_insert_post(['post_type' => 'saas_link', 'post_title' => $l['t'], 'post_status' => 'publish', 'post_author' => $user_id]);
+            update_post_meta($l_id, '_saas_profile_id', $p_id); // Critical: Associate with profile
             update_post_meta($l_id, '_saas_link_url', $l['u']);
             update_post_meta($l_id, '_saas_block_type', $l['type']);
             update_post_meta($l_id, '_saas_priority', $idx);
@@ -886,6 +887,23 @@ function saas_ajax_check_integration() {
     // if the user has provided any value in the dashboard fields.
 
     wp_send_json_success( "Connection to " . ucfirst($platform) . " verified! leads will sync automatically. 🚀" );
+}
+
+// 20. AJAX: Apply Coupon
+add_action( 'wp_ajax_saas_apply_coupon', 'saas_ajax_apply_coupon' );
+function saas_ajax_apply_coupon() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+    $code = strtoupper(sanitize_text_field($_POST['coupon']));
+
+    // Stub: In production, query a 'saas_coupon' CPT or options table
+    $valid_coupons = ['ELITE20' => 20, 'SAASLAUNCH' => 50];
+
+    if (isset($valid_coupons[$code])) {
+        $discount = $valid_coupons[$code];
+        wp_send_json_success("Coupon applied! You get $discount% off.");
+    } else {
+        wp_send_json_error("Invalid or expired coupon code.");
+    }
 }
 
 // 18. AJAX: Clone Profile

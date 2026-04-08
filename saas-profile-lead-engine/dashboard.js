@@ -118,14 +118,27 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // 0. Copy Link Handling
+    // 0. Copy Link Handling (Elite Multi-method support)
     document.addEventListener('click', (e) => {
         if (e.target && e.target.classList.contains('saas-copy-btn')) {
             const btn = e.target;
-            const linkInput = btn.previousElementSibling;
-            if (linkInput) {
-                linkInput.select();
+            let textToCopy = '';
+
+            if (btn.dataset.clipboardText) {
+                textToCopy = btn.dataset.clipboardText;
+            } else {
+                const linkInput = btn.previousElementSibling;
+                if (linkInput) textToCopy = linkInput.value;
+            }
+
+            if (textToCopy) {
+                const tempInput = document.createElement('input');
+                tempInput.value = textToCopy;
+                document.body.appendChild(tempInput);
+                tempInput.select();
                 document.execCommand('copy');
+                document.body.removeChild(tempInput);
+
                 const originalText = btn.innerText;
                 btn.innerText = 'Copied!';
                 setTimeout(() => btn.innerText = originalText, 2000);
@@ -182,28 +195,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 1. Tab Switching
+    // 1. Tab Switching (Improved for Reliability)
     const tabButtons = document.querySelectorAll('.saas-tabs button');
     const tabContents = document.querySelectorAll('.saas-tab-content');
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const target = btn.dataset.tab;
-
-            // Toggle buttons
-            tabButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Toggle content
-            tabContents.forEach(content => {
-                if (content.id === `tab-${target}`) {
-                    content.classList.add('active');
-                } else {
-                    content.classList.remove('active');
-                }
-            });
+    function switchTab(target) {
+        // Toggle buttons
+        tabButtons.forEach(b => {
+            if (b.dataset.tab === target) b.classList.add('active');
+            else b.classList.remove('active');
         });
+
+        // Toggle content
+        tabContents.forEach(content => {
+            if (content.id === `tab-${target}`) {
+                content.classList.add('active');
+            } else {
+                content.classList.remove('active');
+            }
+        });
+
+        // Sync URL for state persistence
+        const url = new URL(window.location);
+        url.searchParams.set('tab', target);
+        window.history.pushState({}, '', url);
+    }
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
+
+    // Check URL for initial tab
+    const initialTab = new URLSearchParams(window.location.search).get('tab');
+    if (initialTab && document.getElementById(`tab-${initialTab}`)) {
+        switchTab(initialTab);
+    }
 
     // Clone Profile
     document.querySelectorAll('.clone-profile-btn').forEach(btn => {
@@ -307,6 +333,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 3. Form Handling (Profile, Branding, Automation)
     const genericFormHandler = function(e) {
         e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = '⏳ Saving...';
+        btn.disabled = true;
+
         const formData = new FormData(this);
         formData.append('action', 'saas_save_profile');
         formData.append('security', saas_dashboard_data.nonce);
@@ -318,6 +349,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(r => r.json())
         .then(data => {
             alert(data.data);
+            btn.innerText = originalText;
+            btn.disabled = false;
             if (document.getElementById('saas-preview-frame')) {
                 document.getElementById('saas-preview-frame').contentWindow.location.reload();
             }
@@ -341,6 +374,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const integrationsForm = document.getElementById('saas-integrations-form');
     if (integrationsForm) integrationsForm.addEventListener('submit', genericFormHandler);
+
+    // Coupon Application
+    document.getElementById('apply-coupon')?.addEventListener('click', function() {
+        const code = document.getElementById('coupon-code').value;
+        if (!code) return;
+
+        const btn = this;
+        btn.innerText = 'Checking...';
+
+        fetch(saas_dashboard_data.ajax_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                action: 'saas_apply_coupon',
+                security: saas_dashboard_data.nonce,
+                coupon: code
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            alert(data.data);
+            btn.innerText = 'Apply';
+            if (data.success) {
+                // In a real system, we'd update price displays here
+            }
+        });
+    });
 
     // Integration Connection Checks
     document.querySelectorAll('.saas-check-integration').forEach(btn => {
@@ -393,6 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const hourTo = li.dataset.hourTo || '';
             const imageId = li.dataset.imageId || '';
             const imageUrl = li.dataset.imageUrl || '';
+            const extra = li.dataset.extra || '';
 
             document.getElementById('edit-link-id').value = linkId;
             document.getElementById('edit-link-title').value = title;
@@ -412,6 +473,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('edit-link-hour-from')) document.getElementById('edit-link-hour-from').value = hourFrom;
             if (document.getElementById('edit-link-hour-to')) document.getElementById('edit-link-hour-to').value = hourTo;
             if (document.getElementById('edit-link-image-id')) document.getElementById('edit-link-image-id').value = imageId;
+            if (document.getElementById('edit-link-extra')) document.getElementById('edit-link-extra').value = extra;
             if (document.getElementById('edit-link-thumb-preview')) {
                 document.getElementById('edit-link-thumb-preview').innerHTML = imageUrl ? `<img src="${imageUrl}" style="width:100%; height:100%; object-fit:cover;">` : '';
             }

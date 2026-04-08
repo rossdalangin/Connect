@@ -91,7 +91,7 @@ class Saas_Dashboard {
         ?>
         <div id="saas-dashboard">
             <!-- Onboarding Checklist -->
-            <div class="saas-onboarding-card">
+            <div class="saas-onboarding-card dashboard-card">
                 <div class="onboarding-flex">
                     <div>
                         <h4>🚀 Get Started Checklist</h4>
@@ -148,6 +148,7 @@ class Saas_Dashboard {
 
             <!-- Links Tab -->
             <div id="tab-links" class="saas-tab-content active">
+                <div class="dashboard-card">
                 <h3 class="tab-title">Manage Blocks</h3>
 
                 <!-- Visual Block Picker -->
@@ -167,7 +168,7 @@ class Saas_Dashboard {
                     <div class="picker-item" data-type="lead_form"><span>🎯</span> Form</div>
                 </div>
 
-                <form id="saas-add-link-form">
+                <form id="saas-add-link-form" class="dashboard-card">
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
                     <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
                     <div class="field-row" style="display:flex; gap:10px; grid-column: 1/-1;">
@@ -199,10 +200,31 @@ class Saas_Dashboard {
                     <button type="submit">Add Block</button>
                 </form>
 
-                <ul id="saas-links-list" class="sortable">
+                <ul id="saas-links-list" class="sortable" style="margin-top:30px;">
                     <?php foreach ( $links as $link ) :
                         $s_date = get_post_meta($link->ID, '_saas_start_date', true);
                         $e_date = get_post_meta($link->ID, '_saas_end_date', true);
+                        ?>
+                        <?php
+                        $type = get_post_meta($link->ID, '_saas_block_type', true);
+                        $extra = '';
+                        if ($type === 'testimonial') $extra = get_post_meta($link->ID, '_saas_testimonial_text', true);
+                        elseif ($type === 'faq') $extra = get_post_meta($link->ID, '_saas_faq_answer', true);
+                        elseif ($type === 'pricing' || $type === 'product') {
+                            $price = get_post_meta($link->ID, '_saas_price', true);
+                            $feats = get_post_meta($link->ID, '_saas_features', true);
+                            $extra = $price . ($feats ? "\n" . implode("\n", $feats) : "");
+                        }
+                        elseif ($type === 'countdown') $extra = get_post_meta($link->ID, '_saas_expiry', true);
+                        elseif ($type === 'milestone') {
+                            $extra = get_post_meta($link->ID, '_saas_ms_label', true) . ":" . get_post_meta($link->ID, '_saas_ms_percent', true);
+                        }
+                        elseif ($type === 'social_icons') {
+                            $soc = get_post_meta($link->ID, '_saas_social_data', true);
+                            if (is_array($soc)) {
+                                foreach($soc as $p => $u) $extra .= "$p:$u\n";
+                            }
+                        }
                         ?>
                         <li data-id="<?php echo $link->ID; ?>"
                             data-start="<?php echo esc_attr($s_date); ?>"
@@ -216,7 +238,12 @@ class Saas_Dashboard {
                             data-ab-url="<?php echo esc_attr(get_post_meta($link->ID, '_saas_ab_url_b', true)); ?>"
                             data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>"
                             data-image-id="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_image_id', true)); ?>"
-                            data-image-url="<?php echo esc_url(wp_get_attachment_thumb_url(get_post_meta($link->ID, '_saas_link_image_id', true))); ?>">
+                            data-image-url="<?php echo esc_url(wp_get_attachment_thumb_url(get_post_meta($link->ID, '_saas_link_image_id', true))); ?>"
+                            data-style="<?php echo esc_attr(get_post_meta($link->ID, '_saas_block_style', true)); ?>"
+                            data-animation="<?php echo esc_attr(get_post_meta($link->ID, '_saas_block_animation', true)); ?>"
+                            data-hour-from="<?php echo esc_attr(get_post_meta($link->ID, '_saas_hour_from', true)); ?>"
+                            data-hour-to="<?php echo esc_attr(get_post_meta($link->ID, '_saas_hour_to', true)); ?>"
+                            data-extra="<?php echo esc_attr($extra); ?>">
                             <span class="handle">⠿</span>
                             <?php
                             $thumb_id = get_post_meta($link->ID, '_saas_link_image_id', true);
@@ -244,10 +271,12 @@ class Saas_Dashboard {
                         </li>
                     <?php endforeach; ?>
                 </ul>
+                </div>
             </div>
 
             <!-- Profile Tab -->
             <div id="tab-profile" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>Profile Settings</h3>
                 <form id="saas-profile-form">
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
@@ -308,12 +337,14 @@ class Saas_Dashboard {
                         <label><input type="checkbox" name="verified_badge" value="1" <?php checked(get_post_meta($profile_id, '_saas_verified_badge', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Show Verified Badge ✅ <?php if(!$is_pro) echo '🔒'; ?></label>
                         <small>Adds a blue verification checkmark next to your name to build elite authority.</small>
                     </div>
-                    <button type="submit">Save Changes</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
                 </form>
+                </div>
             </div>
 
             <!-- Automation / Lead Setup Tab -->
             <div id="tab-automation" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>Lead Automation Settings</h3>
                 <div style="position:relative;">
                 <form id="saas-automation-form" class="<?php echo $is_pro ? '' : 'pro-gated'; ?>">
@@ -371,14 +402,16 @@ class Saas_Dashboard {
                             </tbody>
                         </table>
                     </div>
-                    <button type="submit">Save Automation</button>
+                    <button type="submit" class="btn-primary">Save Automation</button>
                 </form>
                 <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to access Automations</button></div><?php endif; ?>
+                </div>
                 </div>
             </div>
 
             <!-- Share & QR Tab -->
             <div id="tab-share" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>Share Your Profile</h3>
                 <div class="saas-share-card" style="display:flex; gap:40px; background:#f9f9f9; padding:30px; border-radius:16px;">
                     <div class="qr-section" style="text-align:center;">
@@ -465,6 +498,7 @@ class Saas_Dashboard {
 
             <!-- SEO Tab -->
             <div id="tab-seo" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>SEO & Profile Discovery</h3>
                 <form id="saas-seo-form">
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
@@ -505,8 +539,9 @@ class Saas_Dashboard {
                         <input type="hidden" name="favicon" id="saas-favicon-url" value="<?php echo esc_url($favicon); ?>">
                         <button type="button" class="button" id="saas-favicon-upload">Upload Icon</button>
                     </div>
-                    <button type="submit">Save SEO Settings</button>
+                    <button type="submit" class="btn-primary">Save SEO Settings</button>
                 </form>
+                </div>
             </div>
 
             <!-- Tracking & Analytics Tab (Pro Only) -->
@@ -531,6 +566,7 @@ class Saas_Dashboard {
 
             <!-- Branding Tab -->
             <div id="tab-branding" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>Branding & Styling</h3>
                 <form id="saas-branding-form">
                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
@@ -643,12 +679,14 @@ class Saas_Dashboard {
                         </select>
                         <button type="button" id="saas-btn-apply-template" class="button button-secondary">Apply & Reset Blocks</button>
                     </div>
-                    <button type="submit">Save Branding</button>
+                    <button type="submit" class="btn-primary">Save Branding</button>
                 </form>
+                </div>
             </div>
 
             <!-- Other tabs -->
             <div id="tab-leads" class="saas-tab-content">
+                <div class="dashboard-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>Your Leads</h3>
                     <div style="display:flex; gap:10px;">
@@ -707,8 +745,10 @@ class Saas_Dashboard {
                 <?php else : ?>
                     <p>No leads captured yet.</p>
                 <?php endif; ?>
+                </div>
             </div>
             <div id="tab-analytics" class="saas-tab-content">
+                <div class="dashboard-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>Profile Insights</h3>
                     <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_analytics&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button button-secondary">Download CSV</a>
@@ -808,8 +848,10 @@ class Saas_Dashboard {
                         <p>No transactions yet. Start selling products via your profile!</p>
                     <?php endif; ?>
                 </div>
+                </div>
             </div>
             <div id="tab-integrations" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>Integrations Hub</h3>
                 <div style="position:relative;">
                     <form id="saas-integrations-form" class="<?php echo $is_pro ? '' : 'pro-gated'; ?>">
@@ -853,9 +895,11 @@ class Saas_Dashboard {
                     </form>
                     <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to unlock Integrations</button></div><?php endif; ?>
                 </div>
+                </div>
             </div>
 
             <div id="tab-referrals" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>Referral Program</h3>
                 <div style="position:relative;">
                     <div class="integration-card <?php echo $is_pro ? '' : 'pro-gated'; ?>" style="background:linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); color:#fff; padding:40px; border-radius:24px; text-align:center;">
@@ -868,9 +912,11 @@ class Saas_Dashboard {
                     </div>
                     <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to join the Referral Program</button></div><?php endif; ?>
                 </div>
+                </div>
             </div>
 
             <div id="tab-support" class="saas-tab-content">
+                <div class="dashboard-card">
                 <h3>Support & Resources</h3>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
                     <div style="background:#f8f9fa; padding:30px; border-radius:24px; border:1px solid #eee;">
@@ -888,12 +934,19 @@ class Saas_Dashboard {
                         <a href="mailto:support@yourdomain.com" class="button button-primary">Email Support Team</a>
                     </div>
                 </div>
+                </div>
             </div>
 
             <div id="tab-billing" class="saas-tab-content">
+                <div class="dashboard-card">
                 <div class="billing-header" style="text-align:center; margin-bottom:40px;">
                     <h3 style="font-size:2rem; margin-bottom:10px;">Upgrade Your Potential</h3>
                     <p style="color:var(--text-muted);">Join 10,000+ professionals using Pro features to scale.</p>
+                </div>
+
+                <div class="coupon-section" style="max-width:400px; margin:0 auto 40px; display:flex; gap:10px;">
+                    <input type="text" id="coupon-code" placeholder="Enter Coupon Code" style="flex:1;">
+                    <button type="button" id="apply-coupon" class="button">Apply</button>
                 </div>
 
                 <div class="saas-plans-grid">
@@ -969,6 +1022,7 @@ class Saas_Dashboard {
                             <p style="font-size:0.85rem; color:var(--text-muted);">We offer a full 30-day money-back guarantee if you're not satisfied with the Pro features.</p>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
 
@@ -1118,6 +1172,26 @@ class Saas_Dashboard {
                         <label>URL / Embed</label>
                         <input type="url" name="url" id="edit-link-url" required>
                         <small class="helper-note">For videos, use the YouTube/Vimeo watch link.</small>
+                    </div>
+                    <div class="field-row" style="display:flex; gap:10px;">
+                        <div class="field" style="flex:1;">
+                            <label>Style</label>
+                            <select name="block_style" id="edit-link-style">
+                                <option value="regular">Regular Style</option>
+                                <option value="featured">Featured (Pulse)</option>
+                                <option value="rainbow">Rainbow Glow</option>
+                                <option value="outline">Outline Only</option>
+                                <option value="glow">Glow Effect</option>
+                            </select>
+                        </div>
+                        <div class="field" style="flex:1;">
+                            <label>Animation</label>
+                            <select name="block_animation" id="edit-link-animation">
+                                <option value="fadeinup">Fade In Up</option>
+                                <option value="bouncein">Bounce In</option>
+                                <option value="none">No Animation</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div id="ab-testing-settings" class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="background:#f8f9fa; padding:15px; border-radius:12px; margin-top:10px;">
