@@ -38,7 +38,6 @@ function saas_handle_vcard_download() {
             if ( $path && file_exists($path) ) {
                 $type = pathinfo($path, PATHINFO_EXTENSION);
                 $data = file_get_contents($path);
-                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
                 $vcard .= "PHOTO;ENCODING=b;TYPE=" . strtoupper($type) . ":" . base64_encode($data) . "\n";
             }
         }
@@ -62,7 +61,6 @@ function saas_handle_vcard_download() {
 
 /**
  * QR Code Generator Stub
- * (In production, would use a library like endroid/qr-code or an API)
  */
 function saas_get_profile_qr_url( $profile_slug ) {
     $profile_url = home_url( '/' . $profile_slug );
@@ -70,45 +68,67 @@ function saas_get_profile_qr_url( $profile_slug ) {
 }
 
 /**
- * Conditional Routing Helper
+ * Data Helpers (Guarded for Theme Compatibility)
  */
-function saas_get_effective_url( $block_id, $default_url ) {
-    // 1. Device-based routing (Direct Meta)
-    $mobile_url = get_post_meta($block_id, '_saas_url_mobile', true);
-    if ($mobile_url) {
-        $user_agent = $_SERVER['HTTP_USER_AGENT'];
-        if ( stripos($user_agent, 'mobile') !== false ) {
-            return $mobile_url;
-        }
+if ( ! function_exists( 'saas_get_profile_meta' ) ) {
+    function saas_get_profile_meta( $profile_id ) {
+        return [
+            'bio'          => get_post_meta( $profile_id, '_saas_bio', true ),
+            'headline'     => get_post_meta( $profile_id, '_saas_headline', true ),
+            'theme_color'  => get_post_meta( $profile_id, '_saas_theme_color', true ) ?: '#6c5ce7',
+            'social_links' => get_post_meta( $profile_id, '_saas_social_links', true ) ?: [],
+            'phone'        => get_post_meta( $profile_id, '_saas_phone', true ),
+            'avatar_id'    => get_post_thumbnail_id( $profile_id ),
+            'cover_id'     => get_post_meta( $profile_id, '_saas_cover_id', true ),
+        ];
     }
-
-    // 2. Geo-based routing (Direct Meta)
-    $geo_url = get_post_meta($block_id, '_saas_url_geo', true);
-    $target_country = get_post_meta($block_id, '_saas_url_geo_country', true);
-    if ($geo_url && $target_country) {
-        $visitor_country = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? 'US'; // Use Cloudflare header or similar
-        if ( strtoupper($visitor_country) === strtoupper($target_country) ) {
-            return $geo_url;
-        }
-    }
-
-    return $default_url;
 }
 
-// Custom query to find profile by slug
-function saas_get_profile_by_slug( $slug ) {
-    $posts = get_posts([
-        'name'        => $slug,
-        'post_type'   => 'saas_profile',
-        'post_status' => 'publish',
-        'numberposts' => 1
-    ]);
-    return $posts ? $posts[0] : null;
+/**
+ * Conditional Routing Helper
+ */
+if ( ! function_exists( 'saas_get_effective_url' ) ) {
+    function saas_get_effective_url( $block_id, $default_url ) {
+        // 1. Device-based routing
+        $mobile_url = get_post_meta($block_id, '_saas_url_mobile', true);
+        if ($mobile_url) {
+            $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            if ( stripos($user_agent, 'mobile') !== false ) {
+                return $mobile_url;
+            }
+        }
+
+        // 2. Geo-based routing
+        $geo_url = get_post_meta($block_id, '_saas_url_geo', true);
+        $target_country = get_post_meta($block_id, '_saas_url_geo_country', true);
+        if ($geo_url && $target_country) {
+            $visitor_country = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? 'US';
+            if ( strtoupper($visitor_country) === strtoupper($target_country) ) {
+                return $geo_url;
+            }
+        }
+
+        return $default_url;
+    }
+}
+
+/**
+ * Custom query to find profile by slug
+ */
+if ( ! function_exists( 'saas_get_profile_by_slug' ) ) {
+    function saas_get_profile_by_slug( $slug ) {
+        $posts = get_posts([
+            'name'        => $slug,
+            'post_type'   => 'saas_profile',
+            'post_status' => 'publish',
+            'numberposts' => 1
+        ]);
+        return $posts ? $posts[0] : null;
+    }
 }
 
 /**
  * License Validation Helper
- * Combined logic for direct user subscription AND profile-level license keys
  */
 function saas_is_profile_licensed( $profile_id ) {
     $author_id = get_post_field( 'post_author', $profile_id );
@@ -119,7 +139,7 @@ function saas_is_profile_licensed( $profile_id ) {
         return true;
     }
 
-    // 2. Check if specific profile has a valid license key
+    // 2. Check license key
     $license_key = get_post_meta( $profile_id, '_saas_license_key', true );
     if ( ! empty($license_key) ) {
         $licenses = get_posts([
@@ -130,7 +150,6 @@ function saas_is_profile_licensed( $profile_id ) {
         ]);
 
         if ( ! empty($licenses) ) {
-            // Optional: Check license expiry (stored as meta on saas_license)
             $expiry = get_post_meta( $licenses[0]->ID, '_saas_license_expiry', true );
             if ( ! $expiry || $expiry > time() ) {
                 return true;
