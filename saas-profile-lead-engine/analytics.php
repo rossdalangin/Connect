@@ -60,10 +60,14 @@ class Saas_Analytics {
      */
     public function get_user_link_stats( $user_id ) {
         global $wpdb;
-        $results = $wpdb->get_results( $wpdb->prepare(
-            "SELECT target_id, COUNT(*) as clicks FROM {$this->table_name} WHERE user_id = %d AND event_type = 'click' GROUP BY target_id",
-            $user_id
-        ), OBJECT_K ); // Use target_id as key
+        $results = $wpdb->get_results( $wpdb->prepare( "
+            SELECT target_id,
+                   SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) as clicks,
+                   SUM(CASE WHEN event_type = 'click_variant_b' THEN 1 ELSE 0 END) as clicks_b
+            FROM {$this->table_name}
+            WHERE user_id = %d
+            GROUP BY target_id
+        ", $user_id ), OBJECT_K );
 
         return $results ?: [];
     }

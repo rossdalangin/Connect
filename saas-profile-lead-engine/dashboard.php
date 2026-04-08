@@ -135,6 +135,7 @@ class Saas_Dashboard {
                 <button data-tab="automation">Lead Setup</button>
                 <button data-tab="leads">Leads</button>
                 <button data-tab="analytics">Analytics</button>
+                <button data-tab="integrations">Integrations</button>
                 <button data-tab="billing">Billing</button>
             </nav>
 
@@ -203,6 +204,8 @@ class Saas_Dashboard {
                             data-url-mobile="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_mobile', true)); ?>"
                             data-url-geo="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_geo', true)); ?>"
                             data-geo-country="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_geo_country', true)); ?>"
+                            data-ab-title="<?php echo esc_attr(get_post_meta($link->ID, '_saas_ab_title_b', true)); ?>"
+                            data-ab-url="<?php echo esc_attr(get_post_meta($link->ID, '_saas_ab_url_b', true)); ?>"
                             data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>"
                             data-image-id="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_image_id', true)); ?>"
                             data-image-url="<?php echo esc_url(wp_get_attachment_thumb_url(get_post_meta($link->ID, '_saas_link_image_id', true))); ?>">
@@ -219,7 +222,12 @@ class Saas_Dashboard {
                                 <span class="link-url"><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ); ?></span>
                             </div>
                             <span class="click-counter" title="Total Clicks">
-                                📊 <?php echo isset($link_stats[$link->ID]) ? $link_stats[$link->ID]->clicks : 0; ?>
+                                📊 <?php
+                                $ca = isset($link_stats[$link->ID]) ? (int)$link_stats[$link->ID]->clicks : 0;
+                                $cb = isset($link_stats[$link->ID]) ? (int)$link_stats[$link->ID]->clicks_b : 0;
+                                echo $ca + $cb;
+                                if ($cb > 0) echo " <small>(A:$ca B:$cb)</small>";
+                                ?>
                             </span>
                             <div class="block-actions">
                                 <button class="edit-link">Edit</button>
@@ -540,6 +548,7 @@ class Saas_Dashboard {
                             <button type="button" class="preset-btn" data-preset="glass" style="background:#eee; color:#333; border:1px solid #ddd; padding:10px; border-radius:8px;">Glassy</button>
                             <button type="button" class="preset-btn" data-preset="vibrant" style="background:linear-gradient(45deg, #f093fb, #f5576c); color:#fff; border:none; padding:10px; border-radius:8px;">Vibrant</button>
                             <button type="button" class="preset-btn" data-preset="minimal" style="background:#fff; color:#333; border:1px solid #ddd; padding:10px; border-radius:8px;">Minimal</button>
+                            <button type="button" class="preset-btn" data-preset="luxury" style="background:#1a1a1a; color:#d4af37; border:1px solid #d4af37; padding:10px; border-radius:8px;">Luxury</button>
                         </div>
                     </div>
                     <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
@@ -598,14 +607,17 @@ class Saas_Dashboard {
                     </div>
                 </div>
 
-                <div class="crm-filters">
-                    <select id="crm-filter-status">
-                        <option value="all">All Statuses</option>
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="converted">Converted</option>
-                    </select>
-                    <input type="text" id="crm-search-leads" placeholder="Search leads...">
+                <div class="crm-filters" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; gap:10px;">
+                        <select id="crm-filter-status">
+                            <option value="all">All Statuses</option>
+                            <option value="new">New</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="converted">Converted</option>
+                        </select>
+                        <input type="text" id="crm-search-leads" placeholder="Search leads...">
+                    </div>
+                    <button id="saas-bulk-delete-leads" class="button" style="background:#fff0f0; color:#ff7675; border:1px solid #ffeaea; display:none;">Delete Selected</button>
                 </div>
 
                 <?php
@@ -615,15 +627,16 @@ class Saas_Dashboard {
                     'numberposts' => 100
                 ]);
                 if ($leads) : ?>
-                    <table class="saas-table">
-                        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Source</th><th>Date</th><th>Actions</th></tr></thead>
+                    <table class="saas-table" id="leads-table">
+                        <thead><tr><th><input type="checkbox" id="leads-select-all"></th><th>Name</th><th>Email</th><th>Status</th><th>Source</th><th>Date</th><th>Actions</th></tr></thead>
                         <tbody>
                         <?php foreach ($leads as $lead) :
                             $status = get_post_meta($lead->ID, '_saas_lead_status', true) ?: 'New';
                             $source_id = get_post_meta($lead->ID, '_saas_lead_source_id', true);
                             $source_name = $source_id ? get_the_title($source_id) : 'Direct';
                             ?>
-                            <tr class="lead-row-<?php echo esc_attr(strtolower($status)); ?>">
+                            <tr class="lead-row-<?php echo esc_attr(strtolower($status)); ?>" data-id="<?php echo $lead->ID; ?>">
+                                <td><input type="checkbox" class="lead-checkbox" value="<?php echo $lead->ID; ?>"></td>
                                 <td data-label="Name"><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_name', true)); ?></td>
                                 <td data-label="Email"><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_email', true)); ?></td>
                                 <td data-label="Status">
@@ -733,6 +746,52 @@ class Saas_Dashboard {
                     <?php endif; ?>
                 </div>
             </div>
+            <div id="tab-integrations" class="saas-tab-content">
+                <h3>Integrations Hub</h3>
+                <div style="position:relative;">
+                    <form id="saas-integrations-form" class="<?php echo $is_pro ? '' : 'pro-gated'; ?>">
+                        <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+
+                        <div class="integration-card" style="background:#f8f9fa; padding:30px; border-radius:24px; margin-bottom:20px; border:1px solid #eee;">
+                            <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
+                                <div style="font-size:2.5rem;">🐵</div>
+                                <div>
+                                    <h4 style="margin:0;">Mailchimp</h4>
+                                    <p style="margin:0; font-size:0.85rem; color:#666;">Sync new leads automatically to your audience.</p>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>Mailchimp API Key</label>
+                                <input type="password" name="mailchimp_api" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_api', true)); ?>" placeholder="xxxx-us1">
+                            </div>
+                            <div class="field">
+                                <label>Audience / List ID</label>
+                                <input type="text" name="mailchimp_list" id="mailchimp-list-id" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_list', true)); ?>" placeholder="e.g. a1b2c3d4e5">
+                            </div>
+                            <button type="button" class="button saas-check-integration" data-platform="mailchimp">Check Mailchimp Connection</button>
+                        </div>
+
+                        <div class="integration-card" style="background:#f8f9fa; padding:30px; border-radius:24px; border:1px solid #eee;">
+                            <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
+                                <div style="font-size:2.5rem;">🧡</div>
+                                <div>
+                                    <h4 style="margin:0;">HubSpot</h4>
+                                    <p style="margin:0; font-size:0.85rem; color:#666;">Send contact info directly to HubSpot CRM.</p>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>Private App Access Token</label>
+                                <input type="password" name="hubspot_token" id="hubspot-token" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_hubspot_token', true)); ?>" placeholder="pat-na1-xxxx">
+                            </div>
+                            <button type="button" class="button saas-check-integration" data-platform="hubspot">Check HubSpot Connection</button>
+                        </div>
+
+                        <button type="submit" style="margin-top:20px;">Save Integrations</button>
+                    </form>
+                    <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to unlock Integrations</button></div><?php endif; ?>
+                </div>
+            </div>
+
             <div id="tab-billing" class="saas-tab-content">
                 <div class="billing-header" style="text-align:center; margin-bottom:40px;">
                     <h3 style="font-size:2rem; margin-bottom:10px;">Upgrade Your Potential</h3>
@@ -962,6 +1021,19 @@ class Saas_Dashboard {
                         <input type="url" name="url" id="edit-link-url" required>
                         <small class="helper-note">For videos, use the YouTube/Vimeo watch link.</small>
                     </div>
+
+                    <div id="ab-testing-settings" class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="background:#f8f9fa; padding:15px; border-radius:12px; margin-top:10px;">
+                        <h4>A/B Split Testing <?php if(!$is_pro) echo '🔒'; ?></h4>
+                        <div class="field">
+                            <label>Variant B Title</label>
+                            <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Test a different headline" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+                        <div class="field">
+                            <label>Variant B URL</label>
+                            <input type="url" name="ab_url_b" id="edit-link-ab-url" placeholder="Test a different destination" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+                        <small>If set, visitors will randomly see either Variant A or B.</small>
+                    </div>
                     <div id="routing-settings" class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                         <h4>Conditional Routing <?php if(!$is_pro) echo '🔒'; ?></h4>
                         <div class="field">
@@ -1009,6 +1081,17 @@ class Saas_Dashboard {
                             <label>End Date</label>
                             <input type="date" name="end_date" id="edit-link-end">
                         </div>
+                    </div>
+                    <div class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="display:flex; gap:10px; background:#eef9ff; padding:15px; border-radius:12px;">
+                        <div class="field">
+                            <label>Day-Hour: From <?php if(!$is_pro) echo '🔒'; ?></label>
+                            <input type="number" name="hour_from" id="edit-link-hour-from" min="0" max="23" placeholder="0" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+                        <div class="field">
+                            <label>Day-Hour: To <?php if(!$is_pro) echo '🔒'; ?></label>
+                            <input type="number" name="hour_to" id="edit-link-hour-to" min="0" max="23" placeholder="23" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+                        <small style="display:block; width:100%;">Show this link only during specific hours (0-23). Great for "Live Support" or "Lunch Specials".</small>
                     </div>
                     <button type="submit" class="button button-primary">Save Changes</button>
                 </form>

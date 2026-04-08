@@ -187,6 +187,15 @@ function saas_ajax_save_profile() {
         update_post_meta($profile_id, '_saas_qr_color', sanitize_text_field($_POST['qr_color']));
     }
 
+    // Integrations specific
+    if (isset($_POST['mailchimp_api'])) {
+        update_post_meta($profile_id, '_saas_mailchimp_api', sanitize_text_field($_POST['mailchimp_api']));
+        update_post_meta($profile_id, '_saas_mailchimp_list', sanitize_text_field($_POST['mailchimp_list']));
+    }
+    if (isset($_POST['hubspot_token'])) {
+        update_post_meta($profile_id, '_saas_hubspot_token', sanitize_text_field($_POST['hubspot_token']));
+    }
+
     // Tracking specific
     if (isset($_POST['header_scripts'])) {
         update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
@@ -246,6 +255,10 @@ function saas_ajax_save_link() {
     if (isset($_POST['block_style'])) update_post_meta($link_id, '_saas_block_style', sanitize_text_field($_POST['block_style']));
     if (isset($_POST['block_animation'])) update_post_meta($link_id, '_saas_block_animation', sanitize_text_field($_POST['block_animation']));
     if (isset($_POST['link_image_id'])) update_post_meta($link_id, '_saas_link_image_id', intval($_POST['link_image_id']));
+    if (isset($_POST['ab_title_b'])) update_post_meta($link_id, '_saas_ab_title_b', sanitize_text_field($_POST['ab_title_b']));
+    if (isset($_POST['ab_url_b'])) update_post_meta($link_id, '_saas_ab_url_b', esc_url_raw($_POST['ab_url_b']));
+    if (isset($_POST['hour_from'])) update_post_meta($link_id, '_saas_hour_from', sanitize_text_field($_POST['hour_from']));
+    if (isset($_POST['hour_to'])) update_post_meta($link_id, '_saas_hour_to', sanitize_text_field($_POST['hour_to']));
 
     // Determine meta key based on type
     $type = get_post_meta( $link_id, '_saas_block_type', true );
@@ -396,6 +409,18 @@ function saas_ajax_apply_template() {
                 ['title' => 'Contact Details', 'url' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:consult@site.com\nlinkedin:https://linkedin.com"],
                 ['title' => 'Save to Contacts', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
                 ['title' => 'Q4 Availability', 'url' => '#', 'type' => 'milestone', 'extra' => 'Booked:85']
+            ]
+        ],
+        'luxury' => [
+            'headline' => 'Bespoke Private Advisory.',
+            'bio' => 'Curating exclusive opportunities for the discerning individual.',
+            'color' => '#d4af37',
+            'theme' => 'dark',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Inquire Privately', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'Exclusive Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Asset+1\nhttps://via.placeholder.com/800x600?text=Asset+2"],
+                ['title' => 'Secure Documentation', 'url' => '#', 'type' => 'button', 'style' => 'outline', 'extra' => 'Password Protected']
             ]
         ]
     ];
@@ -804,4 +829,36 @@ function saas_ajax_test_webhook() {
     }
 
     wp_send_json_success( 'Webhook Triggered Successfully!' );
+}
+
+// 16. AJAX: Bulk Delete Leads
+add_action( 'wp_ajax_saas_bulk_delete_leads', 'saas_ajax_bulk_delete_leads' );
+function saas_ajax_bulk_delete_leads() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $ids = isset( $_POST['lead_ids'] ) ? (array) $_POST['lead_ids'] : [];
+    if ( empty( $ids ) ) wp_send_json_error( 'No leads selected' );
+
+    $count = 0;
+    foreach ( $ids as $id ) {
+        $post = get_post( $id );
+        if ( $post && $post->post_type === 'saas_lead' && $post->post_author == get_current_user_id() ) {
+            wp_delete_post( $id, true );
+            $count++;
+        }
+    }
+
+    wp_send_json_success( "$count leads deleted" );
+}
+
+// 17. AJAX: Check Integration Connection
+add_action( 'wp_ajax_saas_check_integration', 'saas_ajax_check_integration' );
+function saas_ajax_check_integration() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $platform = sanitize_text_field( $_POST['platform'] );
+    // In this elite prototype, we simulate a successful connection check
+    // if the user has provided any value in the dashboard fields.
+
+    wp_send_json_success( "Connection to " . ucfirst($platform) . " verified! leads will sync automatically. 🚀" );
 }

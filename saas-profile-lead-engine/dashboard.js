@@ -308,6 +308,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const automationForm = document.getElementById('saas-automation-form');
     if (automationForm) automationForm.addEventListener('submit', genericFormHandler);
 
+    const integrationsForm = document.getElementById('saas-integrations-form');
+    if (integrationsForm) integrationsForm.addEventListener('submit', genericFormHandler);
+
+    // Integration Connection Checks
+    document.querySelectorAll('.saas-check-integration').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const platform = this.dataset.platform;
+            const btnEl = this;
+            btnEl.innerText = 'Checking...';
+            btnEl.disabled = true;
+
+            fetch(saas_dashboard_data.ajax_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    action: 'saas_check_integration',
+                    security: saas_dashboard_data.nonce,
+                    platform: platform
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.data);
+                btnEl.innerText = `Check ${platform.charAt(0).toUpperCase() + platform.slice(1)} Connection`;
+                btnEl.disabled = false;
+            });
+        });
+    });
+
     // 4. Edit & Delete Link Handling
     document.addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('edit-link')) {
@@ -327,6 +356,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const blockAnimation = li.dataset.animation || 'fadeinup';
             const linkPass = li.dataset.password || '';
             const urlGeoCountry = li.dataset.geoCountry || '';
+            const abTitleB = li.dataset.abTitle || '';
+            const abUrlB = li.dataset.abUrl || '';
+            const hourFrom = li.dataset.hourFrom || '';
+            const hourTo = li.dataset.hourTo || '';
             const imageId = li.dataset.imageId || '';
             const imageUrl = li.dataset.imageUrl || '';
 
@@ -343,6 +376,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('edit-link-style')) document.getElementById('edit-link-style').value = blockStyle;
             if (document.getElementById('edit-link-animation')) document.getElementById('edit-link-animation').value = blockAnimation;
             if (document.getElementById('edit-link-pass')) document.getElementById('edit-link-pass').value = linkPass;
+            if (document.getElementById('edit-link-ab-title')) document.getElementById('edit-link-ab-title').value = abTitleB;
+            if (document.getElementById('edit-link-ab-url')) document.getElementById('edit-link-ab-url').value = abUrlB;
+            if (document.getElementById('edit-link-hour-from')) document.getElementById('edit-link-hour-from').value = hourFrom;
+            if (document.getElementById('edit-link-hour-to')) document.getElementById('edit-link-hour-to').value = hourTo;
             if (document.getElementById('edit-link-image-id')) document.getElementById('edit-link-image-id').value = imageId;
             if (document.getElementById('edit-link-thumb-preview')) {
                 document.getElementById('edit-link-thumb-preview').innerHTML = imageUrl ? `<img src="${imageUrl}" style="width:100%; height:100%; object-fit:cover;">` : '';
@@ -558,7 +595,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 midnight: { color: '#ffffff', bg: '#1a1a1a', theme: 'dark', shape: 'rounded' },
                 glass: { color: '#6c5ce7', bg: 'rgba(255,255,255,0.7)', theme: 'light', shape: 'pill' },
                 vibrant: { color: '#ffffff', bg: 'linear-gradient(45deg, #f093fb, #f5576c)', theme: 'vibrant', shape: 'pill' },
-                minimal: { color: '#333333', bg: '#ffffff', theme: 'light', shape: 'square' }
+                minimal: { color: '#333333', bg: '#ffffff', theme: 'light', shape: 'square' },
+                luxury: { color: '#d4af37', bg: '#1a1a1a', theme: 'dark', shape: 'rounded' }
             };
             const c = config[preset];
             if (c) {
@@ -593,6 +631,46 @@ document.addEventListener('DOMContentLoaded', function() {
         statusFilter.addEventListener('change', filterLeads);
         leadSearch.addEventListener('input', filterLeads);
     }
+
+    // Bulk Lead Management
+    const selectAll = document.getElementById('leads-select-all');
+    const bulkDeleteBtn = document.getElementById('saas-bulk-delete-leads');
+    const leadCheckboxes = () => document.querySelectorAll('.lead-checkbox');
+
+    if (selectAll) {
+        selectAll.onchange = (e) => {
+            leadCheckboxes().forEach(cb => cb.checked = e.target.checked);
+            toggleBulkBtn();
+        };
+    }
+
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.classList.contains('lead-checkbox')) toggleBulkBtn();
+    });
+
+    const toggleBulkBtn = () => {
+        const checked = Array.from(leadCheckboxes()).filter(cb => cb.checked).length;
+        if (bulkDeleteBtn) bulkDeleteBtn.style.display = checked > 0 ? 'block' : 'none';
+    };
+
+    bulkDeleteBtn?.addEventListener('click', () => {
+        const ids = Array.from(leadCheckboxes()).filter(cb => cb.checked).map(cb => cb.value);
+        if (!ids.length || !confirm(`Delete ${ids.length} selected leads?`)) return;
+
+        fetch(saas_dashboard_data.ajax_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                action: 'saas_bulk_delete_leads',
+                security: saas_dashboard_data.nonce,
+                'lead_ids[]': ids
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) location.reload();
+        });
+    });
 
     const applyTemplateBtn = document.getElementById('saas-btn-apply-template');
     if (applyTemplateBtn) {

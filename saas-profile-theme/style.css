@@ -37,6 +37,25 @@ body.theme-vibrant {
     --text-color: #fff;
     --text-light: rgba(255,255,255,0.8);
 }
+
+body.theme-luxury {
+    background: #0a0a0a fixed;
+    --primary-color: #d4af37;
+    --text-color: #ffffff;
+    --text-light: #888888;
+    --glass-bg: rgba(212, 175, 55, 0.05);
+    --font-family: 'Playfair Display', serif;
+}
+body.theme-luxury .saas-link-btn {
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+body.theme-luxury .saas-link-btn:hover {
+    background: #d4af37;
+    color: #000;
+}
 p { line-height: 1.6; color: var(--text-light); }
 
 body {

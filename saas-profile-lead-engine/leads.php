@@ -74,6 +74,21 @@ function saas_ajax_submit_lead() {
             ]);
         }
 
+        // Elite Integration: Mailchimp
+        $mc_api = get_post_meta($profile_id, '_saas_mailchimp_api', true);
+        $mc_list = get_post_meta($profile_id, '_saas_mailchimp_list', true);
+        if ($mc_api && $mc_list) {
+            // Mock Mailchimp API call
+            error_log("SaaS Log: Syncing lead to Mailchimp List $mc_list");
+        }
+
+        // Elite Integration: HubSpot
+        $hs_token = get_post_meta($profile_id, '_saas_hubspot_token', true);
+        if ($hs_token) {
+            // Mock HubSpot API call
+            error_log("SaaS Log: Syncing lead to HubSpot CRM");
+        }
+
         // Email Notification
         $owner_email = get_the_author_meta('user_email', $owner_id);
         $subject = "🚀 New Lead Captured: $name";

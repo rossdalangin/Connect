@@ -311,6 +311,12 @@ SaaS Dashboard - Elite Interface Styles
 .status-badge.contacted { background: #fff3e0; color: #f57c00; }
 .status-badge.converted { background: #e8f5e9; color: #388e3c; }
 
+#saas-bulk-delete-leads { background: #fff0f0; color: #ff7675; border: 1px solid #ffeaea; display: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+#saas-bulk-delete-leads:hover { background: #ff7675; color: #fff; }
+
+.saas-check-integration { margin-top: 15px; background: #eee; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.saas-check-integration:hover { background: #ddd; }
+
 tr.lead-row-new { border-left: 4px solid var(--primary-color); }
 tr.lead-row-contacted { border-left: 4px solid #f57c00; }
 tr.lead-row-converted { border-left: 4px solid #388e3c; }

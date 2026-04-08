@@ -151,16 +151,39 @@ include __DIR__ . '/header.php';
             $now = time();
             if ($start_date && strtotime($start_date) > $now) continue;
             if ($end_date && strtotime($end_date) < $now) continue;
+
+            // Hour-based scheduling
+            $hour_from = get_post_meta($block->ID, '_saas_hour_from', true);
+            $hour_to   = get_post_meta($block->ID, '_saas_hour_to', true);
+            if ($is_pro && ($hour_from !== '' || $hour_to !== '')) {
+                $current_hour = (int) current_time('G');
+                if ($hour_from !== '' && $current_hour < (int)$hour_from) continue;
+                if ($hour_to !== '' && $current_hour > (int)$hour_to) continue;
+            }
             ?>
             <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" data-block-id="<?php echo $block->ID; ?>" style="animation-delay: <?php echo $index * 0.1; ?>s; <?php echo $block_style_attr; ?>">
                 <?php if ($type === 'button') :
                     $has_pass = !empty(get_post_meta($block->ID, '_saas_link_password', true));
+
+                    // A/B Split Testing Logic
+                    $ab_title_b = get_post_meta($block->ID, '_saas_ab_title_b', true);
+                    $ab_url_b   = get_post_meta($block->ID, '_saas_ab_url_b', true);
+                    $variant    = 'a';
+
+                    if ($is_pro && $ab_title_b && $ab_url_b) {
+                        $variant = (rand(0, 1) === 1) ? 'b' : 'a';
+                        if ($variant === 'b') {
+                            $block->post_title = $ab_title_b;
+                            $url = saas_get_effective_url($block->ID, $ab_url_b);
+                        }
+                    }
                     ?>
                     <a href="<?php echo esc_url( $url ); ?>"
                        class="saas-link-btn"
                        style="<?php echo $block_style_attr; ?>"
                        data-link-id="<?php echo $block->ID; ?>"
-                       onclick="return saasCheckLink(event, <?php echo $block->ID; ?>, <?php echo $has_pass ? 'true' : 'false'; ?>)">
+                       data-variant="<?php echo $variant; ?>"
+                       onclick="return saasCheckLink(event, <?php echo $block->ID; ?>, <?php echo $has_pass ? 'true' : 'false'; ?>, '<?php echo $variant; ?>')">
                         <?php
                         $thumb_id = get_post_meta($block->ID, '_saas_link_image_id', true);
                         if ($thumb_id) : ?>
@@ -416,9 +439,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Password protection check (Modern Modal UI)
-function saasCheckLink(e, linkId, hasPass) {
+function saasCheckLink(e, linkId, hasPass, variant = 'a') {
     if (!hasPass) {
-        saasTrackClick(linkId);
+        saasTrackClick(linkId, variant);
         return true;
     }
 
@@ -468,8 +491,9 @@ document.getElementById('saas-pass-form')?.addEventListener('submit', function(e
 });
 
 // Analytics tracking
-function saasTrackClick(linkId) {
-    saasTrackEvent('click', linkId);
+function saasTrackClick(linkId, variant = 'a') {
+    const eventType = (variant === 'b') ? 'click_variant_b' : 'click';
+    saasTrackEvent(eventType, linkId);
 }
 
 function saasTrackEvent(type, targetId) {
