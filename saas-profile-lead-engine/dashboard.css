@@ -1,5 +1,5 @@
 /*
- * SaaS Dashboard - Simplified & Vibrant Professional Design
+ * SaaS Dashboard - Simplified, Vibrant & Fully Responsive
  */
 
 :root {
@@ -16,21 +16,30 @@
     --text-muted: #64748b;
     --border: #e2e8f0;
     --radius: 16px;
-    --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
 
 body {
     background-color: var(--bg-main);
     color: var(--text-dark);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0; padding: 0;
 }
 
 #saas-dashboard {
     max-width: 1400px;
-    margin: 40px auto;
-    padding: 0 20px;
+    margin: 0 auto;
+    padding: 20px;
     display: flex;
+    flex-direction: column;
     gap: 30px;
+}
+
+@media (min-width: 1100px) {
+    #saas-dashboard {
+        flex-direction: row;
+        margin-top: 40px;
+    }
 }
 
 .dashboard-main-area {
@@ -38,32 +47,38 @@ body {
     min-width: 0;
 }
 
-/* Header & Switcher */
+/* Header */
 .saas-dashboard-header {
     background: var(--white);
-    padding: 24px;
+    padding: 20px;
     border-radius: var(--radius);
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    gap: 15px;
     margin-bottom: 24px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
 }
 
 .profile-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--primary);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    margin: 0;
 }
 
 .saas-share-bar {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .saas-share-bar { width: auto; }
 }
 
 .saas-share-bar input {
@@ -71,8 +86,9 @@ body {
     border: 1px solid var(--border);
     padding: 10px 16px;
     border-radius: 10px;
-    font-size: 0.9rem;
-    width: 250px;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 180px;
 }
 
 /* Vibrant Tabs */
@@ -80,13 +96,16 @@ body {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding: 5px;
+    padding: 4px;
     margin-bottom: 30px;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 
+.saas-tabs::-webkit-scrollbar { display: none; }
+
 .saas-tabs button {
-    padding: 10px 20px;
+    padding: 10px 18px;
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 50px;
@@ -95,6 +114,7 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
+    font-size: 0.85rem;
 }
 
 .saas-tabs button.active {
@@ -104,109 +124,93 @@ body {
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-.saas-tabs button[data-tab="links"] { border-left: 4px solid var(--primary); }
-.saas-tabs button[data-tab="profile"] { border-left: 4px solid #8b5cf6; }
-.saas-tabs button[data-tab="branding"] { border-left: 4px solid #ec4899; }
-.saas-tabs button[data-tab="leads"] { border-left: 4px solid var(--secondary); }
-.saas-tabs button[data-tab="analytics"] { border-left: 4px solid var(--accent); }
-.saas-tabs button[data-tab="automation"] { border-left: 4px solid #06b6d4; }
-.saas-tabs button[data-tab="billing"] { border-left: 4px solid #f97316; }
+.saas-tab-content { display: none; }
+.saas-tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Simplified Cards */
+/* Cards */
 .dashboard-card {
     background: var(--white);
     border-radius: var(--radius);
-    padding: 30px;
+    padding: 20px;
     margin-bottom: 24px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
 }
 
-.dashboard-card h3 {
-    margin-top: 0;
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 20px;
+@media (min-width: 768px) {
+    .dashboard-card { padding: 30px; }
 }
 
-/* Block List Interaction */
+.dashboard-card h3 { margin-top: 0; font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; color: var(--text-dark); }
+
+/* Block List */
+#saas-links-list { list-style: none; padding: 0; }
 #saas-links-list li {
     background: var(--bg-main);
     border: 1px solid var(--border);
-    padding: 16px 20px;
+    padding: 15px;
     border-radius: 12px;
     margin-bottom: 12px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 15px;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: all 0.2s;
 }
 
-#saas-links-list li:hover {
-    transform: translateX(8px);
-    border-color: var(--primary);
-    background: var(--white);
-}
+.link-info { flex: 1; min-width: 150px; }
+.link-title { display: block; font-weight: 700; font-size: 0.95rem; }
+.link-url { font-size: 0.8rem; color: var(--text-muted); word-break: break-all; }
 
-.handle { color: #cbd5e1; cursor: grab; }
-
-/* Vibrant Block Picker */
+/* Block Picker */
 .saas-block-picker {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 12px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    margin-bottom: 25px;
 }
 
 .picker-item {
     background: var(--white);
     border: 2px solid var(--border);
-    padding: 16px;
+    padding: 12px 8px;
     border-radius: 12px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s;
+    font-size: 0.7rem;
+    font-weight: 700;
 }
 
-.picker-item:hover { border-color: var(--primary); background: var(--primary-soft); }
-.picker-item.active { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 4px var(--primary-soft); }
-.picker-item span { display: block; font-size: 1.5rem; margin-bottom: 8px; }
+.picker-item span { display: block; font-size: 1.25rem; margin-bottom: 5px; }
+.picker-item.active { border-color: var(--primary); background: var(--primary-soft); }
 
-/* Form Elements */
-.field label { font-weight: 700; margin-bottom: 8px; display: block; font-size: 0.9rem; }
+/* Forms */
+.field { margin-bottom: 20px; }
+.field label { font-weight: 700; margin-bottom: 8px; display: block; font-size: 0.85rem; }
 .field input, .field textarea, .field select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--bg-main);
-    font-size: 0.95rem;
-    transition: all 0.2s;
+    font-size: 0.9rem;
+    box-sizing: border-box;
 }
 
-.field input:focus { outline: none; border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 4px var(--primary-soft); }
-
-/* Buttons */
-.btn-primary, button[type="submit"] {
-    background: var(--primary);
-    color: var(--white);
-    border: none;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-}
-
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.5); }
-
-/* Live Preview Side Pane */
+/* Preview Side Pane */
 .saas-preview-pane {
-    position: sticky;
-    top: 40px;
-    width: 380px;
-    height: calc(100vh - 80px);
+    display: none;
+}
+
+@media (min-width: 1100px) {
+    .saas-preview-pane {
+        display: block;
+        position: sticky;
+        top: 40px;
+        width: 380px;
+        height: calc(100vh - 80px);
+    }
 }
 
 .preview-frame-container {
@@ -216,42 +220,43 @@ body {
     border-radius: 40px;
     padding: 12px;
     margin: 0 auto;
-    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.3);
     border: 8px solid #1e293b;
 }
 
-#saas-preview-frame {
-    width: 100%;
-    height: 100%;
-    border-radius: 30px;
-    background: var(--white);
-    border: none;
+#saas-preview-frame { width: 100%; height: 100%; border-radius: 30px; background: #fff; border: none; }
+
+/* Modals */
+.saas-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
 }
 
-/* Modals Modernized */
 .saas-modal-content {
-    border: none;
-    padding: 48px;
-    border-radius: 24px;
+    background: var(--white);
+    margin: 20px auto;
+    padding: 25px;
+    width: 90%;
+    max-width: 550px;
+    border-radius: 20px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
-/* Pro Badges & Gating */
-.pro-badge {
-    background: linear-gradient(135deg, var(--accent) 0%, #fbbf24 100%);
-    color: var(--text-dark);
-    padding: 4px 10px;
-    font-size: 0.65rem;
-    border-radius: 6px;
-    font-weight: 900;
-}
+.close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
 
-/* Responsive */
-@media (max-width: 1100px) {
-    #saas-dashboard { flex-direction: column; }
-    .saas-preview-pane { display: none; }
-}
+/* Utilities */
+.btn-primary { background: var(--primary); color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.button { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--white); cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+.pro-badge { background: var(--accent); color: #fff; padding: 4px 8px; font-size: 0.65rem; border-radius: 5px; font-weight: 800; text-transform: uppercase; }
 
-@media (max-width: 640px) {
-    .saas-dashboard-header { flex-direction: column; gap: 20px; text-align: center; }
-    .saas-share-bar input { width: 100%; }
-}
+.pro-gated-inline { opacity: 0.5; pointer-events: none; }
+
+.saas-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.saas-table th, .saas-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.saas-table th { color: var(--text-muted); }

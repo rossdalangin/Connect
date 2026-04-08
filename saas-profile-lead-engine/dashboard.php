@@ -139,8 +139,30 @@ class Saas_Dashboard {
                         <ul id="saas-links-list" class="sortable" style="margin-top:40px;">
                             <?php foreach ( $links as $link ) :
                                 $type = get_post_meta($link->ID, '_saas_block_type', true);
+                                $extra = get_post_meta($link->ID, '_saas_testimonial_text', true) ?: get_post_meta($link->ID, '_saas_faq_answer', true);
+                                if (!$extra) {
+                                    $price = get_post_meta($link->ID, '_saas_price', true);
+                                    $feats = get_post_meta($link->ID, '_saas_features', true);
+                                    if ($price) $extra = $price . ($feats ? "\n" . implode("\n", $feats) : "");
+                                }
                                 ?>
-                                <li data-id="<?php echo $link->ID; ?>">
+                                <li data-id="<?php echo $link->ID; ?>"
+                                    data-type="<?php echo esc_attr($type); ?>"
+                                    data-style="<?php echo esc_attr(get_post_meta($link->ID, '_saas_block_style', true)); ?>"
+                                    data-animation="<?php echo esc_attr(get_post_meta($link->ID, '_saas_block_animation', true)); ?>"
+                                    data-extra="<?php echo esc_attr($extra); ?>"
+                                    data-start="<?php echo esc_attr(get_post_meta($link->ID, '_saas_start_date', true)); ?>"
+                                    data-end="<?php echo esc_attr(get_post_meta($link->ID, '_saas_end_date', true)); ?>"
+                                    data-url-mobile="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_mobile', true)); ?>"
+                                    data-url-geo="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_geo', true)); ?>"
+                                    data-geo-country="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_geo_country', true)); ?>"
+                                    data-ab-title="<?php echo esc_attr(get_post_meta($link->ID, '_saas_ab_title_b', true)); ?>"
+                                    data-ab-url="<?php echo esc_attr(get_post_meta($link->ID, '_saas_ab_url_b', true)); ?>"
+                                    data-hour-from="<?php echo esc_attr(get_post_meta($link->ID, '_saas_hour_from', true)); ?>"
+                                    data-hour-to="<?php echo esc_attr(get_post_meta($link->ID, '_saas_hour_to', true)); ?>"
+                                    data-custom-bg="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_bg', true)); ?>"
+                                    data-custom-text="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_text', true)); ?>"
+                                    data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>">
                                     <span class="handle">⠿</span>
                                     <div class="link-info">
                                         <strong class="link-title"><?php echo esc_html( $link->post_title ); ?></strong>
@@ -299,16 +321,66 @@ class Saas_Dashboard {
                 <h3>Edit Block</h3>
                 <form id="saas-edit-link-form">
                     <input type="hidden" name="link_id" id="edit-link-id">
-                    <div class="field"><label>Title</label><input type="text" name="title" id="edit-link-title" required></div>
-                    <div class="field"><label>URL</label><input type="url" name="url" id="edit-link-url" required></div>
-                    <div class="field"><label>Style</label>
-                        <select name="block_style" id="edit-link-style">
-                            <option value="regular">Regular</option>
-                            <option value="featured">Featured</option>
-                            <option value="outline">Outline</option>
-                        </select>
+
+                    <div class="field"><label>Block Title</label><input type="text" name="title" id="edit-link-title" required></div>
+                    <div class="field"><label>URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
+                    <div class="field"><label>Extra Content (FAQ, Quote, Price)</label><textarea name="extra" id="edit-link-extra"></textarea></div>
+
+                    <button type="button" class="button toggle-advanced" style="width:100%; margin-bottom:20px; background:#f1f5f9; color:#475569;">⚙️ Advanced Settings</button>
+
+                    <div id="edit-advanced-fields" style="display:none; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                        <div class="field">
+                            <label>Style & Animation</label>
+                            <div style="display:flex; gap:10px;">
+                                <select name="block_style" id="edit-link-style" style="flex:1;">
+                                    <option value="regular">Regular</option>
+                                    <option value="featured">Featured (Pulse)</option>
+                                    <option value="outline">Outline</option>
+                                    <option value="glow">Glow</option>
+                                </select>
+                                <select name="block_animation" id="edit-link-animation" style="flex:1;">
+                                    <option value="none">No Animation</option>
+                                    <option value="fadeinup">Fade In Up</option>
+                                    <option value="bouncein">Bounce In</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Custom Colors (Pro Only)</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="color" name="custom_bg" id="edit-link-bg" style="width:50px;">
+                                <input type="color" name="custom_text" id="edit-link-text" style="width:50px;">
+                            </div>
+                        </div>
+
+                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                            <label>A/B Testing Title B (Pro)</label>
+                            <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Variant B Title">
+                        </div>
+
+                        <div class="field">
+                            <label>Scheduling (Start / End Date)</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="date" name="start_date" id="edit-link-start">
+                                <input type="date" name="end_date" id="edit-link-end">
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Hour Range (0-23)</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="number" name="hour_from" id="edit-link-hour-from" placeholder="From" min="0" max="23">
+                                <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To" min="0" max="23">
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Password Protection</label>
+                            <input type="text" name="link_password" id="edit-link-pass" placeholder="Enter password to lock block">
+                        </div>
                     </div>
-                    <div class="field"><label>Extra Info</label><textarea name="extra" id="edit-link-extra"></textarea></div>
+
                     <button type="submit" class="btn-primary" style="width:100%;">Save Changes</button>
                 </form>
             </div>
