@@ -14,6 +14,56 @@ class Saas_Admin_Settings {
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ] );
         add_action( 'wp_dashboard_setup', [ $this, 'add_dashboard_widget' ] );
         add_action( 'admin_post_saas_generate_pages', [ $this, 'handle_generate_pages' ] );
+        add_action( 'admin_post_saas_populate_pro_content', [ $this, 'handle_populate_pro_content' ] );
+    }
+
+    public function handle_populate_pro_content() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die('Unauthorized');
+
+        $features = [
+            ['icon' => '🎯', 'title' => 'Lead Capture Engine', 'desc' => 'Stop losing traffic. Capture names and emails directly on your profile with our integrated conversion forms.'],
+            ['icon' => '📳', 'title' => 'NFC Digital Cards', 'desc' => 'Network like a pro. Tap any phone to instantly share your contact info and save your vCard with zero friction.'],
+            ['icon' => '📈', 'title' => 'Real-Time Insights', 'desc' => 'Track views, clicks, and conversion rates. Know exactly which links are driving revenue for your business.'],
+            ['icon' => '🎨', 'title' => 'Elite Branding', 'desc' => 'Fully customizable themes, fonts, and colors. Whitelabel your profile to keep the focus on YOUR brand, not ours.']
+        ];
+
+        $benefits = [
+            'One-click niche templates for Coaches, Realtors, and Creators',
+            'Automated lead magnet delivery after form submission',
+            'Verified badge to build instant authority and trust',
+            'Webhook integration with Zapier, Make, and your favorite CRMs'
+        ];
+
+        $testimonials = [
+            ['name' => 'Alex Rivera', 'role' => 'Strategic Coach', 'text' => 'I switched from Linktree and my consultation bookings increased by 40% in the first month.'],
+            ['name' => 'Jordan Smith', 'role' => 'Real Estate Mogul', 'text' => 'The NFC business card feature is the ultimate conversation starter at events.'],
+            ['name' => 'Elena Chen', 'role' => 'TikTok Creator', 'text' => 'Finally, a link hub that actually looks high-end. The analytics helped me double my affiliate revenue.']
+        ];
+
+        $faqs = [
+            ['q' => 'How does the lead capture work?', 'a' => 'You can add a specialized "Lead Form" block to your profile. When someone submits their info, it is saved in your dashboard.'],
+            ['q' => 'Can I use it as my main website?', 'a' => 'Yes! Many of our elite users use their profile as a minimalist, high-converting landing page.'],
+            ['q' => 'Does the NFC feature require an app?', 'a' => 'No apps required. Just tap an NFC-enabled card and your profile opens instantly.']
+        ];
+
+        $logos = [
+            'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
+            'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
+            'https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg',
+            'https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png'
+        ];
+
+        update_option('saas_home_title', 'The Only Link-in-Bio Built for Real Conversions');
+        update_option('saas_home_hero', 'Turn your social media followers into loyal clients. A complete digital identity system with built-in lead generation, digital business cards, and advanced analytics.');
+        update_option('saas_home_cta', 'Claim Your Elite URL Now');
+        update_option('saas_home_features', json_encode($features));
+        update_option('saas_home_benefits', json_encode($benefits));
+        update_option('saas_home_testimonials', json_encode($testimonials));
+        update_option('saas_home_faq', json_encode($faqs));
+        update_option('saas_home_trusted_logos', json_encode($logos));
+
+        wp_redirect( admin_url('admin.php?page=saas_settings&pro_content_applied=1') );
+        exit;
     }
 
     public function enqueue_admin_styles() {
@@ -407,6 +457,13 @@ class Saas_Admin_Settings {
     public function settings_page_html() {
         if ( ! current_user_can( 'manage_options' ) ) return;
 
+        if ( isset($_GET['pro_content_applied']) ) {
+            echo '<div class="updated notice is-dismissible"><p>Elite Pro Copy has been applied to your homepage! 🚀</p></div>';
+        }
+        if ( isset($_GET['pages_generated']) ) {
+            echo '<div class="updated notice is-dismissible"><p>System pages and templates generated successfully!</p></div>';
+        }
+
         $analytics = new Saas_Analytics();
         $summary = $analytics->get_global_summary();
         $growth = $analytics->get_growth_data();
@@ -466,9 +523,14 @@ class Saas_Admin_Settings {
             </form>
 
             <hr>
+            <h2>High-Conversion Copy Setup</h2>
+            <p>Populate your homepage with professional, world-class sales copy designed by elite marketers.</p>
+            <a href="<?php echo admin_url('admin-post.php?action=saas_populate_pro_content'); ?>" class="button button-primary" style="background:#39e09b; border-color:#39e09b; color:#1e2329;">Apply Pro Sales Copy</a>
+
+            <hr>
             <h2>System Page Generator</h2>
             <p>Automatically create Login, Register, and Dashboard pages with correct shortcodes.</p>
-            <a href="<?php echo admin_url('admin-post.php?action=saas_generate_pages'); ?>" class="button button-primary">Generate System Pages</a>
+            <a href="<?php echo admin_url('admin-post.php?action=saas_generate_pages'); ?>" class="button button-secondary">Generate System Pages</a>
 
             <hr>
             <h2>Sample Data Generator</h2>
