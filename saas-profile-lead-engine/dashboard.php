@@ -146,8 +146,9 @@ class Saas_Dashboard {
                 <button data-tab="billing">Billing</button>
             </nav>
 
-            <!-- Links Tab -->
-            <div id="tab-links" class="saas-tab-content active">
+            <div class="dashboard-main-area">
+                <!-- Links Tab -->
+                <div id="tab-links" class="saas-tab-content active">
                 <div class="dashboard-card">
                 <h3 class="tab-title">Manage Blocks</h3>
 
@@ -405,7 +406,6 @@ class Saas_Dashboard {
                     <button type="submit" class="btn-primary">Save Automation</button>
                 </form>
                 <?php if(!$is_pro) : ?><div class="pro-overlay"><button type="button" onclick="document.querySelector('[data-tab=billing]').click()">Upgrade to Pro to access Automations</button></div><?php endif; ?>
-                </div>
                 </div>
             </div>
 
@@ -1025,6 +1025,8 @@ class Saas_Dashboard {
                 </div>
                 </div>
             </div>
+
+            </div> <!-- End .dashboard-main-area -->
 
             <!-- Live Preview -->
             <div class="saas-preview-pane">

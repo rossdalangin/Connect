@@ -18,22 +18,31 @@ SaaS Dashboard - Elite Interface Styles (Revamped)
     --glass-bg: rgba(255, 255, 255, 0.8);
 }
 
+body.saas-admin-dark {
+    --bg-light: #1e1e1e;
+    --border-color: #333;
+    --text-main: #f1f2f6;
+    --text-muted: #a0a0a0;
+    --white: #121212;
+}
+
 #saas-dashboard {
     max-width: 1400px;
     margin: 40px auto;
-    background: #fff;
+    background: var(--white);
     padding: 30px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-heavy);
     font-family: 'Inter', sans-serif;
     color: var(--text-main);
-    display: grid;
-    grid-template-columns: 1fr 380px;
+    display: flex;
     gap: 30px;
     min-height: 90vh;
     align-items: start;
     position: relative;
 }
+
+.dashboard-main-area { flex: 1; min-width: 0; }
 
 /* Scrollbar styling for tabs */
 .saas-tabs::-webkit-scrollbar { height: 0; }
@@ -50,19 +59,19 @@ SaaS Dashboard - Elite Interface Styles (Revamped)
     margin-bottom: 20px;
 }
 
-.profile-title { font-size: 1.2rem; font-weight: 800; cursor: pointer; margin: 0; display: flex; align-items: center; gap: 8px; }
+.profile-title { font-size: 1.2rem; font-weight: 800; cursor: pointer; margin: 0; display: flex; align-items: center; gap: 8px; position: relative; }
 
 .saas-tabs {
     grid-column: 1 / -1;
     display: flex;
     gap: 10px;
-    background: #f8f9fa;
+    background: var(--bg-light);
     padding: 10px;
     border-radius: 15px;
     margin-bottom: 30px;
     overflow-x: auto;
     white-space: nowrap;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
 }
 
 .saas-tabs button {
@@ -90,8 +99,8 @@ SaaS Dashboard - Elite Interface Styles (Revamped)
 
 /* Cards & Sections */
 .dashboard-card {
-    background: #fff;
-    border: 1px solid #eee;
+    background: var(--white);
+    border: 1px solid var(--border-color);
     padding: 25px;
     border-radius: var(--radius-md);
     margin-bottom: 20px;
@@ -99,34 +108,45 @@ SaaS Dashboard - Elite Interface Styles (Revamped)
 }
 
 /* Link Management UI */
+#saas-links-list { list-style: none; padding: 0; }
 #saas-links-list li {
-    background: #fff;
+    background: var(--white);
     padding: 15px 20px;
     border-radius: 15px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
     gap: 15px;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
     transition: all 0.2s;
 }
 
 #saas-links-list li:hover { transform: translateX(5px); border-color: var(--primary-color); }
 
+.handle { cursor: grab; color: #ccc; font-size: 1.2rem; }
+.link-thumb-small { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+.link-info { flex: 1; }
+.link-title { display: block; font-weight: 700; }
+.link-url { font-size: 0.8rem; color: var(--text-muted); }
+
 /* Forms */
-.field-group { margin-bottom: 20px; }
-.field-group label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
-.field-group input, .field-group textarea, .field-group select {
+.field { margin-bottom: 20px; }
+.field label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
+.field input[type="text"], .field input[type="url"], .field input[type="email"], .field input[type="password"], .field textarea, .field select {
     width: 100%;
     padding: 12px 15px;
     border-radius: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    color: var(--text-main);
     font-family: inherit;
     font-size: 0.95rem;
 }
 
+.helper-note { display: block; margin-top: 5px; font-size: 0.75rem; color: var(--text-muted); }
+
 /* Buttons */
-.btn-primary {
+.btn-primary, button[type="submit"] {
     background: var(--primary-color);
     color: #fff;
     border: none;
@@ -136,13 +156,13 @@ SaaS Dashboard - Elite Interface Styles (Revamped)
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); }
+.btn-primary:hover, button[type="submit"]:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); }
 
 /* Live Preview Fixed Pane */
 .saas-preview-pane {
     position: sticky;
     top: 40px;
-    height: 100%;
+    height: calc(100vh - 80px);
 }
 
 .preview-frame-container {
@@ -159,11 +179,97 @@ SaaS Dashboard - Elite Interface Styles (Revamped)
 
 #saas-preview-frame { width: 100%; height: 100%; border: none; }
 
+/* Pro Gating */
+.pro-badge { background: #39e09b; color: #1e2329; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; font-weight: 800; text-transform: uppercase; }
+
+.pro-gated { position: relative; opacity: 0.5; pointer-events: none; filter: grayscale(1); transition: all 0.3s; }
+.pro-gated:after { content: "PRO FEATURE 🔒"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-5deg); background: var(--primary-color); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 900; font-size: 1.2rem; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+.pro-gated-inline { opacity: 0.6; pointer-events: none; }
+.pro-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.4); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); border-radius: var(--radius-md); }
+.pro-overlay button { background: var(--primary-color); color: #fff; border: none; padding: 15px 30px; border-radius: 50px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.4); }
+
+/* Modals */
+.saas-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    backdrop-filter: blur(5px);
+}
+
+.saas-modal-content {
+    background-color: var(--white);
+    margin: 5% auto;
+    padding: 40px;
+    border: 1px solid var(--border-color);
+    width: 90%;
+    max-width: 600px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-heavy);
+    position: relative;
+    color: var(--text-main);
+}
+
+.close-modal {
+    color: var(--text-muted);
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Block Picker */
+.saas-block-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.picker-item {
+    padding: 15px 10px;
+    background: var(--bg-light);
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: all 0.2s;
+    color: var(--text-main);
+}
+
+.picker-item.active { border-color: var(--primary-color); background: var(--white); }
+.picker-item span { display: block; font-size: 1.5rem; margin-bottom: 5px; }
+.pro-locked { opacity: 0.5; position: relative; }
+
+/* Profile Switcher */
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--white);
+    min-width: 250px;
+    box-shadow: var(--shadow-heavy);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    z-index: 1000;
+    border: 1px solid var(--border-color);
+}
+
 /* CRM Table */
-.saas-table-container { overflow-x: auto; }
-.saas-table { width: 100%; border-collapse: collapse; }
-.saas-table th, .saas-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-.saas-table th { background: #f8f9fa; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: #888; }
+.saas-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.saas-table th, .saas-table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+.saas-table th { background: var(--bg-light); font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); }
 
 /* Responsive Adjustments */
 @media screen and (max-width: 1100px) {
@@ -174,15 +280,4 @@ SaaS Dashboard - Elite Interface Styles (Revamped)
 @media screen and (max-width: 600px) {
     .saas-dashboard-header { flex-direction: column; gap: 15px; text-align: center; }
     .saas-tabs button { padding: 8px 12px; font-size: 0.75rem; }
-    .saas-share-bar { width: 100%; flex-direction: column; }
-    .saas-share-bar input { width: 100%; margin-bottom: 10px; }
 }
-
-/* Pro Gating Overlays */
-.pro-locked-tab { filter: blur(4px); pointer-events: none; }
-.pro-badge { background: #39e09b; color: #1e2329; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
-
-/* Integration Status */
-.conn-status { font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 50px; }
-.conn-status.active { background: #e8f5e9; color: #2e7d32; }
-.conn-status.inactive { background: #ffebee; color: #c62828; }
