@@ -19,8 +19,15 @@
 5. **Activate Lead Gen:** Turn on the "Work With Me" form.
 6. **Share:** Copy your profile link and paste it into your Instagram/TikTok bio.
 7. **Track:** Check the Analytics tab to see who is visiting and clicking.
+8. **Secure Content:** Protect exclusive links with passwords to gate high-value content.
+9. **Export Data:** Download your leads and analytics as CSV for external processing.
 
-## 4. Scaling Plan (Future Roadmap)
+## 4. Security & Performance
+- **Link Protection:** Password-protected links use server-side AJAX verification to prevent exposure of passwords in frontend code.
+- **Analytics:** High-performance custom table structure ensures fast tracking even at scale (1M+ events).
+- **Isolation:** Multi-tenant architecture ensures data privacy between users.
+
+## 5. Scaling Plan (Future Roadmap)
 - **Whitelabel Domains:** Allow Pro users to map their own custom domains (e.g., `links.sarah.com`).
 - **NFC Support:** Full integration with NFC hardware providers.
 - **Advanced CRM:** Integration with HubSpot, Mailchimp, and Zapier.

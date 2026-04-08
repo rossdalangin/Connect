@@ -8,32 +8,53 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 // Handle vCard Download
 add_action( 'init', 'saas_handle_vcard_download' );
 function saas_handle_vcard_download() {
-    if ( isset( $_GET['saas_action'] ) && $_GET['saas_action'] === 'vcard' && isset( $_GET['profile'] ) ) {
-        $profile_id = intval( $_GET['profile'] );
-        $profile = get_post( $profile_id );
+    if ( isset( $_GET['saas_action'] ) && $_GET['saas_action'] === 'vcard' ) {
+        $profile_param = $_GET['profile'] ?? '';
+        $profile = null;
+
+        if ( is_numeric($profile_param) ) {
+            $profile = get_post( intval($profile_param) );
+        } elseif ( !empty($profile_param) ) {
+            $profile = saas_get_profile_by_slug( sanitize_title($profile_param) );
+        }
 
         if ( ! $profile || $profile->post_type !== 'saas_profile' ) return;
 
+        $profile_id = $profile->ID;
         $meta = saas_get_profile_meta( $profile_id );
 
         $vcard = "BEGIN:VCARD\n";
         $vcard .= "VERSION:3.0\n";
         $vcard .= "FN:" . $profile->post_title . "\n";
         $vcard .= "TITLE:" . $meta['headline'] . "\n";
-        $vcard .= "TEL;TYPE=CELL:" . get_post_meta($profile_id, '_saas_phone', true) . "\n";
+        $vcard .= "TEL;TYPE=CELL:" . ($meta['phone'] ?: '') . "\n";
         $vcard .= "EMAIL;TYPE=INTERNET:" . get_the_author_meta('user_email', $profile->post_author) . "\n";
         $vcard .= "URL:" . home_url('/' . $profile->post_name) . "\n";
 
+        // Photo integration (Base64)
+        $avatar_id = $meta['avatar_id'];
+        if ( $avatar_id ) {
+            $path = get_attached_file( $avatar_id );
+            if ( $path && file_exists($path) ) {
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $data = file_get_contents($path);
+                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                $vcard .= "PHOTO;ENCODING=b;TYPE=" . strtoupper($type) . ":" . base64_encode($data) . "\n";
+            }
+        }
+
         // Add social links to vCard
-        foreach ($meta['social_links'] as $platform => $url) {
-            $vcard .= "X-SOCIALPROFILE;TYPE=" . strtoupper($platform) . ":" . $url . "\n";
+        if ( is_array($meta['social_links']) ) {
+            foreach ($meta['social_links'] as $platform => $url) {
+                $vcard .= "X-SOCIALPROFILE;TYPE=" . strtoupper($platform) . ":" . $url . "\n";
+            }
         }
 
         $vcard .= "NOTE:" . str_replace("\n", "\\n", $meta['bio']) . "\n";
         $vcard .= "END:VCARD";
 
         header('Content-Type: text/vcard');
-        header('Content-Disposition: attachment; filename="contact.vcf"');
+        header('Content-Disposition: attachment; filename="' . sanitize_title($profile->post_title) . '.vcf"');
         echo $vcard;
         exit;
     }
@@ -63,10 +84,12 @@ function saas_get_effective_url( $block_id, $default_url ) {
 
     // 2. Geo-based routing (Direct Meta)
     $geo_url = get_post_meta($block_id, '_saas_url_geo', true);
-    if ($geo_url) {
-        $country = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? 'US'; // Cloudflare header example
-        // Logic: if user is from specified geo (simplified for blueprint)
-        // return $geo_url;
+    $target_country = get_post_meta($block_id, '_saas_url_geo_country', true);
+    if ($geo_url && $target_country) {
+        $visitor_country = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? 'US'; // Use Cloudflare header or similar
+        if ( strtoupper($visitor_country) === strtoupper($target_country) ) {
+            return $geo_url;
+        }
     }
 
     return $default_url;

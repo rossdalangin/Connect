@@ -61,11 +61,25 @@ function saas_ajax_submit_lead() {
             ]);
         }
 
-        // Email Notification Mockup
+        // Email Notification
         $owner_email = get_the_author_meta('user_email', $owner_id);
-        $subject = "New Lead Captured: $name";
-        $body = "You have a new lead from your SaaS profile!\n\nName: $name\nEmail: $email\n\nView details in your dashboard.";
-        // wp_mail($owner_email, $subject, $body);
+        $subject = "🚀 New Lead Captured: $name";
+
+        $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+        $body = "
+            <div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #eee; border-radius:12px;'>
+                <h2 style='color:#6c5ce7;'>You've got a new lead!</h2>
+                <p>A new visitor just submitted a form on your SaaS profile.</p>
+                <hr style='border:0; border-top:1px solid #eee;'>
+                <p><strong>Name:</strong> $name</p>
+                <p><strong>Email:</strong> <a href='mailto:$email'>$email</a></p>
+                <p><strong>Captured via:</strong> " . get_the_title($profile_id) . "</p>
+                <hr style='border:0; border-top:1px solid #eee;'>
+                <p><a href='" . home_url('/dashboard') . "' style='background:#6c5ce7; color:#fff; padding:10px 20px; text-decoration:none; border-radius:6px; display:inline-block;'>View in Dashboard</a></p>
+                <p style='font-size:0.8rem; color:#999; margin-top:30px;'>Sent automatically by your SaaS platform.</p>
+            </div>
+        ";
+        wp_mail($owner_email, $subject, $body, $headers);
 
         // Lead Magnet Delivery (Simulated)
         $lead_magnet_url = get_post_meta( $profile_id, '_saas_lead_magnet_url', true );

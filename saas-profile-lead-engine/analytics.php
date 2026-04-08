@@ -66,6 +66,20 @@ class Saas_Analytics {
         return $results ?: [];
     }
 
+    public function get_global_activity_over_time() {
+        global $wpdb;
+        $results = $wpdb->get_results( "
+            SELECT DATE_FORMAT(created_at, '%b %d') as date,
+                   SUM(CASE WHEN event_type = 'view' THEN 1 ELSE 0 END) as views,
+                   SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) as clicks
+            FROM {$this->table_name}
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY date
+            ORDER BY created_at ASC
+        " );
+        return $results ?: [];
+    }
+
     /**
      * Get Global Analytics Summary (for Admin Dashboard)
      */
@@ -80,6 +94,18 @@ class Saas_Analytics {
             'clicks' => $total_clicks ?: 0,
             'leads'  => $total_leads ?: 0,
         ];
+    }
+
+    public function get_growth_data() {
+        global $wpdb;
+        $results = $wpdb->get_results( "
+            SELECT DATE_FORMAT(post_date, '%b') as month, COUNT(*) as count
+            FROM {$wpdb->posts}
+            WHERE post_type = 'saas_profile' AND post_status = 'publish'
+            GROUP BY month
+            ORDER BY post_date ASC LIMIT 6
+        " );
+        return $results ?: [];
     }
 
     /**

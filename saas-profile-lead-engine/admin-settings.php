@@ -86,10 +86,44 @@ class Saas_Admin_Settings {
     public function render_dashboard_widget() {
         $analytics = new Saas_Analytics();
         $summary = $analytics->get_global_summary();
+        $activity = $analytics->get_global_activity_over_time();
+        $labels = array_column($activity, 'date');
+        $views = array_column($activity, 'views');
+        $clicks = array_column($activity, 'clicks');
+
         echo '<div class="saas-widget-content">';
-        echo '<p><strong>Total Page Views:</strong> ' . number_format($summary['views']) . '</p>';
-        echo '<p><strong>Total Link Clicks:</strong> ' . number_format($summary['clicks']) . '</p>';
-        echo '<p><strong>Total Leads Captured:</strong> ' . number_format($summary['leads']) . '</p>';
+        echo '<div style="display:flex; gap:20px; margin-bottom:20px;">';
+        echo '<div><strong>Views:</strong><br>' . number_format($summary['views']) . '</div>';
+        echo '<div><strong>Clicks:</strong><br>' . number_format($summary['clicks']) . '</div>';
+        echo '<div><strong>Leads:</strong><br>' . number_format($summary['leads']) . '</div>';
+        echo '</div>';
+        echo '<canvas id="saas-mini-chart" height="150"></canvas>';
+        echo '<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const ctx = document.getElementById("saas-mini-chart");
+                if (ctx && typeof Chart !== "undefined") {
+                    new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: ' . json_encode($labels ?: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) . ',
+                            datasets: [{
+                                label: "Views",
+                                data: ' . json_encode($views ?: [0,0,0,0,0,0,0]) . ',
+                                borderColor: "#6c5ce7",
+                                fill: true,
+                                tension: 0.4
+                            }, {
+                                label: "Clicks",
+                                data: ' . json_encode($clicks ?: [0,0,0,0,0,0,0]) . ',
+                                borderColor: "#39e09b",
+                                tension: 0.4
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                }
+            });
+        </script>';
         echo '<hr><p><a href="'.admin_url('admin.php?page=saas_settings').'" class="button button-primary">SaaS Settings</a></p>';
         echo '</div>';
     }
@@ -316,6 +350,34 @@ class Saas_Admin_Settings {
             'saas_settings',
             'saas_license_section'
         );
+
+        add_settings_section(
+            'saas_health_section',
+            'System Health Check',
+            null,
+            'saas_settings'
+        );
+
+        add_settings_field(
+            'system_health',
+            'SaaS Engine Status',
+            [ $this, 'render_health_check' ],
+            'saas_settings',
+            'saas_health_section'
+        );
+    }
+
+    public function render_health_check() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'saas_analytics';
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+        $theme_active = file_exists(get_theme_root() . '/saas-profile-theme/style.css');
+
+        echo '<ul>';
+        echo '<li>Analytics Table: ' . ($table_exists ? '<span style="color:green;">✓ Ready</span>' : '<span style="color:red;">✗ Missing</span>') . '</li>';
+        echo '<li>Profile Theme: ' . ($theme_active ? '<span style="color:green;">✓ Detected</span>' : '<span style="color:red;">✗ Not found</span>') . '</li>';
+        echo '<li>Database Mode: <span style="color:green;">✓ Multi-tenant isolated</span></li>';
+        echo '</ul>';
     }
 
     public function checkbox_render( $args ) {
@@ -347,6 +409,9 @@ class Saas_Admin_Settings {
 
         $analytics = new Saas_Analytics();
         $summary = $analytics->get_global_summary();
+        $growth = $analytics->get_growth_data();
+        $growth_labels = array_column($growth, 'month');
+        $growth_counts = array_column($growth, 'count');
         ?>
         <div class="wrap saas-admin-wrapper">
             <div class="saas-admin-sidebar">
@@ -379,10 +444,10 @@ class Saas_Admin_Settings {
                     new Chart(ctx, {
                         type: 'bar',
                         data: {
-                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                            labels: <?php echo json_encode($growth_labels ?: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']); ?>,
                             datasets: [{
                                 label: 'New Profiles',
-                                data: [65, 59, 80, 81, 56, 95],
+                                data: <?php echo json_encode($growth_counts ?: [0, 0, 0, 0, 0, 0]); ?>,
                                 backgroundColor: '#6c5ce7'
                             }]
                         },

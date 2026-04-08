@@ -62,11 +62,35 @@ class Saas_Payments {
     }
 
     /**
-     * Webhook Handler (Stripe/PayPal)
+     * REST: Webhook Handler (Stripe/PayPal)
      */
-    public static function handle_webhooks() {
-        // logic for processing payment confirmations
-        // update_user_meta( $user_id, '_saas_subscription_plan', 'pro' );
+    public function register_webhook_route() {
+        register_rest_route( 'saas/v1', '/webhook', [
+            'methods' => 'POST',
+            'callback' => [ $this, 'process_webhook' ],
+            'permission_callback' => '__return_true',
+        ]);
+    }
+
+    public function process_webhook( $request ) {
+        $data = $request->get_json_params();
+
+        // Mock verification logic
+        $user_id = $data['user_id'] ?? 0;
+        $status  = $data['status'] ?? '';
+        $plan    = $data['plan'] ?? 'pro';
+
+        if ( $user_id && $status === 'succeeded' ) {
+            update_user_meta( $user_id, '_saas_subscription_plan', $plan );
+            update_user_meta( $user_id, '_saas_subscription_expiry', strtotime('+1 year') );
+            return new WP_REST_Response( [ 'success' => true ], 200 );
+        }
+
+        return new WP_REST_Response( [ 'error' => 'Invalid webhook payload' ], 400 );
     }
 }
+add_action( 'rest_api_init', function() {
+    $p = new Saas_Payments();
+    $p->register_webhook_route();
+});
 new Saas_Payments();

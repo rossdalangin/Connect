@@ -306,6 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const blockStyle = li.dataset.style || 'regular';
             const blockAnimation = li.dataset.animation || 'fadeinup';
             const linkPass = li.dataset.password || '';
+            const urlGeoCountry = li.dataset.geoCountry || '';
             const imageId = li.dataset.imageId || '';
             const imageUrl = li.dataset.imageUrl || '';
 
@@ -318,6 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-link-text').value = customText;
             if (document.getElementById('edit-link-mobile')) document.getElementById('edit-link-mobile').value = urlMobile;
             if (document.getElementById('edit-link-geo')) document.getElementById('edit-link-geo').value = urlGeo;
+            if (document.getElementById('edit-link-geo-country')) document.getElementById('edit-link-geo-country').value = urlGeoCountry;
             if (document.getElementById('edit-link-style')) document.getElementById('edit-link-style').value = blockStyle;
             if (document.getElementById('edit-link-animation')) document.getElementById('edit-link-animation').value = blockAnimation;
             if (document.getElementById('edit-link-pass')) document.getElementById('edit-link-pass').value = linkPass;
@@ -372,6 +374,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     initDarkMode();
+
+    // Profile Switcher logic
+    const switcher = document.querySelector('.profile-switcher-wrapper h2');
+    const dropdown = document.querySelector('.profile-dropdown');
+    if (switcher && dropdown) {
+        switcher.onclick = (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        };
+        window.addEventListener('click', () => dropdown.style.display = 'none');
+    }
+
+    // Add New Profile
+    document.getElementById('saas-add-profile-trigger')?.addEventListener('click', () => {
+        const title = prompt('Enter a title for your new profile:');
+        if (!title) return;
+
+        const formData = new FormData();
+        formData.append('action', 'saas_create_profile');
+        formData.append('security', saas_dashboard_data.nonce);
+        formData.append('profile_title', title);
+
+        fetch(saas_dashboard_data.ajax_url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = `?profile_id=${data.data.id}`;
+            } else {
+                alert(data.data);
+            }
+        });
+    });
 
     // Wizard Logic
     const wizardModal = document.getElementById('saas-wizard-modal');
@@ -440,8 +477,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Notifications Logic
     const notifModal = document.getElementById('saas-notif-modal');
-    document.getElementById('saas-notif-trigger')?.addEventListener('click', () => {
+    const notifTrigger = document.getElementById('saas-notif-trigger');
+    const unreadCount = document.querySelectorAll('#saas-notif-list .notif-item').length;
+
+    if (unreadCount > 0 && document.getElementById('notif-count')) {
+        document.getElementById('notif-count').innerText = unreadCount;
+        document.getElementById('notif-count').style.display = 'block';
+    }
+
+    notifTrigger?.addEventListener('click', () => {
         notifModal.style.display = 'block';
+        if (document.getElementById('notif-count')) document.getElementById('notif-count').style.display = 'none';
     });
 
     // Modal Close
@@ -637,6 +683,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+    });
+
+    // CRM "View on Profile" link fix
+    document.querySelectorAll('.view-on-profile-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const url = document.getElementById('saas-my-link').value;
+            window.open(url, '_blank');
+        };
     });
 
     // Drag-and-Drop

@@ -146,13 +146,13 @@ include __DIR__ . '/header.php';
             ?>
             <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" data-block-id="<?php echo $block->ID; ?>" style="animation-delay: <?php echo $index * 0.1; ?>s; <?php echo $block_style_attr; ?>">
                 <?php if ($type === 'button') :
-                    $link_pass = get_post_meta($block->ID, '_saas_link_password', true);
+                    $has_pass = !empty(get_post_meta($block->ID, '_saas_link_password', true));
                     ?>
                     <a href="<?php echo esc_url( $url ); ?>"
                        class="saas-link-btn"
                        style="<?php echo $block_style_attr; ?>"
                        data-link-id="<?php echo $block->ID; ?>"
-                       onclick="return saasCheckLink(event, <?php echo $block->ID; ?>, '<?php echo esc_js($link_pass); ?>')">
+                       onclick="return saasCheckLink(event, <?php echo $block->ID; ?>, <?php echo $has_pass ? 'true' : 'false'; ?>)">
                         <?php
                         $thumb_id = get_post_meta($block->ID, '_saas_link_image_id', true);
                         if ($thumb_id) : ?>
@@ -249,7 +249,11 @@ include __DIR__ . '/header.php';
                             <h4><?php echo esc_html($block->post_title); ?></h4>
                             <div class="product-price"><?php echo esc_html(get_post_meta($block->ID, '_saas_price', true) ?: '$0'); ?></div>
                         </div>
-                        <a href="<?php echo esc_url($url); ?>" class="saas-link-btn product-cta">Buy Now</a>
+                        <form class="product-checkout-form">
+                            <input type="hidden" name="block_id" value="<?php echo $block->ID; ?>">
+                            <input type="hidden" name="plan_id" value="product_<?php echo $block->ID; ?>">
+                            <button type="submit" class="saas-link-btn product-cta" style="border:none; cursor:pointer;">Buy Now</button>
+                        </form>
                     </div>
                 <?php elseif ($type === 'social_feed') : ?>
                     <div class="social-feed-block">
@@ -316,6 +320,19 @@ include __DIR__ . '/header.php';
         </a>
     </div>
 
+    <!-- Growth Branding (Hide for Pro) -->
+    <?php
+    $hide_branding = get_post_meta($profile_id, '_saas_hide_branding', true);
+    if (!$is_pro || !$hide_branding) : ?>
+        <div class="saas-growth-branding" style="margin-top:40px; padding-bottom:120px; opacity:0.6; font-size:0.8rem;">
+            <a href="<?php echo home_url('/?ref=' . $slug); ?>" style="text-decoration:none; color:inherit; font-weight:800;">
+                Powered by <?php echo get_bloginfo('name'); ?> 🚀
+            </a>
+        </div>
+    <?php else : ?>
+        <div style="padding-bottom:120px;"></div>
+    <?php endif; ?>
+
     <!-- Mobile Navigation Bar -->
     <nav class="profile-bottom-nav">
         <a href="#profile-container" title="Top">🏠</a>
@@ -323,6 +340,21 @@ include __DIR__ . '/header.php';
         <a href="<?php echo home_url('/register'); ?>" title="Create Yours">➕</a>
         <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" title="Share">📤</a>
     </nav>
+
+    <!-- Link Password Modal -->
+    <div id="link-password-modal" class="saas-theme-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+        <div class="modal-inner" style="background:#fff; padding:40px; border-radius:24px; max-width:400px; width:90%; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:20px;">🔒</div>
+            <h3>Password Required</h3>
+            <p>This content is protected. Please enter the password to continue.</p>
+            <form id="saas-pass-form" style="margin-top:20px;">
+                <input type="hidden" id="modal-link-id">
+                <input type="password" id="modal-pass-input" placeholder="Enter Password" style="width:100%; padding:15px; border-radius:12px; border:1px solid #ddd; margin-bottom:15px; box-sizing:border-box;">
+                <button type="submit" style="width:100%; padding:15px; background:var(--primary-color); color:#fff; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">Unlock Content</button>
+            </form>
+            <button class="close-pass-modal" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -340,19 +372,57 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Password protection check
-function saasCheckLink(e, linkId, pass) {
-    if (!pass) return true;
-    e.preventDefault();
-    const input = prompt("This link is password protected. Enter password:");
-    if (input === pass) {
+// Password protection check (Modern Modal UI)
+function saasCheckLink(e, linkId, hasPass) {
+    if (!hasPass) {
         saasTrackClick(linkId);
-        window.location.href = e.target.href;
-    } else {
-        alert("Incorrect password.");
+        return true;
     }
+
+    e.preventDefault();
+    const modal = document.getElementById('link-password-modal');
+    document.getElementById('modal-link-id').value = linkId;
+    document.getElementById('modal-pass-input').value = '';
+    modal.style.display = 'flex';
+
     return false;
 }
+
+document.querySelector('.close-pass-modal')?.addEventListener('click', () => {
+    document.getElementById('link-password-modal').style.display = 'none';
+});
+
+document.getElementById('saas-pass-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const linkId = document.getElementById('modal-link-id').value;
+    const pass = document.getElementById('modal-pass-input').value;
+    const btn = this.querySelector('button');
+    const originalText = btn.innerText;
+
+    btn.innerText = 'Verifying...';
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('action', 'saas_verify_link_password');
+    formData.append('link_id', linkId);
+    formData.append('password', pass);
+
+    fetch(saas_data.ajax_url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            saasTrackClick(linkId);
+            window.location.href = data.data.url;
+        } else {
+            alert(data.data);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    });
+});
 
 // Analytics tracking
 function saasTrackClick(linkId) {
@@ -451,6 +521,30 @@ window.addEventListener('message', function(event) {
             else document.body.style.backgroundColor = value;
         }
     }
+});
+
+// Product Checkout handling
+document.querySelectorAll('.product-checkout-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button');
+        btn.innerText = 'Redirecting...';
+        btn.disabled = true;
+
+        const formData = new FormData(this);
+        formData.append('action', 'saas_checkout');
+        formData.append('gateway', 'stripe'); // Default for products
+
+        fetch(saas_data.ajax_url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) window.location.href = data.data.redirect_url;
+            else alert('Checkout failed');
+        });
+    });
 });
 
 // Lead form handling via AJAX (Dynamic Forms)

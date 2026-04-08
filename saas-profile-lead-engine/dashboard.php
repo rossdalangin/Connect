@@ -35,13 +35,15 @@ class Saas_Dashboard {
         }
 
         $user_id = get_current_user_id();
-        $profile = get_posts([
+        $all_user_profiles = get_posts([
             'post_type'   => 'saas_profile',
             'post_author' => $user_id,
-            'numberposts' => 1,
+            'numberposts' => -1,
         ]);
 
-        if ( empty( $profile ) ) {
+        $active_profile_id = isset($_GET['profile_id']) ? intval($_GET['profile_id']) : 0;
+
+        if ( empty( $all_user_profiles ) ) {
             // Auto-create profile if missing
             $profile_id = wp_insert_post([
                 'post_type'   => 'saas_profile',
@@ -50,9 +52,23 @@ class Saas_Dashboard {
                 'post_author' => $user_id,
             ]);
             $profile_obj = get_post($profile_id);
+            $active_profile_id = $profile_id;
         } else {
-            $profile_id = $profile[0]->ID;
-            $profile_obj = $profile[0];
+            // Select active profile
+            $profile_obj = null;
+            if ($active_profile_id) {
+                foreach($all_user_profiles as $p) {
+                    if ($p->ID === $active_profile_id) {
+                        $profile_obj = $p;
+                        break;
+                    }
+                }
+            }
+            if (!$profile_obj) {
+                $profile_obj = $all_user_profiles[0];
+                $active_profile_id = $profile_obj->ID;
+            }
+            $profile_id = $active_profile_id;
         }
 
         $meta = saas_get_profile_meta( $profile_id );
@@ -90,7 +106,18 @@ class Saas_Dashboard {
 
             <div class="saas-dashboard-header">
                 <div style="display:flex; align-items:center; gap:20px;">
-                    <h2>Welcome, <?php echo esc_html(wp_get_current_user()->display_name); ?></h2>
+                    <div class="profile-switcher-wrapper" style="position:relative;">
+                        <h2 style="margin:0;">Profile: <?php echo esc_html($profile_obj->post_title); ?> ▾</h2>
+                        <div class="profile-dropdown" style="display:none; position:absolute; top:100%; left:0; background:#fff; box-shadow:0 10px 20px rgba(0,0,0,0.1); border-radius:12px; z-index:1001; min-width:200px; padding:10px;">
+                            <?php foreach($all_user_profiles as $up) : ?>
+                                <a href="?profile_id=<?php echo $up->ID; ?>" style="display:block; padding:10px; text-decoration:none; color:<?php echo ($up->ID == $active_profile_id) ? '#6c5ce7' : '#333'; ?>; font-weight:<?php echo ($up->ID == $active_profile_id) ? '800' : '400'; ?>;">
+                                    <?php echo esc_html($up->post_title); ?>
+                                </a>
+                            <?php endforeach; ?>
+                            <hr>
+                            <button id="saas-add-profile-trigger" style="width:100%; border:none; background:none; padding:10px; cursor:pointer; color:#6c5ce7; font-weight:800;">+ New Profile</button>
+                        </div>
+                    </div>
                     <div class="saas-notification-bell" id="saas-notif-trigger" style="cursor:pointer; position:relative; font-size:1.5rem;">
                         🔔<span id="notif-count" style="position:absolute; top:-5px; right:-5px; background:red; color:#fff; font-size:0.7rem; padding:2px 5px; border-radius:50%; display:none;">0</span>
                     </div>
@@ -165,6 +192,7 @@ class Saas_Dashboard {
                             data-custom-text="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_text', true)); ?>"
                             data-url-mobile="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_mobile', true)); ?>"
                             data-url-geo="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_geo', true)); ?>"
+                            data-geo-country="<?php echo esc_attr(get_post_meta($link->ID, '_saas_url_geo_country', true)); ?>"
                             data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>"
                             data-image-id="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_image_id', true)); ?>"
                             data-image-url="<?php echo esc_url(wp_get_attachment_thumb_url(get_post_meta($link->ID, '_saas_link_image_id', true))); ?>">
@@ -312,6 +340,32 @@ class Saas_Dashboard {
                         </div>
                     </div>
                 </div>
+
+                <div class="saas-nfc-guide" style="margin-top:40px; background:#fff; padding:30px; border-radius:16px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #eee;">
+                    <div style="display:flex; gap:30px; align-items:center;">
+                        <div style="font-size:3rem;">📳</div>
+                        <div>
+                            <h4>Elite Networking: NFC Card Setup</h4>
+                            <p style="color:#666; font-size:0.9rem;">Turn any NFC-enabled business card into a digital lead machine. Use the settings below to encode your card.</p>
+                            <div style="background:#f8f9fa; padding:15px; border-radius:8px; font-family:monospace; margin:10px 0; border:1px dashed #ccc;">
+                                <?php echo home_url('/' . $profile_obj->post_name . '?src=nfc'); ?>
+                            </div>
+                            <small>Step 1: Download an 'NFC Tools' app. Step 2: Write the URL above to your card. Step 3: Tap any phone to share your identity.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="saas-pwa-guide" style="margin-top:20px; background:#fff; padding:30px; border-radius:16px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #eee;">
+                    <div style="display:flex; gap:30px; align-items:center;">
+                        <div style="font-size:3rem;">📲</div>
+                        <div>
+                            <h4>Install as App (Save to Home Screen)</h4>
+                            <p style="color:#666; font-size:0.9rem;">Ensure your clients can access you in one tap. Instruct them to follow these steps:</p>
+                            <p style="font-size:0.8rem; margin:0;"><strong>iPhone:</strong> Tap 'Share' icon (square with arrow) -> 'Add to Home Screen'</p>
+                            <p style="font-size:0.8rem; margin:0;"><strong>Android:</strong> Tap three-dot menu -> 'Add to Home Screen'</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- SEO Tab -->
@@ -382,11 +436,27 @@ class Saas_Dashboard {
                         <input type="text" name="bg_value" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_bg_color', true)); ?>" placeholder="#ffffff or linear-gradient(...)">
                     </div>
                     <div class="field">
+                        <label>Profile Theme (Mode)</label>
+                        <select name="profile_theme">
+                            <option value="light" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'light'); ?>>Light Mode</option>
+                            <option value="dark" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'dark'); ?>>Dark Mode</option>
+                            <option value="vibrant" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'vibrant'); ?>>Vibrant (Glass)</option>
+                        </select>
+                    </div>
+                    <div class="field">
                         <label>Button Shape</label>
                         <select name="btn_shape">
                             <option value="pill" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'pill'); ?>>Pill (Modern)</option>
                             <option value="rounded" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'rounded'); ?>>Rounded (Soft)</option>
                             <option value="square" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'square'); ?>>Square (Sharp)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Container Shadow</label>
+                        <select name="container_shadow">
+                            <option value="none" <?php selected(get_post_meta($profile_id, '_saas_container_shadow', true), 'none'); ?>>None</option>
+                            <option value="soft" <?php selected(get_post_meta($profile_id, '_saas_container_shadow', true), 'soft'); ?>>Soft Glow</option>
+                            <option value="hard" <?php selected(get_post_meta($profile_id, '_saas_container_shadow', true), 'hard'); ?>>Retro Hard Shadow</option>
                         </select>
                     </div>
                     <div class="field">
@@ -412,6 +482,10 @@ class Saas_Dashboard {
                         <label><input type="checkbox" name="social_proof" value="1" <?php checked(get_post_meta($profile_id, '_saas_social_proof', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Enable Social Proof Pulse <?php if(!$is_pro) echo '🔒'; ?></label>
                         <small>Shows a live view count bubble on your profile to build trust.</small>
                     </div>
+                    <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                        <label><input type="checkbox" name="hide_branding" value="1" <?php checked(get_post_meta($profile_id, '_saas_hide_branding', true), 1); ?> <?php if(!$is_pro) echo 'disabled'; ?>> Hide "Powered by" Branding <?php if(!$is_pro) echo '🔒'; ?></label>
+                        <small>Whitelabel your profile by removing our platform links.</small>
+                    </div>
                     <div class="field">
                         <label>Apply Page Template</label>
                         <select id="saas-apply-template">
@@ -419,6 +493,8 @@ class Saas_Dashboard {
                             <option value="coach">Coach Funnel</option>
                             <option value="freelancer">Freelancer Portfolio</option>
                             <option value="realtor">Real Estate / Local Biz</option>
+                            <option value="business">Business Page</option>
+                            <option value="politician">Politician / Public Service</option>
                             <option value="elite_card">Elite Digital Card</option>
                         </select>
                         <button type="button" id="saas-btn-apply-template" class="button button-secondary">Apply & Reset Blocks</button>
@@ -467,8 +543,11 @@ class Saas_Dashboard {
                                 </td>
                                 <td data-label="Date"><?php echo get_the_date('', $lead->ID); ?></td>
                                 <td data-label="Actions">
-                                    <button class="view-lead-btn" data-id="<?php echo $lead->ID; ?>">View</button>
-                                    <button class="delete-lead-btn" data-id="<?php echo $lead->ID; ?>" style="color:#ff7675; border:none; background:none; cursor:pointer;">Delete</button>
+                                    <div style="display:flex; gap:10px;">
+                                        <button class="view-lead-btn" data-id="<?php echo $lead->ID; ?>">View</button>
+                                        <button class="view-on-profile-btn button" style="padding:4px 8px; font-size:0.7rem; background:#f0f0f0; color:#333;">🔗 Profile</button>
+                                        <button class="delete-lead-btn" data-id="<?php echo $lead->ID; ?>" style="color:#ff7675; border:none; background:none; cursor:pointer; font-size:0.7rem;">Delete</button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -479,7 +558,10 @@ class Saas_Dashboard {
                 <?php endif; ?>
             </div>
             <div id="tab-analytics" class="saas-tab-content">
-                <h3>Profile Insights</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Profile Insights</h3>
+                    <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_analytics&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button button-secondary">Download CSV</a>
+                </div>
                 <?php
                 $user_analytics = new Saas_Analytics();
                 $stats = $user_analytics->get_user_summary($user_id);
@@ -538,11 +620,23 @@ class Saas_Dashboard {
                         <p>Unlimited Blocks + Lead Gen</p>
                         <form class="checkout-form">
                             <input type="hidden" name="plan_id" value="pro">
-                            <select name="gateway">
-                                <option value="stripe">Stripe</option>
-                                <option value="paypal">PayPal</option>
-                            </select>
-                            <button type="submit">Upgrade Now</button>
+                            <?php
+                            $gateway_logic = $payments->get_active_gateway();
+                            if ($gateway_logic === 'user_select') : ?>
+                                <select name="gateway" style="margin-bottom:15px; width:100%; padding:10px; border-radius:8px;">
+                                    <option value="stripe">Pay with Card (Stripe)</option>
+                                    <option value="paypal">Pay with PayPal</option>
+                                </select>
+                            <?php elseif ($gateway_logic === 'stripe') : ?>
+                                <input type="hidden" name="gateway" value="stripe">
+                                <p style="font-size:0.8rem; color:#888; margin-bottom:15px;">Secure Payment via Stripe</p>
+                            <?php elseif ($gateway_logic === 'paypal') : ?>
+                                <input type="hidden" name="gateway" value="paypal">
+                                <p style="font-size:0.8rem; color:#888; margin-bottom:15px;">Secure Payment via PayPal</p>
+                            <?php else : ?>
+                                <p style="color:red; font-size:0.8rem;">Payments are currently disabled.</p>
+                            <?php endif; ?>
+                            <button type="submit" <?php if($gateway_logic === 'none') echo 'disabled'; ?>>Upgrade Now</button>
                         </form>
                     </div>
                 </div>
@@ -700,8 +794,12 @@ class Saas_Dashboard {
                             <input type="url" name="url_mobile" id="edit-link-mobile" placeholder="Leave empty for default" <?php if(!$is_pro) echo 'disabled'; ?>>
                         </div>
                         <div class="field">
-                            <label>Geo-targeted URL (e.g. US only)</label>
+                            <label>Geo-targeted URL</label>
                             <input type="url" name="url_geo" id="edit-link-geo" placeholder="e.g. US Specific link" <?php if(!$is_pro) echo 'disabled'; ?>>
+                        </div>
+                        <div class="field">
+                            <label>Target Country Code (ISO, e.g. US)</label>
+                            <input type="text" name="url_geo_country" id="edit-link-geo-country" placeholder="US" <?php if(!$is_pro) echo 'disabled'; ?>>
                         </div>
                     </div>
                     <div class="field-row <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>" style="display:flex; gap:10px;">
@@ -715,8 +813,8 @@ class Saas_Dashboard {
                         </div>
                     </div>
                     <div class="field">
-                        <label>Extra Data</label>
-                        <textarea name="extra" id="edit-link-extra"></textarea>
+                        <label>Extra Content / Features (one per line for pricing)</label>
+                        <textarea name="extra" id="edit-link-extra" rows="4"></textarea>
                     </div>
                     <div class="field-row" style="display:flex; gap:10px;">
                         <div class="field" style="flex:1;">

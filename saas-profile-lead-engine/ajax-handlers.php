@@ -145,8 +145,19 @@ function saas_ajax_save_profile() {
     } else {
         update_post_meta($profile_id, '_saas_social_proof', 0);
     }
+    if (isset($_POST['hide_branding'])) {
+        update_post_meta($profile_id, '_saas_hide_branding', 1);
+    } else {
+        update_post_meta($profile_id, '_saas_hide_branding', 0);
+    }
     if (isset($_POST['font_family'])) {
         update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
+    }
+    if (isset($_POST['container_shadow'])) {
+        update_post_meta($profile_id, '_saas_container_shadow', sanitize_text_field($_POST['container_shadow']));
+    }
+    if (isset($_POST['profile_theme'])) {
+        update_post_meta($profile_id, '_saas_profile_theme', sanitize_text_field($_POST['profile_theme']));
     }
 
     // Automation specific
@@ -226,6 +237,7 @@ function saas_ajax_save_link() {
 
     if (isset($_POST['url_mobile'])) update_post_meta($link_id, '_saas_url_mobile', esc_url_raw($_POST['url_mobile']));
     if (isset($_POST['url_geo'])) update_post_meta($link_id, '_saas_url_geo', esc_url_raw($_POST['url_geo']));
+    if (isset($_POST['url_geo_country'])) update_post_meta($link_id, '_saas_url_geo_country', sanitize_text_field($_POST['url_geo_country']));
     if (isset($_POST['link_password'])) update_post_meta($link_id, '_saas_link_password', sanitize_text_field($_POST['link_password']));
     if (isset($_POST['block_style'])) update_post_meta($link_id, '_saas_block_style', sanitize_text_field($_POST['block_style']));
     if (isset($_POST['block_animation'])) update_post_meta($link_id, '_saas_block_animation', sanitize_text_field($_POST['block_animation']));
@@ -235,7 +247,13 @@ function saas_ajax_save_link() {
     $type = get_post_meta( $link_id, '_saas_block_type', true );
     if ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
-    elseif ($type === 'pricing' || $type === 'product') update_post_meta($link_id, '_saas_price', $extra);
+    elseif ($type === 'pricing' || $type === 'product') {
+        update_post_meta($link_id, '_saas_price', $extra);
+        if ($type === 'pricing') {
+            $features = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
+            update_post_meta($link_id, '_saas_features', $features);
+        }
+    }
     elseif ($type === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
     elseif ($type === 'milestone') {
         if (strpos($extra, ':') !== false) {
@@ -288,6 +306,20 @@ function saas_ajax_apply_template() {
             ['title' => 'Happy Homeowners', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Found our dream home in record time!'],
             ['title' => 'Sales Target', 'url' => '#', 'type' => 'milestone', 'extra' => 'Closed:92']
         ],
+        'business' => [
+            ['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => '$99/hr'],
+            ['title' => 'Book a Consultation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+            ['title' => 'Customer Feedback', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Professional and reliable service.'],
+            ['title' => 'Office Location', 'url' => 'https://maps.google.com', 'type' => 'button'],
+            ['title' => 'FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'We operate 24/7 across the globe.']
+        ],
+        'politician' => [
+            ['title' => 'Our Vision for 2024', 'url' => '#', 'type' => 'video'],
+            ['title' => 'Donate to the Campaign', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+            ['title' => 'Join the Volunteer Team', 'url' => '#', 'type' => 'lead_form'],
+            ['title' => 'Endorsements', 'url' => '#', 'type' => 'testimonial', 'extra' => 'A true leader for our community.'],
+            ['title' => 'Fundraising Goal', 'url' => '#', 'type' => 'milestone', 'extra' => 'Goal:75']
+        ],
         'elite_card' => [
             ['title' => 'Contact Info', 'url' => '#', 'type' => 'social_icons', 'extra' => "phone:tel:123456\nemail:mailto:me@site.com\nlinkedin:https://linkedin.com"],
             ['title' => 'Save VCard', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
@@ -303,14 +335,59 @@ function saas_ajax_apply_template() {
             update_post_meta($link_id, '_saas_priority', $index);
             if (isset($b['style'])) update_post_meta($link_id, '_saas_block_style', $b['style']);
             if (isset($b['extra'])) {
-                if ($b['type'] === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $b['extra']);
-                if ($b['type'] === 'image_gallery') update_post_meta($link_id, '_saas_gallery_images', explode("\n", $b['extra']));
+                $extra = $b['extra'];
+                if ($b['type'] === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
+                if ($b['type'] === 'image_gallery') update_post_meta($link_id, '_saas_gallery_images', explode("\n", $extra));
+                if ($b['type'] === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
+                if ($b['type'] === 'pricing' || $b['type'] === 'product') update_post_meta($link_id, '_saas_price', $extra);
+                if ($b['type'] === 'milestone') {
+                    if (strpos($extra, ':') !== false) {
+                        list($lbl, $per) = explode(':', $extra, 2);
+                        update_post_meta($link_id, '_saas_ms_label', $lbl);
+                        update_post_meta($link_id, '_saas_ms_percent', intval($per));
+                    }
+                }
+                if ($b['type'] === 'social_icons') {
+                    $lines = array_filter(array_map('trim', explode("\n", $extra)));
+                    $data = [];
+                    foreach ($lines as $l) {
+                        if (strpos($l, ':') !== false) {
+                            list($p, $u) = explode(':', $l, 2);
+                            $data[trim($p)] = trim($u);
+                        }
+                    }
+                    update_post_meta($link_id, '_saas_social_data', $data);
+                }
             }
         }
         wp_send_json_success('Template applied');
     }
 
     wp_send_json_error('Invalid template');
+}
+
+// 12. AJAX: Export Analytics CSV
+add_action( 'wp_ajax_saas_export_analytics', 'saas_ajax_export_analytics' );
+function saas_ajax_export_analytics() {
+    check_ajax_referer( 'saas_export_nonce', 'security' );
+
+    $user_id = get_current_user_id();
+    global $wpdb;
+    $table = $wpdb->prefix . 'saas_analytics';
+    $results = $wpdb->get_results( $wpdb->prepare( "SELECT target_id, event_type, ip_address, created_at FROM $table WHERE user_id = %d", $user_id ) );
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="analytics.csv"');
+
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Target Name', 'Event Type', 'IP Address', 'Date']);
+
+    foreach ($results as $r) {
+        $target_name = get_the_title($r->target_id) ?: 'Profile View';
+        fputcsv($output, [$target_name, $r->event_type, $r->ip_address, $r->created_at]);
+    }
+    fclose($output);
+    exit;
 }
 
 // 5. AJAX: Export Leads CSV
@@ -441,4 +518,51 @@ function saas_ajax_delete_lead() {
 
     wp_delete_post( $lead_id, true );
     wp_send_json_success( 'Lead deleted' );
+}
+
+// 13. AJAX: Create New Profile
+add_action( 'wp_ajax_saas_create_profile', 'saas_ajax_create_profile' );
+function saas_ajax_create_profile() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+    $user_id = get_current_user_id();
+
+    // Limit free users to 1 profile
+    $payments = new Saas_Payments();
+    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'numberposts' => -1]);
+    if ( count($existing) >= 1 && !$payments->is_pro_user($user_id) ) {
+        wp_send_json_error( 'Free users are limited to 1 profile. Upgrade to Pro for unlimited profiles.' );
+    }
+
+    $title = sanitize_text_field( $_POST['profile_title'] );
+    if ( empty($title) ) wp_send_json_error( 'Title required' );
+
+    $profile_id = wp_insert_post([
+        'post_type'   => 'saas_profile',
+        'post_title'  => $title,
+        'post_status' => 'publish',
+        'post_author' => $user_id,
+    ]);
+
+    if ( ! is_wp_error($profile_id) ) {
+        wp_send_json_success([ 'id' => $profile_id, 'url' => get_permalink($profile_id) ]);
+    } else {
+        wp_send_json_error( 'Failed to create profile' );
+    }
+}
+
+// 11. AJAX: Verify Link Password (Secure)
+add_action( 'wp_ajax_saas_verify_link_password', 'saas_ajax_verify_link_password' );
+add_action( 'wp_ajax_nopriv_saas_verify_link_password', 'saas_ajax_verify_link_password' );
+function saas_ajax_verify_link_password() {
+    $link_id = intval( $_POST['link_id'] );
+    $password = $_POST['password'] ?? '';
+
+    $saved_pass = get_post_meta( $link_id, '_saas_link_password', true );
+    $target_url = get_post_meta( $link_id, '_saas_link_url', true );
+
+    if ( $saved_pass && $password === $saved_pass ) {
+        wp_send_json_success([ 'url' => esc_url($target_url) ]);
+    } else {
+        wp_send_json_error( 'Incorrect password' );
+    }
 }
