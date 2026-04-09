@@ -322,6 +322,20 @@ body {
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
 
+.wizard-step { display: none; }
+.wizard-step.active { display: block; animation: fadeIn 0.4s ease; }
+.wizard-progress { height: 8px; background: var(--bg-main); border-radius: 10px; margin-top: 30px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--secondary); width: 0; transition: width 0.5s ease; }
+
+.saas-onboarding-card {
+    background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+    color: #fff;
+    border: none;
+}
+.saas-onboarding-card h4 { color: #fff; }
+.saas-onboarding-card .button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: #fff; }
+.saas-onboarding-card .button:hover { background: #fff; color: var(--primary); }
+
 .close-modal {
     position: absolute;
     top: 20px;
@@ -329,6 +343,27 @@ body {
     font-size: 1.5rem;
     cursor: pointer;
     color: var(--text-muted);
+}
+
+.saas-notif-bell {
+    position: relative;
+    cursor: pointer;
+    background: var(--bg-main);
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 1.2rem;
+}
+.notif-count {
+    position: absolute;
+    top: -5px; right: -5px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    border-radius: 50%;
+    font-weight: 900;
 }
 
 /* Stats Grid */
@@ -404,3 +439,23 @@ body {
     text-align: left;
     border-bottom: 1px solid var(--border);
 }
+
+/* Insight Cards */
+.insight-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+.insight-card h5 { margin: 0 0 12px 0; font-size: 0.9rem; color: var(--text-muted); }
+.insight-list { list-style: none; padding: 0; margin: 0; }
+.insight-list li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.insight-list li:last-child { border-bottom: none; }
+.insight-list li span { color: var(--text-dark); font-weight: 500; }
+.insight-list li strong { color: var(--primary); }

@@ -77,6 +77,21 @@ class Saas_Dashboard {
         ob_start();
         ?>
         <div id="saas-dashboard">
+            <!-- Onboarding Checklist -->
+            <div class="saas-onboarding-card dashboard-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h4 style="margin:0;">🚀 Quick Start Checklist</h4>
+                        <div style="display:flex; gap:15px; margin-top:8px; font-size:0.8rem;">
+                            <span><?php echo $meta['headline'] ? '✅' : '⚪'; ?> Add Headline</span>
+                            <span><?php echo count($links) > 0 ? '✅' : '⚪'; ?> Create Block</span>
+                            <span><?php echo $is_pro ? '✅' : '⚪'; ?> Go Pro</span>
+                        </div>
+                    </div>
+                    <button class="button" onclick="document.getElementById('saas-wizard-modal').style.display='block'">Launch Wizard</button>
+                </div>
+            </div>
+
             <div class="dashboard-main-area">
 
                 <div class="saas-dashboard-header">
@@ -94,6 +109,11 @@ class Saas_Dashboard {
                         </div>
                     </div>
                     <div class="saas-share-bar">
+                        <?php
+                        $new_leads_count = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'meta_key' => '_saas_lead_status', 'meta_value' => 'New', 'fields' => 'ids', 'numberposts' => -1]);
+                        $count = count($new_leads_count);
+                        ?>
+                        <div class="saas-notif-bell" onclick="document.getElementById('saas-notif-modal').style.display='block'">🔔<?php if($count > 0) echo '<span class="notif-count">'.$count.'</span>'; ?></div>
                         <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile_obj->post_name); ?>" readonly>
                         <button id="saas-copy-btn" class="btn-primary">Copy Link</button>
                     </div>
@@ -105,6 +125,8 @@ class Saas_Dashboard {
                     <button data-tab="branding">🎨 Vibe</button>
                     <button data-tab="leads">👥 Leads</button>
                     <button data-tab="analytics">📈 Stats</button>
+                <button data-tab="integrations">🔌 Sync</button>
+                <button data-tab="referrals">💸 Earn</button>
                     <button data-tab="automation">⚙️ Settings</button>
                     <button data-tab="billing">💳 Pro</button>
                 </nav>
@@ -165,8 +187,9 @@ class Saas_Dashboard {
                                         <span class="link-url"><?php echo esc_url( get_post_meta( $link->ID, '_saas_link_url', true ) ?: '#' ); ?></span>
                                     </div>
                                     <div class="block-actions">
-                                        <button class="edit-link button">Edit</button>
-                                        <button class="delete-link button" style="color:var(--danger);">Delete</button>
+                                        <button class="edit-link button" title="Edit">✏️</button>
+                                        <button class="clone-link button" title="Duplicate">📋</button>
+                                        <button class="delete-link button" title="Delete" style="color:var(--danger);">🗑️</button>
                                     </div>
                                 </li>
                             <?php endforeach; ?>
@@ -191,6 +214,17 @@ class Saas_Dashboard {
                                 <textarea name="bio" rows="4"><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
                             </div>
                             <div class="field">
+                                <label>Your Niche / Category</label>
+                                <select name="niche" id="profile-niche">
+                                    <?php
+                                    $niche = get_post_meta($profile_id, '_saas_niche', true);
+                                    $niches = ['coach' => 'Coach', 'creator' => 'Creator', 'realtor' => 'Real Estate', 'business' => 'Business'];
+                                    foreach($niches as $k => $v) : ?>
+                                        <option value="<?php echo $k; ?>" <?php selected($niche, $k); ?>><?php echo $v; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="field">
                                 <label>Company / Organization</label>
                                 <input type="text" name="company" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_company', true)); ?>">
                             </div>
@@ -210,11 +244,21 @@ class Saas_Dashboard {
                             </div>
                             <div class="field">
                                 <label>Background Vibe</label>
-                                <select name="bg_type">
+                                <select name="bg_type" id="profile-bg-type">
                                     <option value="flat" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'flat'); ?>>Clean Flat</option>
                                     <option value="gradient" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'gradient'); ?>>Modern Gradient</option>
                                     <option value="mesh" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'mesh'); ?>>Elite Mesh (Pro)</option>
                                 </select>
+                            </div>
+                            <div class="field">
+                                <label>Quick Style Presets</label>
+                                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px;">
+                                    <button type="button" class="preset-btn button" data-preset="midnight">🌑 Midnight</button>
+                                    <button type="button" class="preset-btn button" data-preset="glassy">💎 Glassy</button>
+                                    <button type="button" class="preset-btn button" data-preset="vibrant">🌈 Vibrant</button>
+                                    <button type="button" class="preset-btn button" data-preset="minimal">⚪ Minimal</button>
+                                    <button type="button" class="preset-btn button" data-preset="luxury">⚜️ Luxury</button>
+                                </div>
                             </div>
                             <button type="submit" class="btn-primary">Save Styles</button>
                         </form>
@@ -223,25 +267,34 @@ class Saas_Dashboard {
 
                 <div id="tab-leads" class="saas-tab-content">
                     <div class="dashboard-card">
-                        <h3>Captured Leads</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3>Captured Leads</h3>
+                            <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_leads&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button">📥 Export CSV</a>
+                        </div>
                         <div class="saas-table-wrapper">
                             <?php
-                            $leads = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'numberposts' => 20]);
+                            $leads = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'numberposts' => 50]);
                             if ($leads) : ?>
+                                <button id="saas-bulk-delete-leads" class="button" style="margin-bottom:10px; color:var(--danger); display:none;">🗑️ Delete Selected</button>
                                 <table class="saas-table">
-                                    <thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead>
+                                    <thead><tr><th><input type="checkbox" id="leads-select-all"></th><th>Name</th><th>Email</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
                                     <tbody>
-                                        <?php foreach ($leads as $lead) : ?>
+                                        <?php foreach ($leads as $lead) :
+                                            $status = get_post_meta($lead->ID, '_saas_lead_status', true) ?: 'New';
+                                            ?>
                                             <tr>
+                                                <td><input type="checkbox" class="lead-checkbox" value="<?php echo $lead->ID; ?>"></td>
                                                 <td><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_name', true)); ?></td>
                                                 <td><?php echo esc_html(get_post_meta($lead->ID, '_saas_lead_email', true)); ?></td>
+                                                <td><span class="pro-badge" style="background:<?php echo ($status==='New') ? 'var(--primary)' : 'var(--secondary)'; ?>"><?php echo esc_html($status); ?></span></td>
                                                 <td><?php echo get_the_date('M j', $lead->ID); ?></td>
+                                                <td><button class="view-lead button" data-id="<?php echo $lead->ID; ?>">View</button></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
                             <?php else : ?>
-                                <p style="color:var(--text-muted);">No leads captured yet. Your profile is ready to go!</p>
+                                <p style="color:var(--text-muted);">No leads captured yet. Your funnel is ready to go!</p>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -253,9 +306,64 @@ class Saas_Dashboard {
                         <div style="height: 280px; margin-bottom: 24px;"><canvas id="saas-analytics-chart"></canvas></div>
                         <?php $stats = $analytics->get_user_summary($user_id); ?>
                         <div class="stats-grid">
-                            <div class="stat-card"><small>VIEWS</small><div class="value"><?php echo $stats['views']; ?></div></div>
-                            <div class="stat-card"><small>CLICKS</small><div class="value"><?php echo $stats['clicks']; ?></div></div>
-                            <div class="stat-card"><small>LEADS</small><div class="value"><?php echo $stats['leads']; ?></div></div>
+                            <div class="stat-card"><small>VIEWS</small><div class="value"><?php echo number_format($stats['views']); ?></div></div>
+                            <div class="stat-card"><small>CLICKS</small><div class="value"><?php echo number_format($stats['clicks']); ?></div></div>
+                            <div class="stat-card"><small>CONV. RATE</small><div class="value" style="color:var(--secondary);"><?php echo ($stats['views'] > 0) ? round(($stats['leads'] / $stats['views']) * 100, 1) : 0; ?>%</div></div>
+                            <div class="stat-card"><small>LEADS</small><div class="value" style="color:var(--accent);"><?php echo number_format($stats['leads']); ?></div></div>
+                        </div>
+
+                        <div class="saas-insights-row" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px; margin-top:40px;">
+                            <div class="insight-card">
+                                <h5>Traffic Sources</h5>
+                                <ul class="insight-list">
+                                    <?php foreach($stats['referrers'] as $ref): ?>
+                                        <li><span><?php echo esc_html($ref->referrer ?: 'Direct'); ?></span> <strong><?php echo $ref->count; ?></strong></li>
+                                    <?php endforeach; ?>
+                                    <?php if(empty($stats['referrers'])) echo '<li><small>No data yet</small></li>'; ?>
+                                </ul>
+                            </div>
+                            <div class="insight-card">
+                                <h5>Top Countries</h5>
+                                <ul class="insight-list">
+                                    <?php foreach($stats['countries'] as $c): ?>
+                                        <li><span><?php echo esc_html($c->country_code); ?></span> <strong><?php echo $c->count; ?></strong></li>
+                                    <?php endforeach; ?>
+                                    <?php if(empty($stats['countries'])) echo '<li><small>No data yet</small></li>'; ?>
+                                </ul>
+                            </div>
+                            <div class="insight-card">
+                                <h5>Device Types</h5>
+                                <ul class="insight-list">
+                                    <?php foreach($stats['devices'] as $d): ?>
+                                        <li><span><?php echo esc_html($d->label); ?></span> <strong><?php echo $d->count; ?></strong></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:40px;">
+                            <h4>Top Performing Blocks</h4>
+                            <div class="saas-table-wrapper">
+                                <table class="saas-table">
+                                    <thead><tr><th>Block</th><th>Type</th><th>Clicks</th><th>AB Result</th></tr></thead>
+                                    <tbody>
+                                        <?php
+                                        $block_stats = $analytics->get_user_link_stats($user_id);
+                                        foreach($links as $l) :
+                                            $sid = $l->ID;
+                                            $ca = isset($block_stats[$sid]) ? $block_stats[$sid]->clicks : 0;
+                                            $cb = isset($block_stats[$sid]) ? $block_stats[$sid]->clicks_b : 0;
+                                            ?>
+                                            <tr>
+                                                <td><?php echo esc_html($l->post_title); ?></td>
+                                                <td><small><?php echo get_post_meta($sid, '_saas_block_type', true); ?></small></td>
+                                                <td><strong><?php echo $ca + $cb; ?></strong></td>
+                                                <td><?php echo $cb > 0 ? "<small>A:$ca B:$cb</small>" : '-'; ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -275,6 +383,54 @@ class Saas_Dashboard {
                             </div>
                             <button type="submit" class="btn-primary">Save Rules</button>
                         </form>
+                    </div>
+                </div>
+
+                <div id="tab-integrations" class="saas-tab-content">
+                    <div class="dashboard-card">
+                        <h3>Third-Party Sync</h3>
+                        <form id="saas-integrations-form">
+                            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <div class="field">
+                                <label>Mailchimp API Key</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="password" name="mailchimp_api" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_api', true)); ?>" style="flex:1;">
+                                    <button type="button" class="button check-integration" data-platform="mailchimp">Test</button>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>HubSpot Access Token</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="password" name="hubspot_token" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_hubspot_token', true)); ?>" style="flex:1;">
+                                    <button type="button" class="button check-integration" data-platform="hubspot">Test</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary">Save API Settings</button>
+                        </form>
+                        <p style="font-size:0.8rem; color:#888; margin-top:20px;">Connect your favorite CRM to sync leads automatically. Webhooks are also available in Settings. (Pro Feature)</p>
+                    </div>
+                </div>
+
+                <div id="tab-referrals" class="saas-tab-content">
+                    <div class="dashboard-card" style="background:var(--secondary-soft); border-color:var(--secondary);">
+                        <h3 style="color:var(--secondary);">Affiliate Program</h3>
+                        <p>Share your link and earn <strong>30% recurring commission</strong> on every user you refer.</p>
+
+                        <div class="stats-grid" style="margin:20px 0;">
+                            <div class="stat-card" style="background:#fff;"><small>TOTAL EARNED</small><div class="value" style="color:var(--secondary);">$0.00</div></div>
+                            <div class="stat-card" style="background:#fff;"><small>ACTIVE REFS</small><div class="value">0</div></div>
+                        </div>
+
+                        <div style="background:#fff; padding:15px; border-radius:10px; border:1px dashed var(--secondary); margin-bottom:20px;">
+                            <label style="display:block; font-size:0.7rem; color:var(--text-muted); margin-bottom:5px;">YOUR UNIQUE LINK</label>
+                            <code style="font-weight:bold; word-break:break-all;"><?php echo home_url('/?ref=' . wp_get_current_user()->user_login); ?></code>
+                        </div>
+                        <button class="btn-primary" style="background:var(--secondary); width:100%;" onclick="alert('Referral Link Copied!')">Copy Referral Link</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h4>Recent Payouts</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">No payouts recorded yet. Start sharing to earn!</p>
                     </div>
                 </div>
 
@@ -312,6 +468,65 @@ class Saas_Dashboard {
         </div>
 
         <!-- Modals -->
+        <div id="saas-notif-modal" class="saas-modal">
+            <div class="saas-modal-content" style="max-width:400px;">
+                <span class="close-modal">&times;</span>
+                <h3>Recent Activity</h3>
+                <div id="notif-list" style="max-height:300px; overflow-y:auto;">
+                    <div style="padding:12px; border-bottom:1px solid #eee;">🚀 Welcome to your new dashboard!</div>
+                    <?php
+                    $recent = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'numberposts' => 5]);
+                    foreach($recent as $r) : ?>
+                        <div style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem;">
+                            <strong>New Lead:</strong> <?php echo esc_html(get_post_meta($r->ID, '_saas_lead_name', true)); ?>
+                            <br><small style="color:#888;"><?php echo get_the_date('', $r->ID); ?></small>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+
+        <div id="saas-wizard-modal" class="saas-modal">
+            <div class="saas-modal-content" style="max-width:600px;">
+                <span class="close-modal">&times;</span>
+                <div class="wizard-step active" data-step="1">
+                    <h3>Welcome! Let's build your profile 🚀</h3>
+                    <p>What is your primary goal?</p>
+                    <select id="wizard-niche" class="field">
+                        <option value="coach">Capture Coaching Leads</option>
+                        <option value="creator">Share Content & Links</option>
+                        <option value="realtor">Real Estate Showcasing</option>
+                        <option value="business">Business Networking</option>
+                    </select>
+                    <button class="btn-primary next-step" style="width:100%;">Next Step</button>
+                </div>
+                <div class="wizard-step" data-step="2">
+                    <h3>Your Digital Identity</h3>
+                    <div class="field"><label>Your Professional Headline</label><input type="text" id="wizard-headline" placeholder="e.g. Scaling Brands with Elite Strategy"></div>
+                    <div class="field"><label>Short Bio</label><textarea id="wizard-bio" rows="3"></textarea></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="button prev-step" style="flex:1;">Back</button>
+                        <button class="btn-primary next-step" style="flex:2;">Next Step</button>
+                    </div>
+                </div>
+                <div class="wizard-step" data-step="3">
+                    <h3>Launch Ready!</h3>
+                    <p>Your profile is being optimized for your niche. Click finish to see your new dashboard.</p>
+                    <button id="wizard-finish" class="btn-primary" style="width:100%;">Finish & Generate</button>
+                </div>
+                <div class="wizard-progress"><div class="progress-bar-fill"></div></div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="saas-lead-modal" class="saas-modal">
+            <div class="saas-modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>Lead Details</h3>
+                <div id="lead-details-content" style="line-height:1.8;"></div>
+            </div>
+        </div>
+
         <div id="saas-edit-modal" class="saas-modal">
             <div class="saas-modal-content">
                 <span class="close-modal">&times;</span>

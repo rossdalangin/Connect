@@ -86,6 +86,26 @@ document.addEventListener('DOMContentLoaded', function() {
             saasFetch('saas_delete_link', { link_id: e.target.closest('li').dataset.id })
                 .then(() => e.target.closest('li').remove());
         }
+
+        if (e.target.classList.contains('clone-link')) {
+            saasFetch('saas_clone_link', { link_id: e.target.closest('li').dataset.id })
+                .then(() => location.reload());
+        }
+
+        if (e.target.classList.contains('view-lead')) {
+            const id = e.target.dataset.id;
+            saasFetch('saas_get_lead_details', { lead_id: id })
+                .then(html => {
+                    document.getElementById('lead-details-content').innerHTML = html;
+                    document.getElementById('saas-lead-modal').style.display = 'block';
+
+                    // Re-bind update form inside modal
+                    document.getElementById('saas-update-lead-form')?.addEventListener('submit', function(ev) {
+                        ev.preventDefault();
+                        saasFetch('saas_update_lead', new FormData(this)).then(() => location.reload());
+                    });
+                });
+        }
     });
 
     // Advanced Toggle
@@ -103,7 +123,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Config Forms ---
-    ['saas-profile-form', 'saas-branding-form', 'saas-automation-form'].forEach(id => {
+    // Bulk Leads
+    const bulkBtn = document.getElementById('saas-bulk-delete-leads');
+    const selectAll = document.getElementById('leads-select-all');
+    if (selectAll) {
+        selectAll.onclick = (e) => {
+            document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = e.target.checked);
+            bulkBtn.style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('lead-checkbox')) {
+            const checked = document.querySelectorAll('.lead-checkbox:checked').length;
+            bulkBtn.style.display = checked > 0 ? 'block' : 'none';
+        }
+    });
+    bulkBtn?.addEventListener('click', () => {
+        const ids = Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
+        if (confirm(`Delete ${ids.length} leads?`)) {
+            saasFetch('saas_bulk_delete_leads', { 'lead_ids[]': ids }).then(() => location.reload());
+        }
+    });
+
+    ['saas-profile-form', 'saas-branding-form', 'saas-automation-form', 'saas-integrations-form'].forEach(id => {
         document.getElementById(id)?.addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = this.querySelector('button');
@@ -115,6 +157,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Visuals ---
+    // Style Presets
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.onclick = () => {
+            const p = btn.dataset.preset;
+            const color = document.querySelector('[name="theme_color"]');
+            const bg = document.getElementById('profile-bg-type');
+            if (p === 'midnight') { color.value = '#ffffff'; bg.value = 'flat'; }
+            else if (p === 'glassy') { color.value = '#6366f1'; bg.value = 'mesh'; }
+            else if (p === 'vibrant') { color.value = '#ffffff'; bg.value = 'gradient'; }
+            else if (p === 'minimal') { color.value = '#0f172a'; bg.value = 'flat'; }
+            else if (p === 'luxury') { color.value = '#d4af37'; bg.value = 'flat'; }
+            color.dispatchEvent(new Event('input'));
+        };
+    });
+
     document.querySelectorAll('.picker-item').forEach(item => {
         item.onclick = () => {
             document.querySelectorAll('.picker-item').forEach(i => i.classList.remove('active'));
@@ -130,15 +187,33 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.close-modal').forEach(b => b.onclick = closeModals);
     window.onclick = (e) => { if (e.target.classList.contains('saas-modal')) closeModals(); };
 
+    // Check Integrations
+    document.querySelectorAll('.check-integration').forEach(btn => {
+        btn.onclick = () => {
+            const platform = btn.dataset.platform;
+            saasFetch('saas_check_integration', { platform }).then(msg => alert(msg)).catch(e => alert(e.message));
+        };
+    });
+
     // AI Assist
     document.querySelectorAll('.ai-assist-btn').forEach(btn => {
         btn.onclick = () => {
             const target = btn.dataset.target;
             const input = document.querySelector(`[name="${target}"]`);
+            const niche = document.getElementById('profile-niche')?.value || 'business';
             const originalText = btn.innerText;
             btn.innerText = '🤖...';
+
             setTimeout(() => {
-                input.value = (target === 'headline') ? "Helping Professionals Scale with Proven Systems 🚀" : "Elite strategist driving results through conversion-first design.";
+                const suggestions = {
+                    coach: { h: "Helping Founders Scale with Proven Systems 🚀", b: "Elite high-performance coach specializing in sustainable growth for 7-figure entrepreneurs." },
+                    creator: { h: "Exclusive Content & Daily Insights 🎥", b: "Sharing daily tips on digital growth and community building for the next generation of creators." },
+                    realtor: { h: "Modern Homes for Modern Families 🏡", b: "Helping you find your dream luxury property in the city's most exclusive neighborhoods." },
+                    business: { h: "Driving Results through Strategic Design 📈", b: "Providing high-impact solutions for modern organizations ready to scale their digital infrastructure." }
+                };
+
+                input.value = (target === 'headline') ? suggestions[niche].h : suggestions[niche].b;
+                input.dispatchEvent(new Event('input'));
                 btn.innerText = originalText;
             }, 800);
         };
@@ -153,6 +228,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const t = prompt('Profile Title:');
         if (t) saasFetch('saas_create_profile', { profile_title: t }).then(d => window.location.href = `?profile_id=${d.id}`);
     };
+
+    // Wizard Logic
+    let currentStep = 1;
+    const wizardModal = document.getElementById('saas-wizard-modal');
+    const updateWizard = (step) => {
+        document.querySelectorAll('.wizard-step').forEach(s => s.classList.toggle('active', parseInt(s.dataset.step) === step));
+        const progress = (step / 3) * 100;
+        document.querySelector('.progress-bar-fill').style.width = progress + '%';
+    };
+
+    wizardModal?.querySelectorAll('.next-step').forEach(btn => btn.onclick = () => { currentStep++; updateWizard(currentStep); });
+    wizardModal?.querySelectorAll('.prev-step').forEach(btn => btn.onclick = () => { currentStep--; updateWizard(currentStep); });
+
+    document.getElementById('wizard-finish')?.addEventListener('click', function() {
+        const data = {
+            profile_id: document.querySelector('[name="profile_id"]').value,
+            headline: document.getElementById('wizard-headline').value,
+            bio: document.getElementById('wizard-bio').value,
+            niche: document.getElementById('wizard-niche').value
+        };
+        saasFetch('saas_save_profile', data).then(() => location.reload());
+    });
+
+    // Sortable Link List
+    const sortableList = document.getElementById('saas-links-list');
+    if (sortableList && typeof Sortable !== 'undefined') {
+        new Sortable(sortableList, {
+            animation: 150,
+            handle: '.handle',
+            onEnd: function() {
+                const ids = Array.from(sortableList.querySelectorAll('li')).map(li => li.dataset.id);
+                saasFetch('saas_update_link_order', { link_ids: ids })
+                    .then(() => {
+                        document.getElementById('saas-preview-frame').contentWindow.location.reload();
+                    });
+            }
+        });
+    }
 
     // Chart
     const chartCtx = document.getElementById('saas-analytics-chart');

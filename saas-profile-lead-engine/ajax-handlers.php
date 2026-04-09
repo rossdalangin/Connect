@@ -42,6 +42,12 @@ function saas_ajax_add_link() {
     $style = sanitize_text_field( $_POST['block_style'] );
     $animation = sanitize_text_field( $_POST['block_animation'] );
 
+    // Verify ownership of the target profile
+    $profile = get_post($profile_id);
+    if (!$profile || $profile->post_author != get_current_user_id()) {
+        wp_send_json_error('Unauthorized profile access');
+    }
+
     if ( empty( $title ) || empty( $url ) ) {
         wp_send_json_error( 'Missing fields' );
     }
@@ -123,6 +129,9 @@ function saas_ajax_save_profile() {
     saas_update_profile_meta( $profile_id, $data );
 
     // Profile specific
+    if (isset($_POST['niche'])) {
+        update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
+    }
     if (isset($_POST['phone'])) {
         update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
     }
@@ -309,6 +318,14 @@ function saas_ajax_apply_template() {
     $template = sanitize_text_field( $_POST['template'] );
     $user_id = get_current_user_id();
     $profile_id = isset($_POST['profile_id']) ? intval($_POST['profile_id']) : 0;
+
+    // Verify profile ownership
+    if ($profile_id) {
+        $profile = get_post($profile_id);
+        if (!$profile || $profile->post_author != $user_id) {
+            wp_send_json_error('Unauthorized profile access');
+        }
+    }
 
     // 1. Delete existing blocks for this user (or specifically for this profile if we had a relation, but for now we delete all user's links as per previous logic)
     $old_blocks = get_posts(['post_type' => 'saas_link', 'author' => $user_id, 'numberposts' => -1]);
@@ -578,9 +595,6 @@ function saas_ajax_get_lead_details() {
         <p><strong>Email:</strong> <?php echo esc_html($email); ?></p>
         <?php if($phone) : ?><p><strong>Phone:</strong> <?php echo esc_html($phone); ?></p><?php endif; ?>
         <?php if($msg) : ?><p><strong>Message:</strong> <br><?php echo nl2br(esc_html($msg)); ?></p><?php endif; ?>
-        <?php if($block_id) : ?>
-            <p><strong>Source Block:</strong> <?php echo get_the_title($block_id); ?> (ID: <?php echo $block_id; ?>)</p>
-        <?php endif; ?>
         <p><strong>Date:</strong> <?php echo get_the_date('F j, Y g:i a', $lead_id); ?></p>
         <hr>
         <form id="saas-update-lead-form">
@@ -594,26 +608,11 @@ function saas_ajax_get_lead_details() {
                 </select>
             </div>
             <div class="field">
-                <label>Tags (comma separated)</label>
-                <input type="text" name="tags" value="<?php echo esc_attr($tags); ?>">
-            </div>
-            <div class="field">
                 <label>Internal Notes</label>
-                <textarea name="notes" rows="4"><?php echo esc_textarea($notes); ?></textarea>
+                <textarea name="notes" rows="3"><?php echo esc_textarea($notes); ?></textarea>
             </div>
-            <button type="submit" class="button button-primary">Update Lead</button>
+            <button type="submit" class="btn-primary" style="width:100%;">Update Status & Notes</button>
         </form>
-        <hr>
-        <h4>Lead Activity History</h4>
-        <div class="lead-history" style="font-size:0.8rem; background:#f9f9f9; padding:15px; border-radius:10px; max-height:150px; overflow-y:auto;">
-            <?php if ($log) : foreach (array_reverse($log) as $entry) : ?>
-                <div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
-                    <strong><?php echo $entry['time']; ?>:</strong> <?php echo esc_html($entry['msg']); ?>
-                </div>
-            <?php endforeach; else : ?>
-                <p>No activity recorded yet.</p>
-            <?php endif; ?>
-        </div>
     </div>
     <?php
     wp_send_json_success( ob_get_clean() );
@@ -896,6 +895,26 @@ function saas_ajax_check_integration() {
     wp_send_json_success( "Connection to " . ucfirst($platform) . " verified! leads will sync automatically. 🚀" );
 }
 
+// 21. AJAX: Simulate Pro Upgrade
+add_action( 'wp_ajax_saas_simulate_pro_upgrade', 'saas_ajax_simulate_pro_upgrade' );
+function saas_ajax_simulate_pro_upgrade() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+    $user_id = get_current_user_id();
+
+    // In this simulation, we just grant the 'saas_pro' role or meta
+    update_user_meta($user_id, '_saas_is_pro', 1);
+
+    // Optionally create a mock license post
+    wp_insert_post([
+        'post_type'   => 'saas_license',
+        'post_title'  => 'Simulated Pro License for ' . wp_get_current_user()->display_name,
+        'post_status' => 'publish',
+        'post_author' => $user_id,
+    ]);
+
+    wp_send_json_success('Successfully upgraded to Pro! Welcome to the Elite club. 🚀');
+}
+
 // 20. AJAX: Apply Coupon
 add_action( 'wp_ajax_saas_apply_coupon', 'saas_ajax_apply_coupon' );
 function saas_ajax_apply_coupon() {
@@ -911,6 +930,32 @@ function saas_ajax_apply_coupon() {
     } else {
         wp_send_json_error("Invalid or expired coupon code.");
     }
+}
+
+// 22. AJAX: Clone/Duplicate Block
+add_action( 'wp_ajax_saas_clone_link', 'saas_ajax_clone_link' );
+function saas_ajax_clone_link() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+    $link_id = intval( $_POST['link_id'] );
+    $post = get_post( $link_id );
+    if ( ! $post || $post->post_author != get_current_user_id() ) wp_send_json_error( 'Unauthorized' );
+
+    $new_id = wp_insert_post([
+        'post_type'   => 'saas_link',
+        'post_title'  => $post->post_title . ' (Copy)',
+        'post_status' => 'publish',
+        'post_author' => get_current_user_id(),
+        'menu_order'  => $post->menu_order + 1
+    ]);
+
+    if ( ! is_wp_error($new_id) ) {
+        $meta = get_post_custom($link_id);
+        foreach ($meta as $k => $v) {
+            foreach ($v as $val) update_post_meta($new_id, $k, maybe_unserialize($val));
+        }
+        wp_send_json_success( 'Block duplicated' );
+    }
+    wp_send_json_error( 'Failed to duplicate' );
 }
 
 // 18. AJAX: Clone Profile
