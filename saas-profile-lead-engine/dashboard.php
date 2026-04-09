@@ -77,22 +77,21 @@ class Saas_Dashboard {
         ob_start();
         ?>
         <div id="saas-dashboard">
-            <!-- Onboarding Checklist -->
-            <div class="saas-onboarding-card dashboard-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h4 style="margin:0;">🚀 Quick Start Checklist</h4>
-                        <div style="display:flex; gap:15px; margin-top:8px; font-size:0.8rem;">
-                            <span><?php echo $meta['headline'] ? '✅' : '⚪'; ?> Add Headline</span>
-                            <span><?php echo count($links) > 0 ? '✅' : '⚪'; ?> Create Block</span>
-                            <span><?php echo $is_pro ? '✅' : '⚪'; ?> Go Pro</span>
-                        </div>
-                    </div>
-                    <button class="button" onclick="document.getElementById('saas-wizard-modal').style.display='block'">Launch Wizard</button>
-                </div>
-            </div>
-
             <div class="dashboard-main-area">
+                <!-- Onboarding Checklist -->
+                <div class="saas-onboarding-card dashboard-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h4 style="margin:0;">🚀 Get Started Checklist</h4>
+                            <div style="display:flex; gap:15px; margin-top:8px; font-size:0.8rem;">
+                                <span><?php echo $meta['headline'] ? '[✓]' : '[ ]'; ?> Bio</span>
+                                <span><?php echo count($links) > 0 ? '[✓]' : '[ ]'; ?> Blocks</span>
+                                <span><?php echo $is_pro ? '[✓]' : '[ ]'; ?> Pro Upgrade</span>
+                            </div>
+                        </div>
+                        <button class="button" onclick="document.getElementById('saas-wizard-modal').style.display='block'">Launch Setup Wizard</button>
+                    </div>
+                </div>
 
                 <div class="saas-dashboard-header">
                     <div class="profile-switcher-wrapper">
@@ -120,41 +119,46 @@ class Saas_Dashboard {
                 </div>
 
                 <nav class="saas-tabs">
-                    <button class="active" data-tab="links">🔗 Links</button>
+                    <button class="active" data-tab="links">🔗 Blocks</button>
                     <button data-tab="profile">👤 Profile</button>
                     <button data-tab="branding">🎨 Vibe</button>
                     <button data-tab="leads">👥 Leads</button>
                     <button data-tab="analytics">📈 Stats</button>
-                <button data-tab="integrations">🔌 Sync</button>
-                <button data-tab="referrals">💸 Earn</button>
+                    <button data-tab="integrations">🔌 Sync</button>
+                    <button data-tab="referrals">💸 Earn</button>
                     <button data-tab="automation">⚙️ Settings</button>
                     <button data-tab="billing">💳 Pro</button>
                 </nav>
 
                 <div id="tab-links" class="saas-tab-content active">
-                    <div class="dashboard-card">
-                        <h3>Blocks & Elements</h3>
-                        <div class="saas-block-picker">
-                            <div class="picker-item active" data-type="button"><span>🔗</span> Button</div>
-                            <div class="picker-item" data-type="video"><span>🎬</span> Video</div>
-                            <div class="picker-item" data-type="testimonial"><span>⭐</span> Quote</div>
-                            <div class="picker-item" data-type="faq"><span>❓</span> FAQ</div>
-                            <div class="picker-item" data-type="pricing"><span>💰</span> Price</div>
-                            <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="image_gallery"><span>🖼️</span> Gallery</div>
-                            <div class="picker-item" data-type="social_icons"><span>📱</span> Social</div>
-                            <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="newsletter"><span>📧</span> Mail</div>
+                    <div class="link-tab-grid">
+                        <div class="block-picker-sidebar">
+                            <div class="dashboard-card">
+                                <h3>Manage Blocks</h3>
+                                <div class="saas-block-picker">
+                                    <div class="picker-item active" data-type="button"><span>🔗</span> Button</div>
+                                    <div class="picker-item" data-type="video"><span>🎬</span> Video</div>
+                                    <div class="picker-item" data-type="testimonial"><span>⭐</span> Testim</div>
+                                    <div class="picker-item" data-type="faq"><span>❓</span> FAQ</div>
+                                    <div class="picker-item" data-type="pricing"><span>💰</span> Price</div>
+                                    <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="image_gallery"><span>🖼️</span> Gal <span class="pro-badge">Pro</span></div>
+                                    <div class="picker-item" data-type="social_icons"><span>📱</span> Social</div>
+                                    <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="newsletter"><span>📧</span> Mail <span class="pro-badge">Pro</span></div>
+                                </div>
+
+                                <form id="saas-add-link-form">
+                                    <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                                    <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
+                                    <div class="field"><input type="text" name="title" placeholder="Block Title (e.g. FAQ Question)" required></div>
+                                    <div class="field"><input type="url" name="url" placeholder="URL / Embed Link" required></div>
+                                    <div class="field"><textarea name="extra" placeholder="Extra content (e.g. FAQ Answer, Price, Quote)" rows="2"></textarea></div>
+                                    <button type="submit" class="btn-primary" style="width:100%;">Add Block</button>
+                                </form>
+                            </div>
                         </div>
 
-                        <form id="saas-add-link-form">
-                            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
-                            <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
-                            <div class="field"><input type="text" name="title" placeholder="Block Title" required></div>
-                            <div class="field"><input type="url" name="url" placeholder="Destination URL" required></div>
-                            <div class="field"><textarea name="extra" placeholder="Block content (FAQ answer, quote, or price)" rows="3"></textarea></div>
-                            <button type="submit" class="btn-primary">Add New Block</button>
-                        </form>
-
-                        <ul id="saas-links-list" class="sortable" style="margin-top:32px;">
+                        <div class="links-display-area">
+                            <ul id="saas-links-list" class="sortable">
                             <?php foreach ( $links as $link ) :
                                 $type = get_post_meta($link->ID, '_saas_block_type', true);
                                 $extra = get_post_meta($link->ID, '_saas_testimonial_text', true) ?: get_post_meta($link->ID, '_saas_faq_answer', true);
@@ -193,7 +197,8 @@ class Saas_Dashboard {
                                     </div>
                                 </li>
                             <?php endforeach; ?>
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -238,21 +243,50 @@ class Saas_Dashboard {
                         <h3>Style & Identity</h3>
                         <form id="saas-branding-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+
                             <div class="field">
-                                <label>Theme Primary Color</label>
+                                <label>Base Theme</label>
+                                <select name="profile_theme" id="profile-theme-select">
+                                    <option value="light" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'light'); ?>>Light Mode</option>
+                                    <option value="dark" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'dark'); ?>>Dark Mode</option>
+                                    <option value="vibrant" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'vibrant'); ?>>Vibrant (Gradient)</option>
+                                    <option value="luxury" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'luxury'); ?>>Luxury (Gold/Black)</option>
+                                </select>
+                            </div>
+
+                            <div class="field" id="saas-bg-value-wrapper">
+                                <label id="saas-bg-value-label">Background Value</label>
+                                <input type="text" name="bg_value" id="saas-bg-value-input" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_bg_gradient', true) ?: get_post_meta($profile_id, '_saas_bg_color', true) ?: '#f3f3f1'); ?>">
+                                <p style="font-size:0.7rem; color:#888; margin-top:5px;">Hex color (e.g. #ffffff) or CSS gradient.</p>
+                            </div>
+
+                            <div class="field">
+                                <label>Theme Accent Color</label>
                                 <input type="color" name="theme_color" value="<?php echo esc_attr( $meta['theme_color'] ); ?>">
                             </div>
+
                             <div class="field">
-                                <label>Background Vibe</label>
+                                <label>Background Engine</label>
                                 <select name="bg_type" id="profile-bg-type">
                                     <option value="flat" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'flat'); ?>>Clean Flat</option>
                                     <option value="gradient" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'gradient'); ?>>Modern Gradient</option>
                                     <option value="mesh" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'mesh'); ?>>Elite Mesh (Pro)</option>
+                                    <option value="particles" <?php selected(get_post_meta($profile_id, '_saas_bg_type', true), 'particles'); ?>>Interactive Particles (Pro)</option>
                                 </select>
                             </div>
+
+                            <div class="field">
+                                <label>Button Aesthetics</label>
+                                <select name="btn_shape">
+                                    <option value="pill" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'pill'); ?>>Pill (Max Rounded)</option>
+                                    <option value="rounded" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'rounded'); ?>>Rounded Corners</option>
+                                    <option value="square" <?php selected(get_post_meta($profile_id, '_saas_btn_shape', true), 'square'); ?>>Sharp Square</option>
+                                </select>
+                            </div>
+
                             <div class="field">
                                 <label>Quick Style Presets</label>
-                                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px;">
+                                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:10px;">
                                     <button type="button" class="preset-btn button" data-preset="midnight">🌑 Midnight</button>
                                     <button type="button" class="preset-btn button" data-preset="glassy">💎 Glassy</button>
                                     <button type="button" class="preset-btn button" data-preset="vibrant">🌈 Vibrant</button>
@@ -260,7 +294,7 @@ class Saas_Dashboard {
                                     <button type="button" class="preset-btn button" data-preset="luxury">⚜️ Luxury</button>
                                 </div>
                             </div>
-                            <button type="submit" class="btn-primary">Save Styles</button>
+                            <button type="submit" class="btn-primary">Apply Styles</button>
                         </form>
                     </div>
                 </div>

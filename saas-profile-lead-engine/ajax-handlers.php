@@ -147,10 +147,13 @@ function saas_ajax_save_profile() {
 
     // Branding specific
     if (isset($_POST['bg_type'])) {
-        update_post_meta($profile_id, '_saas_bg_type', sanitize_text_field( $_POST['bg_type'] ) );
-        update_post_meta($profile_id, '_saas_bg_color', sanitize_text_field( $_POST['bg_value'] ) );
-        if ($_POST['bg_type'] === 'gradient') {
-            update_post_meta($profile_id, '_saas_bg_gradient', sanitize_text_field( $_POST['bg_value'] ) );
+        $bg_type = sanitize_text_field( $_POST['bg_type'] );
+        $bg_val  = sanitize_text_field( $_POST['bg_value'] );
+        update_post_meta($profile_id, '_saas_bg_type', $bg_type );
+        if ($bg_type === 'gradient') {
+            update_post_meta($profile_id, '_saas_bg_gradient', $bg_val );
+        } else {
+            update_post_meta($profile_id, '_saas_bg_color', $bg_val );
         }
     }
     if (isset($_POST['btn_shape'])) {
@@ -901,8 +904,9 @@ function saas_ajax_simulate_pro_upgrade() {
     check_ajax_referer( 'saas_dashboard_nonce', 'security' );
     $user_id = get_current_user_id();
 
-    // In this simulation, we just grant the 'saas_pro' role or meta
-    update_user_meta($user_id, '_saas_is_pro', 1);
+    // In this simulation, we grant the pro subscription plan
+    update_user_meta($user_id, '_saas_subscription_plan', 'pro');
+    update_user_meta($user_id, '_saas_subscription_expiry', strtotime('+1 year'));
 
     // Optionally create a mock license post
     wp_insert_post([

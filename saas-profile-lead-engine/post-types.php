@@ -132,6 +132,11 @@ function saas_template_redirect( $template ) {
     $profile_slug = get_query_var( 'saas_profile' );
 
     // Check if it's actually a profile and not a standard page/post
+    // Quick VCard check for NFC/Param source
+    if ( $profile_slug && isset($_GET["src"]) && $_GET["src"] === "nfc" && !isset($_GET["saas_action"]) ) {
+        // We let the template load but JS will handle the auto-trigger in index.php
+    }
+
     if ( $profile_slug && ! is_singular(['page', 'post']) ) {
         // Find if a profile with this slug exists
         $profile = get_posts([

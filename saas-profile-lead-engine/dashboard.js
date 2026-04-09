@@ -6,14 +6,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Standard Fetch ---
     const saasFetch = (action, data = {}) => {
-        const fd = (data instanceof FormData) ? data : new URLSearchParams(data);
-        if (!(data instanceof FormData)) {
-            fd.append('action', action);
-            fd.append('security', saas_dashboard_data.nonce);
+        let fd;
+        if (data instanceof FormData) {
+            fd = data;
         } else {
-            fd.append('action', action);
-            fd.append('security', saas_dashboard_data.nonce);
+            fd = new FormData();
+            for (const key in data) {
+                if (Array.isArray(data[key])) {
+                    data[key].forEach(val => fd.append(key, val));
+                } else {
+                    fd.append(key, data[key]);
+                }
+            }
         }
+        fd.append('action', action);
+        fd.append('security', saas_dashboard_data.nonce);
+
         return fetch(saas_dashboard_data.ajax_url, { method: 'POST', body: fd })
             .then(r => r.json())
             .then(res => {
@@ -42,10 +50,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Profile Switcher ---
     const switcher = document.querySelector('.profile-title');
     const dropdown = document.querySelector('.profile-dropdown');
-    if (switcher) {
-        switcher.onclick = (e) => { e.stopPropagation(); dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block'; };
-        window.onclick = () => { if(dropdown) dropdown.style.display = 'none'; };
+    if (switcher && dropdown) {
+        switcher.onclick = (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        };
+        document.addEventListener('click', (e) => {
+            if (!switcher.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
     }
+
+    // Profile Cloning
+    document.querySelectorAll('.clone-profile-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            if (!confirm('Clone this profile and all its links?')) return;
+            const id = btn.dataset.id;
+            saasFetch('saas_clone_profile', { profile_id: id })
+                .then(res => window.location.href = `?profile_id=${res.id}`);
+        };
+    });
 
     // --- Block Engine ---
 
@@ -156,19 +182,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- Visuals ---
+    // --- Visuals & Live Preview ---
+    const previewIframe = document.getElementById('saas-preview-frame');
+    const emitUpdate = (key, value) => {
+        previewIframe?.contentWindow.postMessage({ type: 'live_update', key, value }, '*');
+    };
+
+    document.querySelectorAll('#saas-profile-form input, #saas-profile-form textarea').forEach(el => {
+        el.oninput = () => emitUpdate(el.name, el.value);
+    });
+
+    document.querySelectorAll('#saas-branding-form input, #saas-branding-form select').forEach(el => {
+        el.oninput = () => {
+            emitUpdate(el.name, el.value);
+            if (el.name === 'bg_type') {
+                const bgInput = document.getElementById('saas-bg-value-input');
+                if (el.value === 'flat') {
+                    if (bgInput.value.includes('gradient')) bgInput.value = '#f3f3f1';
+                } else if (el.value === 'gradient') {
+                    if (!bgInput.value.includes('gradient')) bgInput.value = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }
+                bgInput.dispatchEvent(new Event('input'));
+            }
+        };
+    });
+
     // Style Presets
     document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.onclick = () => {
             const p = btn.dataset.preset;
             const color = document.querySelector('[name="theme_color"]');
             const bg = document.getElementById('profile-bg-type');
-            if (p === 'midnight') { color.value = '#ffffff'; bg.value = 'flat'; }
-            else if (p === 'glassy') { color.value = '#6366f1'; bg.value = 'mesh'; }
-            else if (p === 'vibrant') { color.value = '#ffffff'; bg.value = 'gradient'; }
-            else if (p === 'minimal') { color.value = '#0f172a'; bg.value = 'flat'; }
-            else if (p === 'luxury') { color.value = '#d4af37'; bg.value = 'flat'; }
+            const themeSelect = document.getElementById('profile-theme-select');
+            const bgInput = document.getElementById('saas-bg-value-input');
+
+            if (p === 'midnight') {
+                color.value = '#ffffff'; bg.value = 'flat';
+                bgInput.value = '#0f172a';
+                if (themeSelect) themeSelect.value = 'dark';
+            }
+            else if (p === 'glassy') {
+                color.value = '#6366f1'; bg.value = 'mesh';
+                bgInput.value = '#ffffff';
+                if (themeSelect) themeSelect.value = 'light';
+            }
+            else if (p === 'vibrant') {
+                color.value = '#ffffff'; bg.value = 'gradient';
+                bgInput.value = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+                if (themeSelect) themeSelect.value = 'vibrant';
+            }
+            else if (p === 'minimal') {
+                color.value = '#0f172a'; bg.value = 'flat';
+                bgInput.value = '#ffffff';
+                if (themeSelect) themeSelect.value = 'light';
+            }
+            else if (p === 'luxury') {
+                color.value = '#d4af37'; bg.value = 'flat';
+                bgInput.value = '#0a0a0a';
+                if (themeSelect) themeSelect.value = 'luxury';
+            }
+
+            // Trigger UI updates
             color.dispatchEvent(new Event('input'));
+            bg.dispatchEvent(new Event('input'));
+            bgInput.dispatchEvent(new Event('input'));
+            if (themeSelect) themeSelect.dispatchEvent(new Event('input'));
         };
     });
 
@@ -220,8 +298,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Simulation
-    document.getElementById('saas-simulate-pro')?.onclick = () => {
-        saasFetch('saas_simulate_pro_upgrade').then(() => location.reload());
+    document.getElementById('saas-simulate-pro')?.onclick = function() {
+        const btn = this;
+        const original = btn.innerText;
+        btn.innerText = 'Upgrading...';
+        saasFetch('saas_simulate_pro_upgrade')
+            .then(msg => {
+                alert(msg);
+                location.reload();
+            })
+            .catch(err => {
+                alert(err.message);
+                btn.innerText = original;
+            });
     };
 
     document.getElementById('saas-add-profile-trigger')?.onclick = () => {
