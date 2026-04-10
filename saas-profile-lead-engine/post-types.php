@@ -101,6 +101,16 @@ function saas_add_rewrite_rules() {
 }
 add_action( 'init', 'saas_add_rewrite_rules' );
 
+// One-time flush for development environment
+function saas_flush_rules_once() {
+    if ( ! get_option( 'saas_rules_flushed_v3' ) ) {
+        saas_add_rewrite_rules();
+        flush_rewrite_rules();
+        update_option( 'saas_rules_flushed_v3', true );
+    }
+}
+add_action( 'init', 'saas_flush_rules_once', 20 );
+
 function saas_query_vars( $vars ) {
     $vars[] = 'saas_profile';
     return $vars;

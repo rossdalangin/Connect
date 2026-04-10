@@ -83,10 +83,10 @@ class Saas_Dashboard {
             <div class="dashboard-main-area">
                 <!-- Onboarding Checklist -->
                 <div class="saas-onboarding-card dashboard-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
                         <div>
                             <h4 style="margin:0;">🚀 Get Started Checklist</h4>
-                            <div style="display:flex; gap:15px; margin-top:8px; font-size:0.8rem;">
+                            <div style="display:flex; gap:15px; margin-top:8px; font-size:0.8rem; flex-wrap:wrap;">
                                 <span><?php echo $meta['headline'] ? '[✓]' : '[ ]'; ?> Bio</span>
                                 <span><?php echo count($links) > 0 ? '[✓]' : '[ ]'; ?> Blocks</span>
                                 <span><?php echo $is_pro ? '[✓]' : '[ ]'; ?> Pro Upgrade</span>
