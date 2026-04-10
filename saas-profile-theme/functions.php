@@ -86,7 +86,7 @@ if ( ! function_exists( 'saas_get_profile_meta' ) ) {
         return [
             'bio'          => get_post_meta( $profile_id, '_saas_bio', true ),
             'headline'     => get_post_meta( $profile_id, '_saas_headline', true ),
-            'theme_color'  => get_post_meta( $profile_id, '_saas_theme_color', true ) ?: '#0073aa',
+            'theme_color'  => get_post_meta( $profile_id, '_saas_theme_color', true ) ?: '#6c5ce7',
             'social_links' => get_post_meta( $profile_id, '_saas_social_links', true ) ?: [],
             'phone'        => get_post_meta( $profile_id, '_saas_phone', true ),
             'avatar_id'    => get_post_thumbnail_id( $profile_id ),
