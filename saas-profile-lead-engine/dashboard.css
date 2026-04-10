@@ -34,21 +34,22 @@ body {
 }
 
 #saas-dashboard {
-    max-width: 1500px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
     min-height: 100vh;
     box-sizing: border-box;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
     #saas-dashboard {
         display: grid;
-        grid-template-columns: 1fr 380px;
-        padding-top: 40px;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        padding: 20px;
         align-items: flex-start;
     }
 }
@@ -150,8 +151,8 @@ body {
 .dashboard-card {
     background: var(--white);
     border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 24px;
+    padding: 16px;
+    margin-bottom: 20px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
     width: 100%;
@@ -159,31 +160,31 @@ body {
 }
 
 @media (min-width: 768px) {
-    .dashboard-card { padding: 32px; }
+    .dashboard-card { padding: 20px; }
 }
 
 /* New: Link Tab Grid Layout */
 .link-tab-grid {
     display: flex;
-    flex-direction: column;
-    gap: 32px;
+    flex-wrap: wrap;
+    gap: 24px;
 }
 
-@media (min-width: 992px) {
-    .link-tab-grid {
-        flex-direction: row; /* Better flow: Form on left, List on right */
-        align-items: flex-start;
-    }
+.block-picker-sidebar {
+    flex: 1;
+    min-width: 300px;
+}
+
+.links-display-area {
+    flex: 1.5;
+    min-width: 300px;
+}
+
+@media (min-width: 1200px) {
     .block-picker-sidebar {
-        width: 360px;
         position: sticky;
-        top: 80px; /* Adjust for sticky tabs */
-        flex-shrink: 0;
+        top: 80px;
         z-index: 10;
-    }
-    .links-display-area {
-        flex: 1;
-        min-width: 0;
     }
 }
 
@@ -278,13 +279,13 @@ body {
     display: none;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
     .saas-preview-pane {
         display: block;
         position: sticky;
-        top: 80px; /* Below sticky tabs if they overlap */
+        top: 80px;
         width: 100%;
-        max-width: 380px;
+        max-width: 340px;
         z-index: 50;
     }
 }
@@ -348,13 +349,15 @@ body {
 
 .saas-modal-content {
     background: var(--white);
-    margin: 40px auto;
-    padding: 32px;
-    width: 100%;
+    margin: 20px auto;
+    padding: 24px;
+    width: 95%;
     max-width: 500px;
-    border-radius: 24px;
+    border-radius: 20px;
     position: relative;
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .wizard-step { display: none; }
@@ -373,11 +376,27 @@ body {
 
 .close-modal {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 1.5rem;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    background: var(--bg-main);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
     cursor: pointer;
-    color: var(--text-muted);
+    color: var(--text-dark);
+    font-weight: bold;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    z-index: 10;
+}
+.close-modal:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
 }
 
 .saas-notif-bell {
