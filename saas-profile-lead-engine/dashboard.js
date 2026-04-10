@@ -32,9 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Tab Engine ---
     const switchTab = (id) => {
-        document.querySelectorAll('.saas-tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
-        document.querySelectorAll('.saas-tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${id}`));
-        const url = new URL(window.location);
+        if (!id) return;
+        const buttons = document.querySelectorAll('.saas-tabs button');
+        const contents = document.querySelectorAll('.saas-tab-content');
+
+        buttons.forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+        contents.forEach(c => c.classList.toggle('active', c.id === `tab-${id}`));
+
+        const url = new URL(window.location.href);
         if (url.searchParams.get('tab') !== id) {
             url.searchParams.set('tab', id);
             window.history.pushState({}, '', url);
@@ -43,9 +48,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.innerWidth < 1100) window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    document.querySelectorAll('.saas-tabs button').forEach(t => t.onclick = () => switchTab(t.dataset.tab));
+    document.querySelector('.saas-tabs')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (btn && btn.dataset.tab) {
+            switchTab(btn.dataset.tab);
+        }
+    });
+
     const initTab = new URLSearchParams(window.location.search).get('tab');
-    if (initTab) switchTab(initTab);
+    if (initTab) {
+        switchTab(initTab);
+    } else {
+        // Ensure first tab is active if no tab in URL
+        const firstTab = document.querySelector('.saas-tabs button')?.dataset.tab;
+        if (firstTab) switchTab(firstTab);
+    }
 
     // --- Profile Switcher ---
     const switcher = document.querySelector('.profile-title');
@@ -85,15 +102,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => { alert(err.message); btn.innerText = txt; });
     });
 
-    // Edit Modal Click
+    // --- Interaction Engine (Edit/Delete/Clone/Leads) ---
     document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('edit-link')) {
-            const li = e.target.closest('li');
+        const editBtn = e.target.closest('.edit-link');
+        if (editBtn) {
+            const li = editBtn.closest('li');
             const d = li.dataset;
 
             document.getElementById('edit-link-id').value = d.id;
-            document.getElementById('edit-link-title').value = li.querySelector('.link-title').innerText;
-            document.getElementById('edit-link-url').value = li.querySelector('.link-url').innerText;
+            document.getElementById('edit-link-title').value = li.querySelector('.link-title')?.innerText || '';
+            document.getElementById('edit-link-url').value = li.querySelector('.link-url')?.innerText || '';
             document.getElementById('edit-link-extra').value = d.extra || '';
             document.getElementById('edit-link-style').value = d.style || 'regular';
             document.getElementById('edit-link-animation').value = d.animation || 'none';
@@ -105,21 +123,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
             document.getElementById('saas-edit-modal').style.display = 'block';
             document.body.style.overflow = 'hidden';
+            return;
         }
 
-        if (e.target.classList.contains('delete-link')) {
+        const deleteBtn = e.target.closest('.delete-link');
+        if (deleteBtn) {
             if (!confirm('Delete this block?')) return;
-            saasFetch('saas_delete_link', { link_id: e.target.closest('li').dataset.id })
-                .then(() => e.target.closest('li').remove());
+            const li = deleteBtn.closest('li');
+            saasFetch('saas_delete_link', { link_id: li.dataset.id })
+                .then(() => li.remove())
+                .catch(err => alert(err.message));
+            return;
         }
 
-        if (e.target.classList.contains('clone-link')) {
-            saasFetch('saas_clone_link', { link_id: e.target.closest('li').dataset.id })
-                .then(() => location.reload());
+        const cloneBtn = e.target.closest('.clone-link');
+        if (cloneBtn) {
+            saasFetch('saas_clone_link', { link_id: cloneBtn.closest('li').dataset.id })
+                .then(() => location.reload())
+                .catch(err => alert(err.message));
+            return;
         }
 
-        if (e.target.classList.contains('view-lead')) {
-            const id = e.target.dataset.id;
+        const viewLeadBtn = e.target.closest('.view-lead');
+        if (viewLeadBtn) {
+            const id = viewLeadBtn.dataset.id;
             saasFetch('saas_get_lead_details', { lead_id: id })
                 .then(html => {
                     document.getElementById('lead-details-content').innerHTML = html;
@@ -128,16 +155,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Re-bind update form inside modal
                     document.getElementById('saas-update-lead-form')?.addEventListener('submit', function(ev) {
                         ev.preventDefault();
-                        saasFetch('saas_update_lead', new FormData(this)).then(() => location.reload());
+                        saasFetch('saas_update_lead', new FormData(this))
+                            .then(() => location.reload())
+                            .catch(er => alert(er.message));
                     });
-                });
+                })
+                .catch(err => alert(err.message));
         }
     });
 
     // Advanced Toggle
     document.querySelector('.toggle-advanced')?.addEventListener('click', function() {
         const fields = document.getElementById('edit-advanced-fields');
-        const isHidden = fields.style.display === 'none';
+        if (!fields) return;
+        const isHidden = fields.style.display === 'none' || fields.style.display === '';
         fields.style.display = isHidden ? 'block' : 'none';
         this.innerText = isHidden ? '🔼 Hide Advanced Options' : '⚙️ Advanced Options';
     });
@@ -145,7 +176,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save Edit
     document.getElementById('saas-edit-link-form')?.addEventListener('submit', function(e) {
         e.preventDefault();
-        saasFetch('saas_save_link', new FormData(this)).then(() => location.reload());
+        const btn = this.querySelector('button[type="submit"]');
+        const txt = btn.innerText; btn.innerText = 'Saving...';
+        saasFetch('saas_save_link', new FormData(this))
+            .then(() => location.reload())
+            .catch(err => { alert(err.message); btn.innerText = txt; });
     });
 
     // --- Config Forms ---

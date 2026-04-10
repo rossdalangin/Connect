@@ -74,6 +74,9 @@ class Saas_Dashboard {
             'numberposts' => -1,
         ]);
 
+        $profile_bg_type = get_post_meta($profile_id, '_saas_bg_type', true) ?: 'flat';
+        $profile_bg_val  = ($profile_bg_type === 'gradient') ? get_post_meta($profile_id, '_saas_bg_gradient', true) : get_post_meta($profile_id, '_saas_bg_color', true);
+
         ob_start();
         ?>
         <div id="saas-dashboard">
@@ -256,7 +259,7 @@ class Saas_Dashboard {
 
                             <div class="field" id="saas-bg-value-wrapper">
                                 <label id="saas-bg-value-label">Background Value</label>
-                                <input type="text" name="bg_value" id="saas-bg-value-input" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_bg_gradient', true) ?: get_post_meta($profile_id, '_saas_bg_color', true) ?: '#f3f3f1'); ?>">
+                                <input type="text" name="bg_value" id="saas-bg-value-input" value="<?php echo esc_attr($profile_bg_val ?: '#f3f3f1'); ?>">
                                 <p style="font-size:0.7rem; color:#888; margin-top:5px;">Hex color (e.g. #ffffff) or CSS gradient.</p>
                             </div>
 
