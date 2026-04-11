@@ -120,6 +120,13 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-link-hour-from').value = d.hourFrom || '';
             document.getElementById('edit-link-hour-to').value = d.hourTo || '';
             document.getElementById('edit-link-pass').value = d.password || '';
+            document.getElementById('edit-link-ab-title').value = d.abTitle || '';
+            document.getElementById('edit-link-ab-url').value = d.abUrl || '';
+            document.getElementById('edit-link-url-mobile').value = d.urlMobile || '';
+            document.getElementById('edit-link-geo-country').value = d.geoCountry || '';
+            document.getElementById('edit-link-url-geo').value = d.urlGeo || '';
+            document.getElementById('edit-link-custom-bg').value = d.customBg || '#6366f1';
+            document.getElementById('edit-link-custom-text').value = d.customText || '#ffffff';
 
             document.getElementById('saas-edit-modal').style.display = 'block';
             document.body.style.overflow = 'hidden';
@@ -131,7 +138,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!confirm('Delete this block?')) return;
             const li = deleteBtn.closest('li');
             saasFetch('saas_delete_link', { link_id: li.dataset.id })
-                .then(() => li.remove())
+                .then(() => {
+                    li.remove();
+                    document.getElementById('saas-preview-frame')?.contentWindow.location.reload();
+                })
                 .catch(err => alert(err.message));
             return;
         }
@@ -327,6 +337,12 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     });
 
+    document.getElementById('saas-test-webhook-btn')?.addEventListener('click', function() {
+        const url = document.querySelector('[name="lead_webhook"]').value;
+        if (!url) return alert('Please enter a webhook URL first.');
+        saasFetch('saas_test_webhook', { webhook_url: url }).then(msg => alert(msg)).catch(e => alert(e.message));
+    });
+
     // AI Assist
     document.querySelectorAll('.ai-assist-btn').forEach(btn => {
         btn.onclick = () => {
@@ -371,6 +387,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const t = prompt('Profile Title:');
         if (t) saasFetch('saas_create_profile', { profile_title: t }).then(d => window.location.href = `?profile_id=${d.id}`);
     };
+
+    document.getElementById('saas-copy-btn')?.addEventListener('click', function() {
+        const copyText = document.getElementById('saas-my-link');
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+        const original = this.innerText;
+        this.innerText = 'Copied! ✅';
+        setTimeout(() => this.innerText = original, 2000);
+    });
 
     // Wizard Logic
     let currentStep = 1;

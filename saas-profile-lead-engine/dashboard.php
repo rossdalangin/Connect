@@ -418,7 +418,10 @@ class Saas_Dashboard {
                                 <label>Redirect after Submission</label>
                                 <input type="url" name="lead_redirect" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_redirect', true)); ?>">
                             </div>
-                            <button type="submit" class="btn-primary">Save Rules</button>
+                            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                                <button type="submit" class="btn-primary" style="flex:2;">Save Rules</button>
+                                <button type="button" id="saas-test-webhook-btn" class="button" style="flex:1;">Test Webhook</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -596,8 +599,36 @@ class Saas_Dashboard {
                         </div>
 
                         <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
-                            <label>A/B Testing - Variant B Title (Pro)</label>
-                            <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Alternate Title">
+                            <label>A/B Testing (Pro)</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Variant B Title" style="flex:1;">
+                                <input type="url" name="ab_url_b" id="edit-link-ab-url" placeholder="Variant B URL" style="flex:1;">
+                            </div>
+                        </div>
+
+                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                            <label>Conditional Routing (Pro)</label>
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <input type="url" name="url_mobile" id="edit-link-url-mobile" placeholder="Mobile-only URL">
+                                <div style="display:flex; gap:10px;">
+                                    <input type="text" name="url_geo_country" id="edit-link-geo-country" placeholder="Country Code (e.g. US)" style="flex:1;">
+                                    <input type="url" name="url_geo" id="edit-link-url-geo" placeholder="Geo-specific URL" style="flex:1;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Custom Design</label>
+                            <div style="display:flex; gap:10px;">
+                                <div style="flex:1;">
+                                    <small>Background</small>
+                                    <input type="color" name="custom_bg" id="edit-link-custom-bg" style="height:40px; padding:2px;">
+                                </div>
+                                <div style="flex:1;">
+                                    <small>Text</small>
+                                    <input type="color" name="custom_text" id="edit-link-custom-text" style="height:40px; padding:2px;">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="field">
