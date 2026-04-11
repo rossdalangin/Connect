@@ -13,10 +13,10 @@ class Saas_Dashboard {
 
     public function enqueue_dashboard_scripts() {
         wp_enqueue_media();
-        wp_enqueue_style( 'saas-dashboard-css', plugin_dir_url( __FILE__ ) . 'dashboard.css', [], '2.3' );
+        wp_enqueue_style( 'saas-dashboard-css', plugin_dir_url( __FILE__ ) . 'dashboard.css', [], '2.7' );
         wp_enqueue_script( 'sortable-js', 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js', [], '1.15.0', true );
         wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', [], '4.0.0', true );
-        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'sortable-js', 'chart-js' ], '2.3', true );
+        wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'jquery' ], '2.7', true );
         wp_localize_script( 'saas-dashboard-js', 'saas_dashboard_data', [
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'saas_dashboard_nonce' )
@@ -118,6 +118,7 @@ class Saas_Dashboard {
                         <div class="saas-notif-bell" onclick="document.getElementById('saas-notif-modal').style.display='block'">🔔<?php if($count > 0) echo '<span class="notif-count">'.$count.'</span>'; ?></div>
                         <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile_obj->post_name); ?>" readonly>
                         <button id="saas-copy-btn" class="btn-primary">Copy Link</button>
+                        <button id="saas-preview-trigger" class="btn-primary" style="background:var(--secondary);">👁️ Preview</button>
                     </div>
                 </div>
 
@@ -498,6 +499,7 @@ class Saas_Dashboard {
 
             <div class="saas-preview-pane">
                 <div class="preview-header">
+                    <button id="saas-close-preview" class="close-preview-btn">&times;</button>
                     <strong>Real-Time Preview</strong>
                     <button onclick="document.getElementById('saas-preview-frame').contentWindow.location.reload();" class="button">🔄</button>
                 </div>
