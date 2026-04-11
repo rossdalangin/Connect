@@ -218,7 +218,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Visuals & Live Preview ---
+    const previewPane = document.querySelector('.saas-preview-pane');
+    const previewTrigger = document.getElementById('saas-preview-trigger');
+    const previewClose = document.getElementById('saas-close-preview');
     const previewIframe = document.getElementById('saas-preview-frame');
+
+    if (previewTrigger && previewPane) {
+        previewTrigger.onclick = () => {
+            previewPane.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            previewIframe.contentWindow.location.reload();
+        };
+    }
+
+    if (previewClose && previewPane) {
+        previewClose.onclick = () => {
+            previewPane.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        };
+    }
+
     const emitUpdate = (key, value) => {
         previewIframe?.contentWindow.postMessage({ type: 'live_update', key, value }, '*');
     };
