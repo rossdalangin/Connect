@@ -959,6 +959,30 @@ function saas_ajax_check_integration() {
     wp_send_json_success( "Connection to " . ucfirst($platform) . " verified! leads will sync automatically. 🚀" );
 }
 
+// 24. AJAX: Check Username Availability
+add_action( 'wp_ajax_saas_check_username', 'saas_ajax_check_username' );
+add_action( 'wp_ajax_nopriv_saas_check_username', 'saas_ajax_check_username' );
+function saas_ajax_check_username() {
+    $username = sanitize_user( $_POST['username'] );
+    if ( empty($username) ) wp_send_json_error('Empty');
+
+    // Check WordPress users
+    if ( username_exists($username) ) wp_send_json_error('Taken');
+
+    // Check SaaS Profile slugs
+    $exists = get_posts([
+        'name' => $username,
+        'post_type' => 'saas_profile',
+        'post_status' => 'publish',
+        'fields' => 'ids',
+        'numberposts' => 1
+    ]);
+
+    if ( ! empty($exists) ) wp_send_json_error('Taken');
+
+    wp_send_json_success('Available');
+}
+
 // 21. AJAX: Simulate Pro Upgrade
 add_action( 'wp_ajax_saas_simulate_pro_upgrade', 'saas_ajax_simulate_pro_upgrade' );
 function saas_ajax_simulate_pro_upgrade() {

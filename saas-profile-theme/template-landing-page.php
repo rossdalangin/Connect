@@ -53,9 +53,16 @@ $h_img   = get_option('saas_home_image');
 
         <div class="landing-body" style="font-size: 1.25rem; color: #666;">
             <?php while ( have_posts() ) : the_post(); the_content(); endwhile; ?>
-            <a href="<?php echo home_url('/register'); ?>" class="saas-cta-btn-vibrant">
-                <?php echo esc_html($h_cta); ?>
-            </a>
+
+            <div class="hero-claim-wrapper" style="margin-top: 40px;">
+                <form action="<?php echo home_url('/register'); ?>" method="GET" style="display:inline-flex; background:#fff; padding:10px; border-radius:100px; box-shadow:0 15px 35px rgba(0,0,0,0.1); border:1px solid #eee; width:100%; max-width:500px;">
+                    <span style="padding:0 20px; color:#999; display:flex; align-items:center; font-weight:700;"><?php echo parse_url(home_url(), PHP_URL_HOST); ?>/</span>
+                    <input type="text" name="username" id="saas-home-username" placeholder="yourname" style="flex:1; border:none; outline:none; font-size:1.1rem; font-weight:700; padding:10px 0;">
+                    <button type="submit" style="background:#6c5ce7; color:#fff; border:none; padding:15px 30px; border-radius:50px; font-weight:800; cursor:pointer; margin-left:10px;"><?php echo esc_html($h_cta); ?></button>
+                </form>
+                <div id="username-status" style="margin-top:10px; font-size:0.9rem; font-weight:700; height:20px;"></div>
+                <p style="font-size:0.8rem; margin-top:15px; color:#a0a0a0;">⚡️ It takes less than 60 seconds to launch.</p>
+            </div>
         </div>
     </div>
 </main>
@@ -80,16 +87,104 @@ $h_img   = get_option('saas_home_image');
                 <?php endforeach; ?>
             </ul>
         </div>
-        <div style="flex: 1; min-width: 300px; background: #f8f9fa; padding: 40px; border-radius: 40px; border: 1px solid #eee;">
-            <h4 style="margin-top: 0;">Try the Live Demo</h4>
-            <p>See how your profile looks on mobile instantly.</p>
-            <div style="width: 100%; height: 300px; background: #fff; border-radius: 20px; border: 8px solid #333; overflow: hidden;">
-                <div style="padding: 20px; text-align: center;">
-                    <div style="width: 50px; height: 50px; background: #eee; border-radius: 50%; margin: 0 auto 10px;"></div>
-                    <div style="width: 100px; height: 10px; background: #eee; margin: 0 auto 10px;"></div>
-                    <div style="width: 100%; height: 40px; background: #6c5ce7; border-radius: 50px; margin-bottom: 10px;"></div>
-                    <div style="width: 100%; height: 40px; background: #eee; border-radius: 50px;"></div>
+        <div style="flex: 1; min-width: 340px; background: #0f172a; padding: 50px; border-radius: 60px; border: 12px solid #1e293b; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);">
+            <div style="text-align: center; color: #fff; margin-bottom: 30px;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); border-radius: 50%; margin: 0 auto 15px; border: 4px solid #fff;"></div>
+                <h4 style="margin: 0; font-size: 1.5rem; font-weight: 800;">@yourname</h4>
+                <p style="font-size: 0.9rem; opacity: 0.6;">Digital Architect & Creator</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="height: 50px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0f172a;">🚀 Work with Me</div>
+                <div style="height: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;">🎬 Latest Masterclass</div>
+                <div style="height: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;">📦 My Products</div>
+
+                <div style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2); text-align: center;">
+                    <p style="color: #39e09b; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px;">New Lead Captured!</p>
+                    <div style="height: 8px; background: #39e09b; border-radius: 10px; width: 80%; margin: 0 auto;"></div>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison Section -->
+<section style="padding: 120px 20px; background: #fff;">
+    <div style="max-width: 1000px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 60px;">Why elite creators choose us</h2>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; border-radius: 32px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.05);">
+                <thead>
+                    <tr style="background: #f8fafc;">
+                        <th style="padding: 30px; font-size: 1.2rem;">Feature</th>
+                        <th style="padding: 30px; font-size: 1.2rem; color: #94a3b8;">Basic Link Hubs</th>
+                        <th style="padding: 30px; font-size: 1.2rem; color: #6c5ce7; font-weight: 900;">Elite SaaS Funnel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 25px 30px; font-weight: 700;">Lead Generation Forms</td>
+                        <td style="padding: 25px 30px; color: #ef4444;">✗ No</td>
+                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Integrated</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 25px 30px; font-weight: 700;">A/B Split Testing</td>
+                        <td style="padding: 25px 30px; color: #ef4444;">✗ No</td>
+                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Automated</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 25px 30px; font-weight: 700;">NFC Digital Business Card</td>
+                        <td style="padding: 25px 30px; color: #ef4444;">✗ No</td>
+                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Native Sync</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 25px 30px; font-weight: 700;">CRM & Email Integrations</td>
+                        <td style="padding: 25px 30px; color: #94a3b8;">Limited</td>
+                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Full Suite</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Growth Stats Section -->
+<section style="padding: 80px 20px; background: #f8fafc;">
+    <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; text-align: center;">
+        <div>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #6c5ce7;">1M+</div>
+            <p style="font-weight: 700; color: #64748b;">Profiles Created</p>
+        </div>
+        <div>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #10b981;">$50M+</div>
+            <p style="font-weight: 700; color: #64748b;">Revenue Generated</p>
+        </div>
+        <div>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #f59e0b;">98%</div>
+            <p style="font-weight: 700; color: #64748b;">Satisfaction Rate</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section style="padding: 120px 20px; background: #fff;">
+    <div style="max-width: 1100px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 60px;">Your elite presence in 3 simple steps</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
+            <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
+                <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;">1</div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Claim Your Link</h3>
+                <p>Register your unique URL and customize your digital identity.</p>
+            </div>
+            <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
+                <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;">2</div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Build Your Funnel</h3>
+                <p>Drag and drop links, forms, and galleries to showcase your best work.</p>
+            </div>
+            <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
+                <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;">3</div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Launch & Grow</h3>
+                <p>Share your link everywhere and watch your conversion rates skyrocket.</p>
             </div>
         </div>
     </div>
@@ -98,8 +193,37 @@ $h_img   = get_option('saas_home_image');
 <!-- Features Grid -->
 <section class="features-section" style="padding: 120px 20px; background: #f8f9fa; border-top: 1px solid #eee;">
     <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
-        <h2 style="font-size: 2.5rem; margin-bottom: 60px;">Everything you need to grow online</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 80px;">Everything you need to grow online</h2>
+
+        <!-- Interactive Tech Preview -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 80px; text-align: left; align-items: center;">
+            <div style="background:#fff; padding:50px; border-radius:40px; box-shadow:0 30px 60px rgba(0,0,0,0.05);">
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <span style="background:rgba(108, 92, 231, 0.1); color:#6c5ce7; padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem;">Smart Routing</span>
+                    <span style="background:rgba(57, 224, 155, 0.1); color:#39e09b; padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem;">A/B Testing</span>
+                </div>
+                <h3 style="font-size:2rem; margin-bottom:20px;">The only link hub with an IQ.</h3>
+                <p style="color:#64748b; font-size:1.1rem; line-height:1.7;">Our system automatically detects your visitor's location and device. Send iPhone users to the App Store and Android users to Play Store—automatically. Run split tests on your CTAs to see which version converts better.</p>
+            </div>
+            <div style="background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding:40px; border-radius:40px; color:#fff; position:relative; overflow:hidden;">
+                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:15px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <strong>Variant A: "Buy Now"</strong>
+                        <span style="color:#ef4444;">12.5%</span>
+                    </div>
+                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px;"><div style="width:12.5%; height:100%; background:#ef4444; border-radius:10px;"></div></div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <strong>Variant B: "Get Started"</strong>
+                        <span style="color:#39e09b;">24.8% (Winner)</span>
+                    </div>
+                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px;"><div style="width:24.8%; height:100%; background:#39e09b; border-radius:10px;"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px;">
             <?php
             $features_json = get_option('saas_home_features');
             $features = json_decode($features_json, true);
@@ -119,6 +243,31 @@ $h_img   = get_option('saas_home_image');
                     <p><?php echo esc_html($f['desc']); ?></p>
                 </div>
             <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Theme Showcase Section -->
+<section style="padding: 120px 20px; background: #fff;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 60px;">Bespoke themes for elite brands</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+            <div style="padding: 30px; border-radius: 24px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div style="height: 200px; background: #fff; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #64748b;">Light Mode</div>
+                <h4 style="margin: 0;">Clean & Professional</h4>
+            </div>
+            <div style="padding: 30px; border-radius: 24px; background: #0f172a; border: 1px solid #1e293b; color: #fff;">
+                <div style="height: 200px; background: #1e293b; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #94a3b8;">Dark Mode</div>
+                <h4 style="margin: 0;">Modern & Bold</h4>
+            </div>
+            <div style="padding: 30px; border-radius: 24px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                <div style="height: 200px; background: rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff;">Vibrant</div>
+                <h4 style="margin: 0;">Energetic & Fun</h4>
+            </div>
+            <div style="padding: 30px; border-radius: 24px; background: #000; border: 2px solid #d4af37; color: #d4af37;">
+                <div style="height: 200px; background: #1a1a1a; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(212,175,55,0.1); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #d4af37;">Luxury</div>
+                <h4 style="margin: 0;">Premium & Elite</h4>
+            </div>
         </div>
     </div>
 </section>
@@ -167,20 +316,33 @@ $h_img   = get_option('saas_home_image');
 </section>
 
 <!-- Testimonials Section -->
-<section style="padding: 100px 20px; background: #fff;">
-    <div style="max-width: 1000px; margin: 0 auto; text-align: center;">
-        <h2 style="font-size: 2.5rem; margin-bottom: 60px;">Trusted by 10,000+ creators</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+<section style="padding: 120px 20px; background: #fff;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 80px;">What elite creators are saying</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
             <?php
             $t_json = get_option('saas_home_testimonials');
-            $testimonials = json_decode($t_json, true) ?: [
-                ['name' => 'Sarah J.', 'role' => 'Coach', 'text' => 'This tool changed my business. I capture 3x more leads now.'],
-                ['name' => 'Mark D.', 'role' => 'Realtor', 'text' => 'The NFC business card feature is a game-changer at events.']
-            ];
+            $testimonials = json_decode($t_json, true);
+
+            if (!$testimonials) {
+                $testimonials = [
+                    ['name' => 'Alex Rivera', 'role' => 'Strategic Coach', 'text' => 'I switched from Linktree and my consultation bookings increased by 40% in the first month.'],
+                    ['name' => 'Jordan Smith', 'role' => 'Real Estate Mogul', 'text' => 'The NFC business card feature is the ultimate conversation starter at networking events.'],
+                    ['name' => 'Elena Chen', 'role' => 'Digital Artist', 'text' => 'Finally, a link hub that actually looks high-end. The analytics helped me double my revenue.']
+                ];
+            }
+
             foreach ($testimonials as $t) : ?>
-                <div style="background: #f8f9fa; padding: 40px; border-radius: 32px; text-align: left;">
-                    <p style="font-style: italic; margin-bottom: 20px;">"<?php echo esc_html($t['text']); ?>"</p>
-                    <strong><?php echo esc_html($t['name']); ?></strong> - <small><?php echo esc_html($t['role']); ?></small>
+                <div style="background: #f8fafc; padding: 50px; border-radius: 40px; text-align: left; border: 1px solid #f1f5f9; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
+                    <div style="color: #f59e0b; font-size: 1.5rem; margin-bottom: 20px;">★★★★★</div>
+                    <p style="font-size: 1.15rem; line-height: 1.7; margin-bottom: 30px; color: #475569;">"<?php echo esc_html($t['text']); ?>"</p>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 50px; height: 50px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #94a3b8;"><?php echo substr($t['name'], 0, 1); ?></div>
+                        <div>
+                            <strong style="display: block; font-size: 1.1rem; color: #1e293b;"><?php echo esc_html($t['name']); ?></strong>
+                            <small style="color: #64748b; font-weight: 600;"><?php echo esc_html($t['role']); ?></small>
+                        </div>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -215,6 +377,16 @@ $h_img   = get_option('saas_home_image');
                 <a href="<?php echo home_url('/register?plan=pro'); ?>" style="display: block; padding: 15px; background: #fff; border-radius: 50px; color: #6c5ce7; text-decoration: none; font-weight: 700;">Upgrade to Pro</a>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section style="padding: 120px 20px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="font-size: 4rem; font-weight: 900; margin-bottom: 20px;">Ready to scale your digital presence?</h2>
+        <p style="font-size: 1.5rem; opacity: 0.9; margin-bottom: 40px;">Join thousands of elite creators who are building their future on our platform.</p>
+        <a href="<?php echo home_url('/register'); ?>" style="display: inline-block; padding: 25px 60px; background: #39e09b; color: #1e2329; text-decoration: none; border-radius: 100px; font-weight: 900; font-size: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">Get Started for Free</a>
+        <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">No credit card required. Cancel anytime.</p>
     </div>
 </section>
 
@@ -269,5 +441,36 @@ $h_img   = get_option('saas_home_image');
         box-shadow: 0 10px 20px rgba(57, 224, 155, 0.3);
     }
 </style>
+
+<script>
+jQuery(document).ready(function($) {
+    var timer;
+    $('#saas-home-username').on('keyup', function() {
+        var user = $(this).val();
+        var $status = $('#username-status');
+        clearTimeout(timer);
+
+        if (user.length < 3) {
+            $status.text('').css('color', 'inherit');
+            return;
+        }
+
+        $status.text('Checking availability...').css('color', '#666');
+
+        timer = setTimeout(function() {
+            $.post(saas_data.ajax_url, {
+                action: 'saas_check_username',
+                username: user
+            }, function(res) {
+                if (res.success) {
+                    $status.text('✓ ' + user + ' is available!').css('color', '#10b981');
+                } else {
+                    $status.text('✗ ' + user + ' is already taken.').css('color', '#ef4444');
+                }
+            });
+        }, 500);
+    });
+});
+</script>
 
 <?php get_footer(); ?>

@@ -55,7 +55,7 @@ class Saas_Admin_Settings {
 
         update_option('saas_home_title', 'The Only Link-in-Bio Built for Real Conversions');
         update_option('saas_home_hero', 'Turn your social media followers into loyal clients. A complete digital identity system with built-in lead generation, digital business cards, and advanced analytics.');
-        update_option('saas_home_cta', 'Claim Your Elite URL Now');
+        update_option('saas_home_cta', 'Claim My Link');
         update_option('saas_home_features', json_encode($features));
         update_option('saas_home_benefits', json_encode($benefits));
         update_option('saas_home_testimonials', json_encode($testimonials));

@@ -63,7 +63,7 @@ if ( ! get_query_var( 'saas_profile' ) ) : ?>
         </div>
     <?php endif; ?>
 
-    <header id="masthead" class="site-header" style="padding: 20px 0; background: #fff; border-bottom: 1px solid #eee;">
+    <header id="masthead" class="site-header" style="padding: 20px 0; background: #fff; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000;">
         <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
             <div class="site-branding">
                 <?php
@@ -75,15 +75,13 @@ if ( ! get_query_var( 'saas_profile' ) ) : ?>
                 ?>
             </div>
             <nav id="site-navigation" class="main-navigation">
-                <?php
-                wp_nav_menu([
-                    'theme_location' => 'primary',
-                    'menu_id'        => 'primary-menu',
-                    'container'      => false,
-                    'menu_class'     => 'primary-menu-list',
-                    'fallback_cb'    => false,
-                ]);
-                ?>
+                <ul class="primary-menu-list">
+                    <li><a href="<?php echo home_url('/'); ?>">Home</a></li>
+                    <li><a href="<?php echo home_url('/directory'); ?>">Discovery</a></li>
+                    <li><a href="<?php echo home_url('/pricing'); ?>">Pricing</a></li>
+                    <li><a href="<?php echo home_url('/about'); ?>">About</a></li>
+                    <li><a href="<?php echo home_url('/contact'); ?>">Contact</a></li>
+                </ul>
                 <style>
                     .primary-menu-list { list-style: none; display: flex; gap: 30px; margin: 0; padding: 0; }
                     .primary-menu-list a { text-decoration: none; color: #666; font-weight: 600; font-size: 0.95rem; }

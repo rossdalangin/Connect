@@ -25,13 +25,15 @@ class Saas_Auth {
     public function register_form() {
         if ( is_user_logged_in() ) return '<p>You already have an account.</p>';
 
+        $requested_username = isset($_GET['username']) ? sanitize_user($_GET['username']) : '';
+
         // Simple registration form
         ob_start();
         ?>
         <form id="saas-registration-form" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
             <?php wp_nonce_field( 'saas_register_nonce', 'saas_register_security' ); ?>
             <input type="hidden" name="action" value="saas_register_user">
-            <p><input type="text" name="user_login" placeholder="Username" required></p>
+            <p><input type="text" name="user_login" placeholder="Username" value="<?php echo esc_attr($requested_username); ?>" required></p>
             <p><input type="email" name="user_email" placeholder="Email" required></p>
             <p><input type="password" name="user_pass" placeholder="Password" required></p>
             <p><button type="submit" class="button button-primary">Create Account</button></p>
