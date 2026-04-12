@@ -83,6 +83,20 @@ class Saas_Analytics {
         return $results ?: [];
     }
 
+    public function get_user_activity_over_time( $user_id ) {
+        global $wpdb;
+        $results = $wpdb->get_results( $wpdb->prepare( "
+            SELECT DATE_FORMAT(created_at, '%b %d') as date,
+                   SUM(CASE WHEN event_type = 'view' THEN 1 ELSE 0 END) as views,
+                   SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) as clicks
+            FROM {$this->table_name}
+            WHERE user_id = %d AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY date
+            ORDER BY created_at ASC
+        ", $user_id ) );
+        return $results ?: [];
+    }
+
     public function get_global_activity_over_time() {
         global $wpdb;
         $results = $wpdb->get_results( "
@@ -137,7 +151,7 @@ class Saas_Analytics {
         global $wpdb;
         $total_views  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'view'" );
         $total_clicks = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'click'" );
-        $total_leads  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'lead_gen'" );
+        $total_leads  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'lead_conversion'" );
 
         return [
             'views'  => $total_views ?: 0,

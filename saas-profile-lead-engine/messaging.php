@@ -10,6 +10,7 @@ class Saas_Messaging {
         add_action( 'init', [ $this, 'register_message_cpt' ] );
         add_action( 'wp_ajax_saas_send_message', [ $this, 'handle_send_message' ] );
         add_action( 'wp_ajax_saas_get_message_content', [ $this, 'get_message_content' ] );
+        add_action( 'add_meta_boxes', [ $this, 'add_admin_meta_boxes' ] );
     }
 
     public function register_message_cpt() {
@@ -27,10 +28,11 @@ class Saas_Messaging {
 
         $to_user_id = intval( $_POST['to_user'] );
         $content = sanitize_textarea_field( $_POST['message'] );
+        $subject = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : ('Message from ' . wp_get_current_user()->display_name);
 
         $msg_id = wp_insert_post([
             'post_type' => 'saas_message',
-            'post_title' => 'Message from ' . wp_get_current_user()->display_name,
+            'post_title' => $subject,
             'post_content' => $content,
             'post_status' => 'publish',
             'post_author' => get_current_user_id(),
@@ -61,6 +63,49 @@ class Saas_Messaging {
             'content' => nl2br($msg->post_content),
             'from_id' => $msg->post_author
         ]);
+    }
+
+    public function add_admin_meta_boxes() {
+        add_meta_box( 'saas_msg_details', 'Message Details', [ $this, 'render_admin_meta_box' ], 'saas_message', 'normal', 'high' );
+    }
+
+    public function render_admin_meta_box( $post ) {
+        $recipient_id = get_post_meta($post->ID, '_saas_msg_recipient', true);
+        $recipient = get_userdata($recipient_id);
+        $sender = get_userdata($post->post_author);
+        ?>
+        <div class="saas-admin-msg-info">
+            <p><strong>From:</strong> <?php echo $sender ? $sender->display_name . ' (ID: '.$sender->ID.')' : 'Unknown'; ?></p>
+            <p><strong>To:</strong> <?php echo $recipient ? $recipient->display_name . ' (ID: '.$recipient->ID.')' : 'Unknown'; ?></p>
+            <p><strong>Status:</strong> <?php echo get_post_meta($post->ID, '_saas_msg_status', true); ?></p>
+        </div>
+        <hr>
+        <h4>Quick Reply</h4>
+        <p>Send a reply back to the sender of this message.</p>
+        <form action="<?php echo admin_url('admin-ajax.php'); ?>" method="POST" id="saas-admin-reply-form">
+            <input type="hidden" name="action" value="saas_send_message">
+            <input type="hidden" name="security" value="<?php echo wp_create_nonce('saas_dashboard_nonce'); ?>">
+            <input type="hidden" name="to_user" value="<?php echo $post->post_author; ?>">
+            <textarea name="message" rows="5" style="width:100%;" required placeholder="Type your reply here..."></textarea>
+            <p><button type="submit" class="button button-primary">Send Reply</button></p>
+        </form>
+        <script>
+            jQuery('#saas-admin-reply-form').on('submit', function(e) {
+                e.preventDefault();
+                var $form = jQuery(this);
+                $form.find('button').prop('disabled', true).text('Sending...');
+                jQuery.post(ajaxurl, $form.serialize(), function(res) {
+                    if(res.success) {
+                        alert('Reply sent!');
+                        $form.find('textarea').val('');
+                    } else {
+                        alert('Error: ' + res.data);
+                    }
+                    $form.find('button').prop('disabled', false).text('Send Reply');
+                });
+            });
+        </script>
+        <?php
     }
 }
 new Saas_Messaging();

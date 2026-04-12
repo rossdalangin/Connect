@@ -82,6 +82,7 @@ class Saas_Admin_Settings {
             'Pricing'   => 'Check our plans',
             'Contact'   => 'Get in touch',
             'About'     => 'Learn about us',
+            'Directory' => 'Meet our elite creators.',
         ];
 
         $home_id = 0;
@@ -110,6 +111,9 @@ class Saas_Admin_Settings {
                 }
                 if ($title === 'About') {
                     update_post_meta($id, '_wp_page_template', 'template-about.php');
+                }
+                if ($title === 'Directory') {
+                    update_post_meta($id, '_wp_page_template', 'template-directory.php');
                 }
             } else {
                 if ($title === 'Home') $home_id = $page->ID;

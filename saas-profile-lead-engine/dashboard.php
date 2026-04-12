@@ -92,7 +92,7 @@ class Saas_Dashboard {
                                 <span><?php echo $is_pro ? '[✓]' : '[ ]'; ?> Pro Upgrade</span>
                             </div>
                         </div>
-                        <button class="button" onclick="document.getElementById('saas-wizard-modal').style.display='block'">Launch Setup Wizard</button>
+                        <button class="button" onclick="document.getElementById('saas-wizard-modal').style.display='flex'">Launch Setup Wizard</button>
                     </div>
                 </div>
 
@@ -115,7 +115,7 @@ class Saas_Dashboard {
                         $new_leads_count = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'meta_key' => '_saas_lead_status', 'meta_value' => 'New', 'fields' => 'ids', 'numberposts' => -1]);
                         $count = count($new_leads_count);
                         ?>
-                        <div class="saas-notif-bell" onclick="document.getElementById('saas-notif-modal').style.display='block'">🔔<?php if($count > 0) echo '<span class="notif-count">'.$count.'</span>'; ?></div>
+                        <div class="saas-notif-bell" onclick="document.getElementById('saas-notif-modal').style.display='flex'">🔔<?php if($count > 0) echo '<span class="notif-count">'.$count.'</span>'; ?></div>
                         <input type="text" id="saas-my-link" value="<?php echo home_url('/' . $profile_obj->post_name); ?>" readonly>
                         <button id="saas-copy-btn" class="btn-primary">Copy Link</button>
                         <button id="saas-preview-trigger" class="btn-primary" style="background:var(--secondary);">👁️ Preview</button>
@@ -131,6 +131,7 @@ class Saas_Dashboard {
                     <button data-tab="integrations">🔌 Sync</button>
                     <button data-tab="referrals">💸 Earn</button>
                     <button data-tab="automation">⚙️ Settings</button>
+                    <button data-tab="share">📱 Share</button>
                     <button data-tab="billing">💳 Pro</button>
                     <button data-tab="inbox">📩 Inbox</button>
                 </nav>
@@ -238,6 +239,14 @@ class Saas_Dashboard {
                                 <label>Company / Organization</label>
                                 <input type="text" name="company" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_company', true)); ?>">
                             </div>
+                            <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                <label>Custom Domain / Subdomain (Pro)</label>
+                                <input type="text" name="custom_domain" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_custom_domain', true)); ?>" placeholder="profile.yourdomain.com">
+                                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:5px;">Point your CNAME record to our server to use your own domain.</p>
+                            </div>
+                            <div class="field">
+                                <label><input type="checkbox" name="show_in_directory" value="1" <?php checked(get_post_meta($profile_id, '_saas_show_in_directory', true), 1); ?>> Show in Public Discovery Directory</label>
+                            </div>
                             <button type="submit" class="btn-primary">Update Profile</button>
                         </form>
                     </div>
@@ -308,7 +317,10 @@ class Saas_Dashboard {
                     <div class="dashboard-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                             <h3>Captured Leads</h3>
-                            <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_leads&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button">📥 Export CSV</a>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="lead-search" placeholder="Search leads..." class="button" style="background:#fff; text-align:left;">
+                                <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_leads&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button">📥 Export CSV</a>
+                            </div>
                         </div>
                         <div class="saas-table-wrapper">
                             <?php
@@ -341,8 +353,30 @@ class Saas_Dashboard {
 
                 <div id="tab-analytics" class="saas-tab-content">
                     <div class="dashboard-card">
-                        <h3>Performance</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3>Performance</h3>
+                            <a href="<?php echo admin_url('admin-ajax.php?action=saas_export_analytics&security='.wp_create_nonce('saas_export_nonce')); ?>" class="button">📥 Export Stats</a>
+                        </div>
                         <div style="height: 280px; margin-bottom: 24px;"><canvas id="saas-analytics-chart"></canvas></div>
+                        <?php
+                        $user_activity = $analytics->get_user_activity_over_time($user_id);
+                        $u_labels = array_column($user_activity, 'date');
+                        $u_views = array_column($user_activity, 'views');
+                        $u_clicks = array_column($user_activity, 'clicks');
+                        ?>
+                        <script>
+                            var saas_chart_data = {
+                                labels: <?php echo json_encode($u_labels); ?>,
+                                views: <?php echo json_encode($u_views); ?>,
+                                clicks: <?php echo json_encode($u_clicks); ?>
+                            };
+                        </script>
+
+                        <div class="saas-ab-testing-results" style="margin-bottom: 40px;">
+                            <h4>A/B Testing Insights</h4>
+                            <div style="height: 200px;"><canvas id="saas-ab-chart"></canvas></div>
+                        </div>
+
                         <?php $stats = $analytics->get_user_summary($user_id); ?>
                         <div class="stats-grid">
                             <div class="stat-card"><small>VIEWS</small><div class="value"><?php echo number_format($stats['views']); ?></div></div>
@@ -407,6 +441,40 @@ class Saas_Dashboard {
                     </div>
                 </div>
 
+                <div id="tab-share" class="saas-tab-content">
+                    <div class="dashboard-card" style="text-align:center;">
+                        <h3>Share Your Identity</h3>
+                        <div style="margin:20px 0;">
+                            <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name, get_post_meta($profile_id, '_saas_theme_color', true)); ?>" style="max-width:200px; border-radius:15px; border:5px solid #fff; box-shadow:var(--shadow);">
+                        </div>
+                        <p>Download your custom QR code for business cards and marketing materials.</p>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:400px; margin:20px auto;">
+                            <a href="<?php echo home_url('/?saas_action=vcard&profile='.$profile_id); ?>" class="button" style="width:100%;">📥 Get vCard</a>
+                            <button class="button" onclick="window.print()">🖨️ Print Card</button>
+                        </div>
+                        <hr>
+                        <h4>Social Story Card (Elite Pro)</h4>
+                        <div id="saas-story-card-preview" style="width:240px; height:426px; background:linear-gradient(135deg, <?php echo $meta['theme_color']; ?> 0%, #000 100%); margin:20px auto; border-radius:20px; position:relative; padding:30px; color:#fff; overflow:hidden; display: flex; flex-direction: column;">
+                             <div style="text-align:center;">
+                                 <?php if ( has_post_thumbnail( $profile_id ) ) : ?>
+                                    <?php echo get_the_post_thumbnail( $profile_id, 'thumbnail', ['style' => 'width:80px; height:80px; border-radius:50%; border:3px solid #fff;']); ?>
+                                 <?php endif; ?>
+                                 <h3 style="margin:10px 0 5px; font-size:1.2rem;"><?php echo esc_html($profile_obj->post_title); ?></h3>
+                                 <p style="font-size:0.7rem; opacity:0.8;"><?php echo esc_html($meta['headline']); ?></p>
+                             </div>
+                             <div style="margin-top: auto; padding-bottom: 40px; text-align:center;">
+                                <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name, '#ffffff'); ?>" style="width:100px; border-radius:10px;">
+                                <p style="font-size:0.8rem; margin-top:10px; font-weight:bold;">Scan to Connect</p>
+                             </div>
+                        </div>
+                        <button class="button" onclick="alert('Story Card Downloaded (Simulated)')">📥 Download Story Card</button>
+
+                        <hr>
+                        <h4>NFC Configuration</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted);">Program your NFC tag to point to: <br><code><?php echo home_url('/' . $profile_obj->post_name . '?src=nfc'); ?></code></p>
+                    </div>
+                </div>
+
                 <div id="tab-automation" class="saas-tab-content">
                     <div class="dashboard-card">
                         <h3>Settings & Rules</h3>
@@ -419,6 +487,17 @@ class Saas_Dashboard {
                             <div class="field">
                                 <label>Redirect after Submission</label>
                                 <input type="url" name="lead_redirect" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_redirect', true)); ?>">
+                            </div>
+                            <div class="field">
+                                <label>Lead Magnet URL (Auto-download)</label>
+                                <input type="url" name="lead_magnet_url" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_magnet_url', true)); ?>">
+                            </div>
+                            <div class="field">
+                                <label><input type="checkbox" name="lead_auto_respond" value="1" <?php checked(get_post_meta($profile_id, '_saas_lead_auto_respond', true), 1); ?>> Enable Email Auto-responder</label>
+                            </div>
+                            <div class="field">
+                                <label>Auto-reply Message</label>
+                                <textarea name="lead_auto_msg" rows="3"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_lead_auto_msg', true)); ?></textarea>
                             </div>
                             <div style="display:flex; gap:10px; margin-bottom:20px;">
                                 <button type="submit" class="btn-primary" style="flex:2;">Save Rules</button>
@@ -513,6 +592,40 @@ class Saas_Dashboard {
                     </div>
 
                     <div class="dashboard-card">
+                        <h4>Request Payout</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted);">Minimum $50.00</p>
+                        <form id="saas-payout-request-form">
+                            <div class="field"><label>Amount ($)</label><input type="number" name="amount" min="50" step="0.01" required></div>
+                            <div class="field">
+                                <label>Method</label>
+                                <select name="method">
+                                    <option value="paypal">PayPal</option>
+                                    <option value="bank">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="field"><label>Payment Email/Account</label><input type="text" name="email" required></div>
+                            <button type="submit" class="btn-primary" style="width:100%; background:var(--secondary);">Submit Request</button>
+                        </form>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h4>Marketing Materials</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Use these elite assets to boost your referrals.</p>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                            <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
+                                <small style="font-weight:bold; display:block; margin-bottom:5px;">Standard Banner</small>
+                                <img src="https://via.placeholder.com/300x100?text=Claim+Your+Elite+Bio" style="width:100%; border-radius:5px;">
+                                <button class="button copy-html-btn" style="width:100%; margin-top:10px;">Copy HTML</button>
+                            </div>
+                            <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
+                                <small style="font-weight:bold; display:block; margin-bottom:5px;">Sidebar Ad</small>
+                                <img src="https://via.placeholder.com/150x150?text=Stop+Losing+Leads" style="width:100%; border-radius:5px;">
+                                <button class="button copy-html-btn" style="width:100%; margin-top:10px;">Copy HTML</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
                         <h4>Contact Affiliate Manager</h4>
                         <form id="saas-support-msg-form">
                             <input type="hidden" name="subject" value="Affiliate Inquiry">
@@ -533,8 +646,14 @@ class Saas_Dashboard {
                                 <li>✓ Pro Backgrounds</li>
                                 <li>✓ No Branding</li>
                             </ul>
-                            <?php if ($is_pro) : ?>
-                                <div style="color:var(--secondary); font-weight:bold; margin-bottom:15px;">✓ Your subscription is active</div>
+                            <?php if ($is_pro) :
+                                $expiry = get_user_meta($user_id, '_saas_subscription_expiry', true);
+                                ?>
+                                <div style="color:var(--secondary); font-weight:bold; margin-bottom:15px;">✓ Your elite subscription is active</div>
+                                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;">
+                                    Plan: Elite Pro<br>
+                                    Next Billing: <?php echo $expiry ? date('M j, Y', $expiry) : 'Never'; ?>
+                                </p>
                                 <button id="saas-cancel-sub" class="button" style="width:100%; color:var(--danger);">Cancel Subscription</button>
                             <?php else : ?>
                                 <div class="payment-options" style="display:flex; flex-direction:column; gap:10px;">

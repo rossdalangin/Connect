@@ -39,8 +39,8 @@ function saas_ajax_add_link() {
     $url   = esc_url_raw( $_POST['url'] );
     $profile_id = intval( $_POST['profile_id'] );
     $type  = sanitize_text_field( $_POST['block_type'] );
-    $style = sanitize_text_field( $_POST['block_style'] );
-    $animation = sanitize_text_field( $_POST['block_animation'] );
+    $style = isset($_POST['block_style']) ? sanitize_text_field( $_POST['block_style'] ) : 'regular';
+    $animation = isset($_POST['block_animation']) ? sanitize_text_field( $_POST['block_animation'] ) : 'fadeinup';
 
     // Verify ownership of the target profile
     $profile = get_post($profile_id);
@@ -138,6 +138,10 @@ function saas_ajax_save_profile() {
     if (isset($_POST['company'])) {
         update_post_meta($profile_id, '_saas_company', sanitize_text_field($_POST['company']));
     }
+    if (isset($_POST['custom_domain'])) {
+        update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
+    }
+    update_post_meta($profile_id, '_saas_show_in_directory', isset($_POST['show_in_directory']) ? '1' : '0');
     if (isset($_POST['profile_image_id'])) {
         set_post_thumbnail($profile_id, intval($_POST['profile_image_id']));
     }
@@ -193,6 +197,9 @@ function saas_ajax_save_profile() {
         update_post_meta($profile_id, '_saas_form_label_msg', sanitize_text_field($_POST['form_label_msg']));
         update_post_meta($profile_id, '_saas_form_req_phone', isset($_POST['form_req_phone']) ? 1 : 0);
         update_post_meta($profile_id, '_saas_form_req_msg', isset($_POST['form_req_msg']) ? 1 : 0);
+
+        update_post_meta($profile_id, '_saas_lead_auto_respond', isset($_POST['lead_auto_respond']) ? 1 : 0);
+        update_post_meta($profile_id, '_saas_lead_auto_msg', sanitize_textarea_field($_POST['lead_auto_msg']));
     }
 
     // SEO specific
@@ -527,9 +534,11 @@ function saas_ajax_export_analytics() {
     $output = fopen('php://output', 'w');
     fputcsv($output, ['Target Name', 'Event Type', 'IP Address', 'Date']);
 
-    foreach ($results as $r) {
-        $target_name = get_the_title($r->target_id) ?: 'Profile View';
-        fputcsv($output, [$target_name, $r->event_type, $r->ip_address, $r->created_at]);
+    if ($results) {
+        foreach ($results as $r) {
+            $target_name = get_the_title($r->target_id) ?: 'Profile View';
+            fputcsv($output, [$target_name, $r->event_type, $r->ip_address, $r->created_at]);
+        }
     }
     fclose($output);
     exit;
@@ -600,6 +609,14 @@ function saas_ajax_get_lead_details() {
         <?php if($msg) : ?><p><strong>Message:</strong> <br><?php echo nl2br(esc_html($msg)); ?></p><?php endif; ?>
         <p><strong>Date:</strong> <?php echo get_the_date('F j, Y g:i a', $lead_id); ?></p>
         <hr>
+        <h4>Quick Email to Lead</h4>
+        <form id="saas-email-lead-form" style="margin-bottom:20px;">
+            <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
+            <div class="field"><label>Subject</label><input type="text" name="subject" value="Regarding your inquiry" required></div>
+            <div class="field"><label>Message</label><textarea name="message" rows="3" required></textarea></div>
+            <button type="submit" class="button">✉️ Send Email</button>
+        </form>
+        <hr>
         <form id="saas-update-lead-form">
             <input type="hidden" name="lead_id" value="<?php echo $lead_id; ?>">
             <div class="field">
@@ -649,6 +666,50 @@ function saas_ajax_update_lead() {
     update_post_meta($lead_id, '_saas_lead_log', array_slice($log, -10)); // Keep last 10
 
     wp_send_json_success( 'Lead updated successfully' );
+}
+
+// 23. AJAX: Email Lead
+add_action( 'wp_ajax_saas_email_lead', 'saas_ajax_email_lead' );
+function saas_ajax_email_lead() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $lead_id = intval( $_POST['lead_id'] );
+    $subject = sanitize_text_field( $_POST['subject'] );
+    $message = sanitize_textarea_field( $_POST['message'] );
+
+    $lead = get_post( $lead_id );
+    if ( ! $lead || $lead->post_author != get_current_user_id() ) wp_send_json_error('Unauthorized');
+
+    $lead_email = get_post_meta($lead_id, '_saas_lead_email', true);
+    if ( ! $lead_email ) wp_send_json_error('Lead email not found');
+
+    $user = wp_get_current_user();
+    $headers = [
+        'Content-Type: text/html; charset=UTF-8',
+        'Reply-To: ' . $user->display_name . ' <' . $user->user_email . '>'
+    ];
+
+    $body = "
+        <div style='font-family:sans-serif; padding:30px; background:#f8fafc; border-radius:20px;'>
+            <div style='background:#fff; padding:30px; border-radius:15px; border:1px solid #e2e8f0;'>
+                " . wpautop($message) . "
+            </div>
+            <p style='font-size:0.8rem; color:#64748b; margin-top:20px;'>
+                Sent by " . esc_html($user->display_name) . " via elite SaaS platform.
+            </p>
+        </div>
+    ";
+
+    if ( wp_mail( $lead_email, $subject, $body, $headers ) ) {
+        // Log the activity
+        $log = get_post_meta($lead_id, '_saas_lead_log', true) ?: [];
+        $log[] = [ 'time' => current_time('mysql'), 'msg' => "Email sent: $subject" ];
+        update_post_meta($lead_id, '_saas_lead_log', array_slice($log, -10));
+
+        wp_send_json_success( 'Email sent successfully to ' . $lead_email );
+    }
+
+    wp_send_json_error( 'Failed to send email' );
 }
 
 // 10. AJAX: Delete Lead

@@ -214,6 +214,15 @@
             });
         });
 
+        // Payout Request
+        $('#saas-payout-request-form').on('submit', function(e) {
+            e.preventDefault();
+            saasFetch('saas_request_payout', new FormData(this), $(this).find('button')).done(function(msg) {
+                alert(msg);
+                location.reload();
+            });
+        });
+
         // Inbox: View Message
         $(document).on('click', '.view-message', function() {
             var msgId = $(this).attr('data-id');
@@ -257,6 +266,28 @@
             $('body').css('overflow', 'auto');
         });
 
+        // 10.1 Marketing Material Copy
+        $('.copy-html-btn').on('click', function() {
+            var html = $(this).closest('div').find('img').prop('outerHTML');
+            var $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val(html).select();
+            document.execCommand("copy");
+            $temp.remove();
+            var $btn = $(this);
+            var old = $btn.text();
+            $btn.text('HTML Copied! ✅');
+            setTimeout(function() { $btn.text(old); }, 2000);
+        });
+
+        // 11. Lead Management (Search)
+        $('#lead-search').on('keyup', function() {
+            var val = $(this).val().toLowerCase();
+            $('.saas-table tbody tr').filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(val) > -1);
+            });
+        });
+
         // 11. Lead Management
         $(document).on('click', '.view-lead', function() {
             var leadId = $(this).attr('data-id');
@@ -265,6 +296,24 @@
                     $('#lead-details-content').html(html);
                     $('#saas-lead-modal').css('display', 'flex');
                 });
+        });
+
+        // Update Lead Details
+        $(document).on('submit', '#saas-update-lead-form', function(e) {
+            e.preventDefault();
+            saasFetch('saas_update_lead', new FormData(this), $(this).find('button')).done(function() {
+                location.reload();
+            });
+        });
+
+        // Email Lead
+        $(document).on('submit', '#saas-email-lead-form', function(e) {
+            e.preventDefault();
+            var $form = $(this);
+            saasFetch('saas_email_lead', new FormData(this), $form.find('button')).done(function(msg) {
+                alert(msg);
+                $form.find('textarea').val('');
+            });
         });
 
         // 12. Sortable Initializer
@@ -278,6 +327,41 @@
                         ids.push($(this).attr('data-id'));
                     });
                     saasFetch('saas_update_link_order', { link_ids: ids });
+                }
+            });
+        }
+
+        // 13. Charts (Analytics)
+        if ($('#saas-analytics-chart').length && typeof Chart !== 'undefined' && typeof saas_chart_data !== 'undefined') {
+            new Chart(document.getElementById('saas-analytics-chart'), {
+                type: 'line',
+                data: {
+                    labels: saas_chart_data.labels.length ? saas_chart_data.labels : ['No Data'],
+                    datasets: [
+                        { label: 'Views', data: saas_chart_data.views.length ? saas_chart_data.views : [0], borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.05)', fill: true, tension: 0.4 },
+                        { label: 'Clicks', data: saas_chart_data.clicks.length ? saas_chart_data.clicks : [0], borderColor: '#10b981', fill: false, tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } } }
+            });
+        }
+
+        if ($('#saas-ab-chart').length && typeof Chart !== 'undefined') {
+            new Chart(document.getElementById('saas-ab-chart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Variant A', 'Variant B'],
+                    datasets: [{
+                        label: 'Click-through Rate (%)',
+                        data: [12.5, 18.2],
+                        backgroundColor: ['#6366f1', '#10b981'],
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100 } }
                 }
             });
         }
