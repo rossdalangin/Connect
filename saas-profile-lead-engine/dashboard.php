@@ -132,6 +132,7 @@ class Saas_Dashboard {
                     <button data-tab="referrals">💸 Earn</button>
                     <button data-tab="automation">⚙️ Settings</button>
                     <button data-tab="billing">💳 Pro</button>
+                    <button data-tab="inbox">📩 Inbox</button>
                 </nav>
 
                 <div id="tab-links" class="saas-tab-content active">
@@ -457,27 +458,73 @@ class Saas_Dashboard {
                         <h3 style="color:var(--secondary);">Affiliate Program</h3>
                         <p>Share your link and earn <strong>30% recurring commission</strong> on every user you refer.</p>
 
+                        <?php
+                        $earned = get_user_meta($user_id, '_saas_affiliate_earned', true) ?: 0;
+                        $refs_count = count(get_users(['meta_key' => '_saas_referred_by', 'meta_value' => $user_id, 'fields' => 'ID']));
+                        ?>
                         <div class="stats-grid" style="margin:20px 0;">
-                            <div class="stat-card" style="background:#fff;"><small>TOTAL EARNED</small><div class="value" style="color:var(--secondary);">$0.00</div></div>
-                            <div class="stat-card" style="background:#fff;"><small>ACTIVE REFS</small><div class="value">0</div></div>
+                            <div class="stat-card" style="background:#fff;"><small>TOTAL EARNED</small><div class="value" style="color:var(--secondary);">$<?php echo number_format($earned, 2); ?></div></div>
+                            <div class="stat-card" style="background:#fff;"><small>ACTIVE REFS</small><div class="value"><?php echo $refs_count; ?></div></div>
                         </div>
 
                         <div style="background:#fff; padding:15px; border-radius:10px; border:1px dashed var(--secondary); margin-bottom:20px;">
                             <label style="display:block; font-size:0.7rem; color:var(--text-muted); margin-bottom:5px;">YOUR UNIQUE LINK</label>
-                            <code style="font-weight:bold; word-break:break-all;"><?php echo home_url('/?ref=' . wp_get_current_user()->user_login); ?></code>
+                            <input type="text" id="saas-ref-link" value="<?php echo home_url('/?ref=' . wp_get_current_user()->user_login); ?>" readonly style="width:100%; border:none; font-weight:bold; background:transparent;">
                         </div>
-                        <button class="btn-primary" style="background:var(--secondary); width:100%;" onclick="alert('Referral Link Copied!')">Copy Referral Link</button>
+                        <button id="saas-copy-ref-btn" class="btn-primary" style="background:var(--secondary); width:100%;">Copy Referral Link</button>
                     </div>
 
                     <div class="dashboard-card">
                         <h4>Recent Payouts</h4>
-                        <p style="color:var(--text-muted); font-size:0.9rem;">No payouts recorded yet. Start sharing to earn!</p>
+                        <?php
+                        $payouts = get_posts(['post_type' => 'saas_payout', 'post_author' => $user_id, 'numberposts' => 10]);
+                        if($payouts) : ?>
+                            <table class="saas-table">
+                                <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <?php foreach($payouts as $p) : ?>
+                                        <tr><td><?php echo get_the_date('', $p->ID); ?></td><td>$<?php echo get_post_meta($p->ID, '_amount', true); ?></td><td>Paid</td></tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p style="color:var(--text-muted); font-size:0.9rem;">No payouts recorded yet. Start sharing to earn!</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h4>Referred Users</h4>
+                        <?php
+                        $referred_users = get_users(['meta_key' => '_saas_referred_by', 'meta_value' => $user_id, 'number' => 10]);
+                        if($referred_users) : ?>
+                            <table class="saas-table">
+                                <thead><tr><th>User</th><th>Joined</th><th>Plan</th></tr></thead>
+                                <tbody>
+                                    <?php foreach($referred_users as $ru) :
+                                        $u_plan = get_user_meta($ru->ID, '_saas_subscription_plan', true) ?: 'Free';
+                                        ?>
+                                        <tr><td><?php echo esc_html($ru->display_name); ?></td><td><?php echo date('M j, Y', strtotime($ru->user_registered)); ?></td><td><?php echo ucfirst($u_plan); ?></td></tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p style="color:var(--text-muted); font-size:0.9rem;">No referrals yet. Time to share your link!</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h4>Contact Affiliate Manager</h4>
+                        <form id="saas-support-msg-form">
+                            <input type="hidden" name="subject" value="Affiliate Inquiry">
+                            <textarea name="message" rows="3" placeholder="Questions about payouts or materials?" required></textarea>
+                            <button type="submit" class="button" style="margin-top:10px;">Send Message</button>
+                        </form>
                     </div>
                 </div>
 
                 <div id="tab-billing" class="saas-tab-content">
                     <div class="dashboard-card" style="text-align:center;">
-                        <h3>Go Pro 🚀</h3>
+                        <h3>Plan Management</h3>
                         <div class="plan-card" style="background:var(--primary-soft); padding:32px; border-radius:20px; border:2px solid var(--primary); max-width:320px; margin:20px auto;">
                             <h4 style="font-size:1.5rem; margin:0;">Elite Pro</h4>
                             <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$19<small style="font-size:1rem;">/mo</small></div>
@@ -487,9 +534,68 @@ class Saas_Dashboard {
                                 <li>✓ No Branding</li>
                             </ul>
                             <?php if ($is_pro) : ?>
-                                <button disabled class="btn-primary" style="width:100%;">Current Plan Active</button>
+                                <div style="color:var(--secondary); font-weight:bold; margin-bottom:15px;">✓ Your subscription is active</div>
+                                <button id="saas-cancel-sub" class="button" style="width:100%; color:var(--danger);">Cancel Subscription</button>
                             <?php else : ?>
-                                <button id="saas-simulate-pro" class="btn-primary" style="width:100%;">Upgrade Now</button>
+                                <div class="payment-options" style="display:flex; flex-direction:column; gap:10px;">
+                                    <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="pro" style="width:100%;">Upgrade with Stripe</button>
+                                    <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="pro" style="width:100%; background:#0070ba;">Upgrade with PayPal</button>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h4>Payment History</h4>
+                        <?php
+                        $orders = get_posts(['post_type' => 'saas_order', 'post_author' => $user_id, 'numberposts' => 10]);
+                        if($orders) : ?>
+                            <table class="saas-table">
+                                <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <?php foreach($orders as $o) : ?>
+                                        <tr>
+                                            <td><?php echo get_the_date('', $o->ID); ?></td>
+                                            <td>$<?php echo get_post_meta($o->ID, '_saas_order_amount', true); ?></td>
+                                            <td><?php echo ucfirst(get_post_meta($o->ID, '_saas_order_status', true)); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p style="color:var(--text-muted);">No transactions found.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div id="tab-inbox" class="saas-tab-content">
+                    <div class="dashboard-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3>System Messages</h3>
+                            <button class="button" onclick="document.getElementById('saas-new-msg-modal').style.display='flex'">Compose</button>
+                        </div>
+                        <div id="saas-message-list">
+                            <?php
+                            $messages = get_posts([
+                                'post_type' => 'saas_message',
+                                'meta_query' => [['key' => '_saas_msg_recipient', 'value' => $user_id]],
+                                'numberposts' => 20
+                            ]);
+                            if($messages) :
+                                foreach($messages as $m) :
+                                    $status = get_post_meta($m->ID, '_saas_msg_status', true);
+                                    ?>
+                                    <div class="message-item <?php echo $status; ?>" style="padding:15px; border-bottom:1px solid #eee; <?php if($status=='unread') echo 'background:var(--primary-soft);'; ?>">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <strong><?php echo esc_html($m->post_title); ?></strong>
+                                            <small><?php echo get_the_date('M j', $m->ID); ?></small>
+                                        </div>
+                                        <p style="margin:10px 0; font-size:0.9rem;"><?php echo wp_trim_words($m->post_content, 20); ?></p>
+                                        <button class="button view-message" data-id="<?php echo $m->ID; ?>">Read Full Message</button>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p style="color:var(--text-muted);">No messages yet. Check back later for system updates.</p>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -561,6 +667,33 @@ class Saas_Dashboard {
         </div>
 
         <!-- Modals -->
+        <div id="saas-message-modal" class="saas-modal">
+            <div class="saas-modal-content">
+                <span class="close-modal">&times;</span>
+                <h3 id="msg-modal-title">Message Details</h3>
+                <div id="msg-modal-content" style="line-height:1.6; margin-bottom:20px;"></div>
+                <hr>
+                <h4>Reply</h4>
+                <form id="saas-reply-msg-form">
+                    <input type="hidden" name="to_user" id="msg-reply-to">
+                    <textarea name="message" rows="3" required placeholder="Type your reply here..."></textarea>
+                    <button type="submit" class="btn-primary" style="margin-top:10px;">Send Reply</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="saas-new-msg-modal" class="saas-modal">
+            <div class="saas-modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>New Message to Admin</h3>
+                <form id="saas-new-support-msg">
+                    <div class="field"><label>Subject</label><input type="text" name="subject" required></div>
+                    <div class="field"><label>Message</label><textarea name="message" rows="5" required></textarea></div>
+                    <button type="submit" class="btn-primary" style="width:100%;">Send Message</button>
+                </form>
+            </div>
+        </div>
+
         <div id="saas-lead-modal" class="saas-modal">
             <div class="saas-modal-content">
                 <span class="close-modal">&times;</span>

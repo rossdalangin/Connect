@@ -26,6 +26,8 @@ require_once SAAS_PLUGIN_DIR . 'ajax-handlers.php';
 require_once SAAS_PLUGIN_DIR . 'analytics.php';
 require_once SAAS_PLUGIN_DIR . 'leads.php';
 require_once SAAS_PLUGIN_DIR . 'payments.php';
+require_once SAAS_PLUGIN_DIR . 'affiliates.php';
+require_once SAAS_PLUGIN_DIR . 'messaging.php';
 require_once SAAS_PLUGIN_DIR . 'utils.php';
 
 // 4. Admin Interface

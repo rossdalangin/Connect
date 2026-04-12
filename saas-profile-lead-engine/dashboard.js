@@ -116,7 +116,7 @@
             $('#edit-link-hour-from').val($li.attr('data-hour-from'));
             $('#edit-link-hour-to').val($li.attr('data-hour-to'));
 
-            $('#saas-edit-modal').show();
+            $('#saas-edit-modal').css('display', 'flex');
             $('body').css('overflow', 'hidden');
         });
 
@@ -162,15 +162,67 @@
                 });
         });
 
-        // 6. Copy Link
-        $('#saas-copy-btn').on('click', function() {
-            var $input = $('#saas-my-link');
+        // 6. Copy Link (Profile & Ref)
+        // Cancel Subscription
+        $('#saas-cancel-sub').on('click', function() {
+            if(!confirm("Are you sure you want to cancel your elite subscription?")) return;
+            saasFetch('saas_cancel_subscription', {}, $(this)).done(function(msg) {
+                alert(msg);
+                location.reload();
+            });
+        });
+
+        // 6. Copy Link (Profile & Ref)
+        $('#saas-copy-btn, #saas-copy-ref-btn').on('click', function() {
+            var targetId = ($(this).attr('id') === 'saas-copy-btn') ? '#saas-my-link' : '#saas-ref-link';
+            var $input = $(targetId);
             $input.select();
             document.execCommand('copy');
             var $btn = $(this);
             var oldText = $btn.text();
             $btn.text('Copied! ✅');
             setTimeout(function() { $btn.text(oldText); }, 2000);
+        });
+
+        // Checkout Button
+        $('.saas-checkout-btn').on('click', function() {
+            var data = {
+                gateway: $(this).data('gateway'),
+                plan_id: $(this).data('plan')
+            };
+            saasFetch('saas_checkout', data, $(this)).done(function(res) {
+                window.location.href = res.redirect_url;
+            });
+        });
+
+        // Affiliate/Support Messaging
+        $('#saas-support-msg-form, #saas-new-support-msg, #saas-reply-msg-form').on('submit', function(e) {
+            e.preventDefault();
+            var $form = $(this);
+            var data = {
+                to_user: $form.find('[name="to_user"]').val() || 1, // Default to admin
+                message: $form.find('textarea').val(),
+                subject: $form.find('[name="subject"]').val() || 'Support Request'
+            };
+            saasFetch('saas_send_message', data, $form.find('button')).done(function(msg) {
+                alert(msg);
+                $form.find('textarea, input[type="text"]').val('');
+                if($form.closest('.saas-modal').length) {
+                    $form.closest('.saas-modal').hide();
+                    $('body').css('overflow', 'auto');
+                }
+            });
+        });
+
+        // Inbox: View Message
+        $(document).on('click', '.view-message', function() {
+            var msgId = $(this).attr('data-id');
+            saasFetch('saas_get_message_content', { msg_id: msgId }, $(this)).done(function(res) {
+                $('#msg-modal-title').text(res.title);
+                $('#msg-modal-content').html(res.content);
+                $('#msg-reply-to').val(res.from_id);
+                $('#saas-message-modal').css('display', 'flex');
+            });
         });
 
         // 7. Modal Control
@@ -211,7 +263,7 @@
             saasFetch('saas_get_lead_details', { lead_id: leadId }, $(this))
                 .done(function(html) {
                     $('#lead-details-content').html(html);
-                    $('#saas-lead-modal').show();
+                    $('#saas-lead-modal').css('display', 'flex');
                 });
         });
 

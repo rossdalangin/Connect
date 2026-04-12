@@ -92,6 +92,11 @@ add_action( 'pre_get_posts', 'saas_enforce_data_isolation' );
  * Using a more resilient approach to avoid hijacking homepage/admin/existing pages.
  */
 function saas_add_rewrite_rules() {
+    // 1. Referral tracking
+    if ( isset($_GET['ref']) ) {
+        setcookie('saas_ref', sanitize_text_field($_GET['ref']), time() + (86400 * 30), "/");
+    }
+
     // Only apply if it's not a standard WP path
     add_rewrite_rule(
         '^([^/]+)/?$',

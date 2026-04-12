@@ -58,6 +58,14 @@ class Saas_Auth {
         $user_id = wp_create_user( $user_login, $user_pass, $user_email );
 
         if ( ! is_wp_error($user_id) ) {
+            // Handle Referral attribution
+            if ( isset($_COOKIE['saas_ref']) ) {
+                $referrer = get_user_by('login', $_COOKIE['saas_ref']);
+                if ($referrer) {
+                    update_user_meta($user_id, '_saas_referred_by', $referrer->ID);
+                }
+            }
+
             wp_set_current_user( $user_id );
             wp_set_auth_cookie( $user_id );
             wp_redirect( home_url('/dashboard') );

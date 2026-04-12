@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Saas_Payments {
     public function __construct() {
         add_action( 'wp_ajax_saas_checkout', [ $this, 'handle_checkout' ] );
+        add_action( 'wp_ajax_saas_cancel_subscription', [ $this, 'handle_cancel_subscription' ] );
     }
 
     /**
@@ -44,8 +45,11 @@ class Saas_Payments {
      * AJAX: Process Checkout Session
      */
     public function handle_checkout() {
+        check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
         $plan_id = sanitize_text_field( $_POST['plan_id'] );
         $gateway = sanitize_text_field( $_POST['gateway'] );
+        $user_id = get_current_user_id();
 
         if ( $gateway === 'stripe' ) {
             $secret_key = get_option('saas_stripe_secret_key');
@@ -72,6 +76,16 @@ class Saas_Payments {
         wp_send_json_error( 'Gateway not supported' );
     }
 
+    public function handle_cancel_subscription() {
+        check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+        $user_id = get_current_user_id();
+
+        update_user_meta( $user_id, '_saas_subscription_plan', 'free' );
+        update_user_meta( $user_id, '_saas_subscription_expiry', time() ); // Expire immediately
+
+        wp_send_json_success( 'Subscription cancelled successfully.' );
+    }
+
     /**
      * REST: Webhook Handler (Stripe/PayPal)
      */
@@ -94,6 +108,14 @@ class Saas_Payments {
         if ( $user_id && $status === 'succeeded' ) {
             update_user_meta( $user_id, '_saas_subscription_plan', $plan );
             update_user_meta( $user_id, '_saas_subscription_expiry', strtotime('+1 year') );
+
+            // Handle Affiliate Commission
+            $referrer_id = get_user_meta($user_id, '_saas_referred_by', true);
+            if ($referrer_id) {
+                $aff = new Saas_Affiliates();
+                $aff->record_referral_sale($referrer_id, 19.00); // Dynamic amount in production
+            }
+
             return new WP_REST_Response( [ 'success' => true ], 200 );
         }
 

@@ -477,6 +477,9 @@ class Saas_Admin_Settings {
                     <li><a href="<?php echo admin_url('edit.php?post_type=saas_profile'); ?>">Profiles</a></li>
                     <li><a href="<?php echo admin_url('edit.php?post_type=saas_lead'); ?>">Captured Leads</a></li>
                     <li><a href="<?php echo admin_url('edit.php?post_type=saas_license'); ?>">System Licenses</a></li>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_order'); ?>">Sales/Orders</a></li>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_payout'); ?>">Affiliate Payouts</a></li>
+                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_message'); ?>">System Messages</a></li>
                 </ul>
             </div>
             <div class="saas-admin-main">
