@@ -80,6 +80,10 @@ class Saas_Dashboard {
         ob_start();
         ?>
         <div id="saas-dashboard">
+            <div class="saas-top-utility-nav" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <a href="<?php echo home_url('/'); ?>" style="color:var(--text-muted); text-decoration:none; font-weight:700; font-size:0.85rem;">← Back to Website</a>
+                <a href="<?php echo wp_logout_url(home_url()); ?>" style="color:var(--danger); text-decoration:none; font-weight:700; font-size:0.85rem;">Logout 👋</a>
+            </div>
             <div class="dashboard-main-area">
                 <!-- Onboarding Checklist -->
                 <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom:20px;">
@@ -157,7 +161,10 @@ class Saas_Dashboard {
                             <?php foreach($all_user_profiles as $up) : ?>
                                 <div class="dropdown-item-wrapper <?php echo ($up->ID == $active_profile_id) ? 'active' : ''; ?>">
                                     <a href="?profile_id=<?php echo $up->ID; ?>" class="dropdown-item"><?php echo esc_html($up->post_title); ?></a>
-                                    <button class="clone-profile-btn" data-id="<?php echo $up->ID; ?>" title="Clone Profile">📋</button>
+                                    <div style="display:flex; gap:5px;">
+                                        <button class="clone-profile-btn" data-id="<?php echo $up->ID; ?>" title="Clone Profile">📋</button>
+                                        <button class="delete-profile-btn" data-id="<?php echo $up->ID; ?>" title="Delete Profile" style="color:var(--danger);">🗑️</button>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                             <div class="dropdown-divider"></div>
@@ -207,6 +214,8 @@ class Saas_Dashboard {
                                     <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="image_gallery"><span>🖼️</span> Gal <span class="pro-badge">Pro</span></div>
                                     <div class="picker-item" data-type="social_icons"><span>📱</span> Social</div>
                                     <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="newsletter"><span>📧</span> Mail <span class="pro-badge">Pro</span></div>
+                                    <div class="picker-item" data-type="lead_form"><span>🎯</span> Form</div>
+                                    <div class="picker-item <?php echo $is_pro ? '' : 'pro-locked'; ?>" data-type="calendar"><span>📅</span> Cal <span class="pro-badge">Pro</span></div>
                                 </div>
 
                                 <form id="saas-add-link-form">
@@ -692,6 +701,7 @@ class Saas_Dashboard {
                         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Add Google Analytics, Facebook Pixel, or custom tracking scripts. (Elite Pro Feature)</p>
                         <form id="saas-tracking-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="form_context" value="tracking">
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                                 <label>Header Scripts (e.g. Google Tag Manager)</label>
                                 <textarea name="header_scripts" rows="5" placeholder="<script>...</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_header_scripts', true)); ?></textarea>
@@ -741,6 +751,7 @@ class Saas_Dashboard {
                         <h3>Settings & Rules</h3>
                         <form id="saas-automation-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="form_context" value="automation">
 
                             <h4>Lead Form Customization</h4>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
@@ -809,8 +820,6 @@ class Saas_Dashboard {
                         <h3>Third-Party Sync</h3>
                         <form id="saas-integrations-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
-                            <input type="hidden" name="form_context" value="tracking">
-                            <input type="hidden" name="form_context" value="automation">
                             <input type="hidden" name="form_context" value="integrations">
                             <div class="field">
                                 <label>Mailchimp API Key</label>
@@ -991,6 +1000,8 @@ class Saas_Dashboard {
                                         <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="pro" style="width:100%; background:#0070ba;">Upgrade with PayPal</button>
                                     <?php endif; ?>
 
+                                <button id="saas-demo-upgrade-btn" class="button" style="width:100%; margin-top:10px; background:var(--accent-soft); border-color:var(--accent); color:var(--accent);">⚡ Instant Demo Upgrade (UID: <?php echo $user_id; ?>)</button>
+
                                     <?php if ($gateway_mode === 'none') : ?>
                                         <p style="color:var(--text-muted); font-size:0.8rem;">Online payments are currently disabled. Please contact support to upgrade.</p>
                                     <?php endif; ?>
@@ -1074,7 +1085,7 @@ class Saas_Dashboard {
                                             <small><?php echo get_the_date('M j', $m->ID); ?></small>
                                         </div>
                                         <p style="margin:10px 0; font-size:0.9rem;"><?php echo wp_trim_words($m->post_content, 20); ?></p>
-                                        <button class="button view-message" data-id="<?php echo $m->ID; ?>">Read Full Message</button>
+                                    <button class="button view-message" data-id="<?php echo $m->ID; ?>">Read Full Message</button>
                                     </div>
                                 <?php endforeach; ?>
                             <?php else: ?>

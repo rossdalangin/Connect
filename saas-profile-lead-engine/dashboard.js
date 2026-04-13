@@ -147,6 +147,21 @@
                 .done(function() { location.reload(); });
         });
 
+        $(document).on('click', '#saas-demo-upgrade-btn', function() {
+            if(!confirm('This will simulate a successful payment and grant you Pro access. Continue?')) return;
+            saasFetch('saas_simulate_pro_upgrade', {}, $(this)).done(function(msg) {
+                alert(msg);
+                location.reload();
+            });
+        });
+
+        $(document).on('click', '.delete-profile-btn', function(e) {
+            e.stopPropagation();
+            if(!confirm('DELETE this profile and all its links forever?')) return;
+            saasFetch('saas_delete_profile', { profile_id: $(this).attr('data-id') }, $(this))
+                .done(function() { window.location.href = '?'; });
+        });
+
         $(document).on('click', '.clone-profile-btn', function(e) {
             e.stopPropagation();
             if(!confirm('Clone this profile and all its blocks?')) return;
@@ -214,16 +229,30 @@
         $('#saas-branding-form [name="bg_value"]').on('input', function() { updatePreview('bg_value', $(this).val()); });
         $('#saas-branding-form [name="profile_theme"]').on('change', function() { updatePreview('profile_theme', $(this).val()); });
         $('#saas-branding-form [name="container_shadow"]').on('change', function() { updatePreview('container_shadow', $(this).val()); });
+        $('#saas-branding-form [name="font_family"]').on('change', function() { updatePreview('font_family', $(this).val()); });
+        $('#saas-branding-form [name="btn_shape"]').on('change', function() { updatePreview('btn_shape', $(this).val()); });
+        $('#saas-branding-form [name="custom_css"]').on('input', function() { updatePreview('custom_css', $(this).val()); });
+        $('#saas-profile-form [name="verified_badge"]').on('change', function() { updatePreview('verified_badge', $(this).is(':checked')); });
 
         // Global Settings Forms
         $('#saas-profile-form, #saas-branding-form, #saas-automation-form, #saas-integrations-form, #saas-seo-form, #saas-tracking-form').on('submit', function(e) {
             e.preventDefault();
             var $form = $(this);
+            var isProfileTab = $form.attr('id') === 'saas-profile-form';
+            var newSlug = isProfileTab ? $form.find('[name="profile_slug"]').val() : null;
+
             saasFetch('saas_save_profile', new FormData(this), $form.find('button'))
                 .done(function(msg) {
                     alert(msg);
                     var frame = document.getElementById('saas-preview-frame');
-                    if (frame) frame.contentWindow.location.reload();
+                    if (frame) {
+                        if (newSlug) {
+                            var baseUrl = new URL(frame.src).origin;
+                            frame.src = baseUrl + '/' + newSlug;
+                        } else {
+                            frame.contentWindow.location.reload();
+                        }
+                    }
                 });
         });
 
@@ -556,7 +585,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, max: 100 } }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }

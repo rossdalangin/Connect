@@ -71,7 +71,7 @@ $theme_class = 'theme-' . $profile_theme;
 include __DIR__ . '/header.php';
 ?>
 
-<style>
+<style id="saas-dynamic-css">
     :root {
         --primary-color: <?php echo esc_attr( $meta['theme_color'] ); ?>;
         --bg-color: <?php echo esc_attr( $bg_color ); ?>;
@@ -132,9 +132,7 @@ include __DIR__ . '/header.php';
         <?php endif; ?>
         <h1>
             <?php echo esc_html( $profile->post_title ); ?>
-            <?php if ($is_pro && get_post_meta($profile_id, '_saas_verified_badge', true)) : ?>
-                <span class="verified-badge" title="Verified Professional" style="color:#1d9bf0; font-size:0.8em; margin-left:5px;">✅</span>
-            <?php endif; ?>
+            <span class="verified-badge" title="Verified Professional" style="color:#1d9bf0; font-size:0.8em; margin-left:5px; <?php echo ($is_pro && get_post_meta($profile_id, '_saas_verified_badge', true)) ? '' : 'display:none;'; ?>">✅</span>
         </h1>
         <p class="headline"><?php echo esc_html( $meta['headline'] ); ?></p>
         <p class="bio"><?php echo nl2br( esc_html( $meta['bio'] ) ); ?></p>
@@ -179,13 +177,20 @@ include __DIR__ . '/header.php';
                 <?php if ($type === 'button') :
                     $has_pass = !empty(get_post_meta($block->ID, '_saas_link_password', true));
 
-                    // A/B Split Testing Logic
+                    // A/B Split Testing Logic (Sticky via Cookie)
                     $ab_title_b = get_post_meta($block->ID, '_saas_ab_title_b', true);
                     $ab_url_b   = get_post_meta($block->ID, '_saas_ab_url_b', true);
                     $variant    = 'a';
 
                     if ($is_pro && $ab_title_b && $ab_url_b) {
-                        $variant = (rand(0, 1) === 1) ? 'b' : 'a';
+                        $cookie_name = 'saas_ab_' . $block->ID;
+                        if (isset($_COOKIE[$cookie_name])) {
+                            $variant = $_COOKIE[$cookie_name];
+                        } else {
+                            $variant = (rand(0, 1) === 1) ? 'b' : 'a';
+                            setcookie($cookie_name, $variant, time() + (86400 * 30), "/"); // 30 days
+                        }
+
                         if ($variant === 'b') {
                             $block->post_title = $ab_title_b;
                             $url = saas_get_effective_url($block->ID, $ab_url_b);
@@ -660,6 +665,16 @@ window.addEventListener('message', function(event) {
             if (value === 'soft') shadow = '0 10px 30px rgba(0,0,0,0.05)';
             else if (value === 'hard') shadow = '8px 8px 0px #333';
             document.documentElement.style.setProperty('--shadow-style', shadow);
+        }
+        if (key === 'verified_badge') {
+            const badge = document.querySelector('.verified-badge');
+            if (badge) badge.style.display = value ? 'inline' : 'none';
+        }
+        if (key === 'custom_css') {
+            const style = document.getElementById('saas-custom-style-tag') || document.createElement('style');
+            style.id = 'saas-custom-style-tag';
+            style.textContent = value;
+            if (!style.parentElement) document.head.appendChild(style);
         }
     }
 });

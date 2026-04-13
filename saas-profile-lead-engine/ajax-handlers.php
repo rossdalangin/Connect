@@ -112,7 +112,8 @@ function saas_ajax_save_profile() {
     check_ajax_referer( 'saas_dashboard_nonce', 'security' );
 
     $user_id = get_current_user_id();
-    $profile_id = $_POST['profile_id']; // Should verify ownership
+    $profile_id = intval($_POST['profile_id']);
+    $context = sanitize_text_field($_POST['form_context'] ?? 'all');
 
     // Verify ownership
     $profile = get_post( $profile_id );
@@ -120,138 +121,104 @@ function saas_ajax_save_profile() {
         wp_send_json_error( 'Unauthorized' );
     }
 
-    $data = [
-        'bio'         => $_POST['bio'] ?? '',
-        'headline'    => $_POST['headline'] ?? '',
-        'theme_color' => $_POST['theme_color'] ?? '',
-    ];
+    // IDENTITY & PROFILE CONTEXT
+    if ($context === 'profile') {
+        if (isset($_POST['headline'])) update_post_meta($profile_id, '_saas_headline', sanitize_text_field($_POST['headline']));
+        if (isset($_POST['bio'])) update_post_meta($profile_id, '_saas_bio', sanitize_textarea_field($_POST['bio']));
+        if (isset($_POST['niche'])) update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
+        if (isset($_POST['phone'])) update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
+        if (isset($_POST['company'])) update_post_meta($profile_id, '_saas_company', sanitize_text_field($_POST['company']));
+        if (isset($_POST['custom_domain'])) update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
 
-    saas_update_profile_meta( $profile_id, $data );
+        update_post_meta($profile_id, '_saas_show_in_directory', isset($_POST['show_in_directory']) ? '1' : '0');
+        update_post_meta($profile_id, '_saas_verified_badge', isset($_POST['verified_badge']) ? '1' : '0');
 
-    // Update Slug (Username)
-    if (isset($_POST['profile_slug'])) {
-        $new_slug = sanitize_title($_POST['profile_slug']);
-        if ($new_slug && $new_slug !== $profile->post_name) {
-            // Check if slug is taken
-            $exists = get_posts(['name' => $new_slug, 'post_type' => 'saas_profile', 'post_status' => 'publish', 'numberposts' => 1]);
-            if (empty($exists)) {
-                wp_update_post(['ID' => $profile_id, 'post_name' => $new_slug]);
+        if (isset($_POST['profile_password'])) update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
+        if (isset($_POST['profile_image_id'])) set_post_thumbnail($profile_id, intval($_POST['profile_image_id']));
+        if (isset($_POST['cover_image_id'])) update_post_meta($profile_id, '_saas_cover_id', intval($_POST['cover_image_id']));
+
+        // Update Slug (Username)
+        if (isset($_POST['profile_slug'])) {
+            $new_slug = sanitize_title($_POST['profile_slug']);
+            if ($new_slug && $new_slug !== $profile->post_name) {
+                $exists = get_posts(['name' => $new_slug, 'post_type' => 'saas_profile', 'post_status' => 'publish', 'numberposts' => 1]);
+                if (empty($exists)) wp_update_post(['ID' => $profile_id, 'post_name' => $new_slug]);
             }
         }
     }
 
-    // Profile specific
-    if (isset($_POST['niche'])) {
-        update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
-    }
-    if (isset($_POST['phone'])) {
-        update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
-    }
-    if (isset($_POST['company'])) {
-        update_post_meta($profile_id, '_saas_company', sanitize_text_field($_POST['company']));
-    }
-    if (isset($_POST['custom_domain'])) {
-        update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
-    }
-    update_post_meta($profile_id, '_saas_show_in_directory', isset($_POST['show_in_directory']) ? '1' : '0');
-    if (isset($_POST['profile_image_id'])) {
-        set_post_thumbnail($profile_id, intval($_POST['profile_image_id']));
-    }
-    if (isset($_POST['cover_image_id'])) {
-        update_post_meta($profile_id, '_saas_cover_id', intval($_POST['cover_image_id']));
-    }
+    // BRANDING CONTEXT
+    if ($context === 'branding') {
+        if (isset($_POST['theme_color'])) update_post_meta($profile_id, '_saas_theme_color', sanitize_hex_color($_POST['theme_color']));
+        if (isset($_POST['profile_theme'])) update_post_meta($profile_id, '_saas_profile_theme', sanitize_text_field($_POST['profile_theme']));
+        if (isset($_POST['font_family'])) update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
+        if (isset($_POST['container_shadow'])) update_post_meta($profile_id, '_saas_container_shadow', sanitize_text_field($_POST['container_shadow']));
+        if (isset($_POST['btn_shape'])) update_post_meta($profile_id, '_saas_btn_shape', sanitize_text_field($_POST['btn_shape']));
+        if (isset($_POST['custom_css'])) update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
 
-    // Branding specific
-    if (isset($_POST['bg_type'])) {
-        $bg_type = sanitize_text_field( $_POST['bg_type'] );
-        $bg_val  = sanitize_text_field( $_POST['bg_value'] );
-        update_post_meta($profile_id, '_saas_bg_type', $bg_type );
-        if ($bg_type === 'gradient') {
-            update_post_meta($profile_id, '_saas_bg_gradient', $bg_val );
-        } else {
-            update_post_meta($profile_id, '_saas_bg_color', $bg_val );
+        if (isset($_POST['bg_type'])) {
+            $bg_type = sanitize_text_field( $_POST['bg_type'] );
+            $bg_val  = sanitize_text_field( $_POST['bg_value'] );
+            update_post_meta($profile_id, '_saas_bg_type', $bg_type );
+            if ($bg_type === 'gradient') update_post_meta($profile_id, '_saas_bg_gradient', $bg_val );
+            else update_post_meta($profile_id, '_saas_bg_color', $bg_val );
         }
-    }
-    if (isset($_POST['btn_shape'])) {
-        update_post_meta($profile_id, '_saas_btn_shape', sanitize_text_field($_POST['btn_shape']));
-    }
-    if (isset($_POST['social_proof'])) {
-        update_post_meta($profile_id, '_saas_social_proof', 1);
-    } else {
-        update_post_meta($profile_id, '_saas_social_proof', 0);
-    }
-    if (isset($_POST['hide_branding'])) {
-        update_post_meta($profile_id, '_saas_hide_branding', 1);
-    } else {
-        update_post_meta($profile_id, '_saas_hide_branding', 0);
-    }
-    if (isset($_POST['font_family'])) {
-        update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
-    }
-    if (isset($_POST['container_shadow'])) {
-        update_post_meta($profile_id, '_saas_container_shadow', sanitize_text_field($_POST['container_shadow']));
-    }
-    if (isset($_POST['profile_theme'])) {
-        update_post_meta($profile_id, '_saas_profile_theme', sanitize_text_field($_POST['profile_theme']));
-    }
-    if (isset($_POST['custom_css'])) {
-        update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
-    }
-    if (isset($_POST['verified_badge'])) {
-        update_post_meta($profile_id, '_saas_verified_badge', 1);
-    } else {
-        update_post_meta($profile_id, '_saas_verified_badge', 0);
-    }
-    if (isset($_POST['profile_password'])) {
-        update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
+
+        update_post_meta($profile_id, '_saas_social_proof', isset($_POST['social_proof']) ? '1' : '0');
+        update_post_meta($profile_id, '_saas_hide_branding', isset($_POST['hide_branding']) ? '1' : '0');
     }
 
-    // Automation specific
-    if (isset($_POST['lead_magnet_url'])) {
-        update_post_meta($profile_id, '_saas_lead_magnet_url', esc_url_raw($_POST['lead_magnet_url']));
-        update_post_meta($profile_id, '_saas_lead_redirect', esc_url_raw($_POST['lead_redirect']));
-        update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
-        update_post_meta($profile_id, '_saas_lead_success_msg', sanitize_text_field($_POST['lead_success_msg']));
-
-        update_post_meta($profile_id, '_saas_form_phone', isset($_POST['form_field_phone']) ? 1 : 0);
-        update_post_meta($profile_id, '_saas_form_msg', isset($_POST['form_field_msg']) ? 1 : 0);
-
-        update_post_meta($profile_id, '_saas_form_label_phone', sanitize_text_field($_POST['form_label_phone']));
-        update_post_meta($profile_id, '_saas_form_label_msg', sanitize_text_field($_POST['form_label_msg']));
-        update_post_meta($profile_id, '_saas_form_req_phone', isset($_POST['form_req_phone']) ? 1 : 0);
-        update_post_meta($profile_id, '_saas_form_req_msg', isset($_POST['form_req_msg']) ? 1 : 0);
-
-        update_post_meta($profile_id, '_saas_lead_auto_respond', isset($_POST['lead_auto_respond']) ? 1 : 0);
-        update_post_meta($profile_id, '_saas_lead_auto_msg', sanitize_textarea_field($_POST['lead_auto_msg']));
-    }
-
-    // SEO specific
-    if (isset($_POST['meta_title'])) {
-        update_post_meta($profile_id, '_saas_seo_title', sanitize_text_field($_POST['meta_title']));
-        update_post_meta($profile_id, '_saas_seo_desc', sanitize_textarea_field($_POST['meta_desc']));
-        update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
-    }
-
-    if (isset($_POST['qr_color'])) {
+    // QR CONTEXT
+    if ($context === 'qr' && isset($_POST['qr_color'])) {
         update_post_meta($profile_id, '_saas_qr_color', sanitize_text_field($_POST['qr_color']));
     }
 
-    // Integrations specific
-    if (isset($_POST['mailchimp_api'])) {
-        update_post_meta($profile_id, '_saas_mailchimp_api', sanitize_text_field($_POST['mailchimp_api']));
-        update_post_meta($profile_id, '_saas_mailchimp_list', sanitize_text_field($_POST['mailchimp_list']));
-    }
-    if (isset($_POST['hubspot_token'])) {
-        update_post_meta($profile_id, '_saas_hubspot_token', sanitize_text_field($_POST['hubspot_token']));
+    // AUTOMATION CONTEXT
+    if ($context === 'automation') {
+        if (isset($_POST['lead_magnet_url'])) update_post_meta($profile_id, '_saas_lead_magnet_url', esc_url_raw($_POST['lead_magnet_url']));
+        if (isset($_POST['lead_redirect'])) update_post_meta($profile_id, '_saas_lead_redirect', esc_url_raw($_POST['lead_redirect']));
+        if (isset($_POST['lead_webhook'])) update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
+        if (isset($_POST['lead_success_msg'])) update_post_meta($profile_id, '_saas_lead_success_msg', sanitize_text_field($_POST['lead_success_msg']));
+
+        update_post_meta($profile_id, '_saas_form_phone', isset($_POST['form_field_phone']) ? '1' : '0');
+        update_post_meta($profile_id, '_saas_form_msg', isset($_POST['form_field_msg']) ? '1' : '0');
+        update_post_meta($profile_id, '_saas_form_req_phone', isset($_POST['form_req_phone']) ? '1' : '0');
+        update_post_meta($profile_id, '_saas_form_req_msg', isset($_POST['form_req_msg']) ? '1' : '0');
+        update_post_meta($profile_id, '_saas_lead_auto_respond', isset($_POST['lead_auto_respond']) ? '1' : '0');
+
+        if (isset($_POST['form_label_phone'])) update_post_meta($profile_id, '_saas_form_label_phone', sanitize_text_field($_POST['form_label_phone']));
+        if (isset($_POST['form_label_msg'])) update_post_meta($profile_id, '_saas_form_label_msg', sanitize_text_field($_POST['form_label_msg']));
+        if (isset($_POST['lead_auto_msg'])) update_post_meta($profile_id, '_saas_lead_auto_msg', sanitize_textarea_field($_POST['lead_auto_msg']));
     }
 
-    // Tracking specific
-    if (isset($_POST['header_scripts'])) {
-        update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
-        update_post_meta($profile_id, '_saas_footer_scripts', $_POST['footer_scripts']);
+    // ALL/WIZARD CONTEXT (fallback)
+    if ($context === 'all') {
+        if (isset($_POST['headline'])) update_post_meta($profile_id, '_saas_headline', sanitize_text_field($_POST['headline']));
+        if (isset($_POST['bio'])) update_post_meta($profile_id, '_saas_bio', sanitize_textarea_field($_POST['bio']));
+        if (isset($_POST['niche'])) update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
     }
 
-    wp_send_json_success( 'Data saved' );
+    // SEO CONTEXT
+    if ($context === 'seo' || $context === 'all') {
+        if (isset($_POST['meta_title'])) update_post_meta($profile_id, '_saas_seo_title', sanitize_text_field($_POST['meta_title']));
+        if (isset($_POST['meta_desc'])) update_post_meta($profile_id, '_saas_seo_desc', sanitize_textarea_field($_POST['meta_desc']));
+        if (isset($_POST['favicon'])) update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
+    }
+
+    // INTEGRATIONS CONTEXT
+    if ($context === 'integrations' || $context === 'all') {
+        if (isset($_POST['mailchimp_api'])) update_post_meta($profile_id, '_saas_mailchimp_api', sanitize_text_field($_POST['mailchimp_api']));
+        if (isset($_POST['mailchimp_list'])) update_post_meta($profile_id, '_saas_mailchimp_list', sanitize_text_field($_POST['mailchimp_list']));
+        if (isset($_POST['hubspot_token'])) update_post_meta($profile_id, '_saas_hubspot_token', sanitize_text_field($_POST['hubspot_token']));
+    }
+
+    // TRACKING CONTEXT
+    if ($context === 'tracking' || $context === 'all') {
+        if (isset($_POST['header_scripts'])) update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
+        if (isset($_POST['footer_scripts'])) update_post_meta($profile_id, '_saas_footer_scripts', $_POST['footer_scripts']);
+    }
+
+    wp_send_json_success( 'Data saved successfully!' );
 }
 
 // 4. AJAX: Delete Link
@@ -360,9 +327,16 @@ function saas_ajax_apply_template() {
         }
     }
 
-    // 1. Delete existing blocks for this user (or specifically for this profile if we had a relation, but for now we delete all user's links as per previous logic)
-    $old_blocks = get_posts(['post_type' => 'saas_link', 'author' => $user_id, 'numberposts' => -1]);
-    foreach ($old_blocks as $ob) wp_delete_post($ob->ID, true);
+    // 1. Delete existing blocks ONLY for this specific profile
+    if ($profile_id) {
+        $old_blocks = get_posts([
+            'post_type' => 'saas_link',
+            'meta_key' => '_saas_profile_id',
+            'meta_value' => $profile_id,
+            'numberposts' => -1
+        ]);
+        foreach ($old_blocks as $ob) wp_delete_post($ob->ID, true);
+    }
 
     // 2. Define Template Sets
     $sets = [
@@ -496,6 +470,7 @@ function saas_ajax_apply_template() {
 
         foreach ( $set['links'] as $index => $b ) {
             $link_id = wp_insert_post(['post_type' => 'saas_link', 'post_title' => $b['title'], 'post_status' => 'publish', 'post_author' => $user_id]);
+            update_post_meta($link_id, '_saas_profile_id', $profile_id); // Associate with profile
             update_post_meta($link_id, '_saas_block_type', $b['type']);
             update_post_meta($link_id, '_saas_link_url', $b['url']);
             update_post_meta($link_id, '_saas_priority', $index);
@@ -1196,4 +1171,35 @@ function saas_ajax_clone_profile() {
     }
 
     wp_send_json_success([ 'id' => $new_profile_id ]);
+}
+
+// 26. AJAX: Delete Profile
+add_action( 'wp_ajax_saas_delete_profile', 'saas_ajax_delete_profile' );
+function saas_ajax_delete_profile() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+    $user_id = get_current_user_id();
+    $profile_id = intval( $_POST['profile_id'] );
+
+    $profile = get_post( $profile_id );
+    if ( ! $profile || $profile->post_author != $user_id ) wp_send_json_error( 'Unauthorized' );
+
+    // 1. Prevent deleting the only profile
+    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'fields' => 'ids', 'numberposts' => -1]);
+    if ( count($existing) <= 1 ) {
+        wp_send_json_error( 'You must have at least one profile. Create a new one before deleting this one.' );
+    }
+
+    // 2. Delete Profile and associated links
+    $links = get_posts([
+        'post_type'  => 'saas_link',
+        'meta_key'   => '_saas_profile_id',
+        'meta_value' => $profile_id,
+        'numberposts' => -1,
+        'fields' => 'ids'
+    ]);
+    foreach ($links as $l_id) wp_delete_post($l_id, true);
+
+    wp_delete_post($profile_id, true);
+
+    wp_send_json_success( 'Profile and its blocks deleted successfully.' );
 }
