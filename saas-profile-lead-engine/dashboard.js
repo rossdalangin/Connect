@@ -125,6 +125,8 @@
             $('#edit-link-hour-from').val($li.attr('data-hour-from'));
             $('#edit-link-hour-to').val($li.attr('data-hour-to'));
             $('#edit-link-image-id').val($li.attr('data-link-image-id'));
+            var imgUrl = $li.find('.btn-thumb').attr('src');
+            $('#edit-link-image-preview').html(imgUrl ? '<img src="' + imgUrl + '" style="width:100%; height:100%; object-fit:cover;">' : '');
 
             $('#saas-edit-modal').css('display', 'flex');
             $('body').css('overflow', 'hidden');
@@ -152,6 +154,24 @@
             saasFetch('saas_simulate_pro_upgrade', {}, $(this)).done(function(msg) {
                 alert(msg);
                 location.reload();
+            });
+        });
+
+        $(document).on('click', '#saas-simulate-payment-btn', function() {
+            if(!confirm('This will trigger the Stripe Webhook simulator for $19. Continue?')) return;
+            var $btn = $(this);
+            var userId = $btn.text().match(/\(UID: (\d+)\)/) ? $btn.text().match(/\(UID: (\d+)\)/)[1] : 1;
+
+            $.ajax({
+                url: '/wp-json/saas/v1/webhook',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ user_id: userId, status: 'succeeded', plan: 'pro' }),
+                success: function(res) {
+                    alert('Webhook processed successfully! You are now Pro.');
+                    location.reload();
+                },
+                error: function() { alert('Webhook simulation failed.'); }
             });
         });
 
@@ -433,6 +453,9 @@
                 } else if (target === 'cover-image') {
                     $('#cover-image-id').val(attachment.id);
                     $('#cover-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                } else if (target === 'link-image') {
+                    $('#edit-link-image-id').val(attachment.id);
+                    $('#edit-link-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
                 }
             }).open();
         });
@@ -531,13 +554,22 @@
         });
 
         $('#wizard-finish').on('click', function() {
+            var $btn = $(this);
+            var profileId = $('[name="profile_id"]').val();
+            var niche = $('#wizard-niche').val();
             var data = {
-                profile_id: $('[name="profile_id"]').val(),
+                profile_id: profileId,
                 headline: $('#wizard-headline').val(),
                 bio: $('#wizard-bio').val(),
-                niche: $('#wizard-niche').val()
+                niche: niche,
+                form_context: 'all'
             };
-            saasFetch('saas_save_profile', data, $(this)).done(function() { location.reload(); });
+
+            saasFetch('saas_save_profile', data, $btn).done(function() {
+                // After saving info, apply the template for the selected niche
+                saasFetch('saas_apply_template', { template: niche, profile_id: profileId }, $btn)
+                    .done(function() { location.reload(); });
+            });
         });
 
         // 13. Sortable Initializer

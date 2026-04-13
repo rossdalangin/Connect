@@ -54,19 +54,29 @@ Unlike Linktree (which is just a list) or Kontak.me (which is just a card), this
 
 ---
 
-## 3. UI/UX WIREFRAME (DASHBOARD SECTIONS)
+## 3. UI/UX WIREFRAME & KEY FEATURES
 
-### 1. The Focus Center
-- **Checklist**: Onboarding steps to get 100% profile completion.
-- **Pulse**: Real-time activity feed of views/leads.
+### 1. The Focus Center (Main Area)
+- **Pulse Feed**: Real-time combined activity monitoring (Views, Clicks, Leads).
+- **Onboarding Wizard**: Niche-aware setup (Coach, Realtor, etc.) that auto-applies templates.
+- **AI Profile Assistant**: Heuristic-based generation of headlines and bios.
 
-### 2. Block Manager
-- **Drag-and-Drop**: Reorder links instantly.
-- **Quick-Add**: Single-click addition of Video, FAQ, or Pricing blocks.
+### 2. Advanced Block Management
+- **Modular Ecosystem**: FAQ, Testimonials, Pricing, Social Icons, and Video blocks.
+- **Dynamic Icons**: WordPress Media Library integration for all block thumbnails.
+- **Smart Scheduling**: Visibility controls based on dates and specific hours (0-23).
+- **Sticky A/B Testing**: Cookie-persistent split testing for maximum conversion data.
 
-### 3. Analytics Suite
-- **A/B Comparison**: See which button text is converting best.
-- **Heatmap (Mock)**: Visual representation of where users are clicking.
+### 3. Identity & Branding Engine
+- **Vibe Presets**: One-click styling (Midnight, Glassy, Luxury).
+- **Live Preview**: Real-time `postMessage` bridge for CSS and content updates.
+- **Custom Domains**: Enterprise-ready CNAME routing logic.
+- **vCard & QR**: Dynamic color-customizable QR codes and downloadable business cards.
+
+### 4. Commercial Infrastructure
+- **Recurring Affiliates**: Automated 30% commission tracking on all plan upgrades.
+- **Hybrid Payments**: Native support for both subscription plans and direct product sales.
+- **Integrated CRM**: Built-in lead management with auto-responders and CRM sync stubs.
 
 ---
 

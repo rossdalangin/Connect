@@ -83,6 +83,7 @@ class Saas_Admin_Settings {
             'Contact'   => 'Get in touch',
             'About'     => 'Learn about us',
             'Directory' => 'Meet our elite creators.',
+            'Story Card' => 'Your vertical social card.',
         ];
 
         $home_id = 0;
@@ -117,6 +118,9 @@ class Saas_Admin_Settings {
                 }
                 if ($title === 'Story Card') {
                     update_post_meta($id, '_wp_page_template', 'template-story-card.php');
+                }
+                if ($title === 'Register') {
+                    update_option('users_can_register', 1);
                 }
             } else {
                 if ($title === 'Home') $home_id = $page->ID;

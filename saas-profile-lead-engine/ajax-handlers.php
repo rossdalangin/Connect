@@ -196,6 +196,7 @@ function saas_ajax_save_profile() {
         if (isset($_POST['headline'])) update_post_meta($profile_id, '_saas_headline', sanitize_text_field($_POST['headline']));
         if (isset($_POST['bio'])) update_post_meta($profile_id, '_saas_bio', sanitize_textarea_field($_POST['bio']));
         if (isset($_POST['niche'])) update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
+        if (isset($_POST['theme_color'])) update_post_meta($profile_id, '_saas_theme_color', sanitize_hex_color($_POST['theme_color']));
     }
 
     // SEO CONTEXT
@@ -665,6 +666,7 @@ function saas_ajax_update_lead() {
 
     wp_send_json_success( 'Lead updated successfully' );
 }
+
 
 // 23. AJAX: Email Lead
 add_action( 'wp_ajax_saas_email_lead', 'saas_ajax_email_lead' );

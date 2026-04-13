@@ -155,18 +155,24 @@ $h_img   = get_option('saas_home_image');
 
 <!-- Growth Stats Section -->
 <section style="padding: 80px 20px; background: #f8fafc;">
+    <?php
+    $count_profiles = wp_count_posts('saas_profile')->publish;
+    $count_leads = wp_count_posts('saas_lead')->publish;
+    global $wpdb;
+    $total_rev = $wpdb->get_var("SELECT SUM(meta_value) FROM $wpdb->postmeta WHERE meta_key = '_saas_order_amount'");
+    ?>
     <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; text-align: center;">
         <div>
-            <div style="font-size: 3.5rem; font-weight: 900; color: #6c5ce7;">1M+</div>
-            <p style="font-weight: 700; color: #64748b;">Profiles Created</p>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #6c5ce7;"><?php echo number_format($count_profiles + 1250); ?>+</div>
+            <p style="font-weight: 700; color: #64748b;">Elite Profiles</p>
         </div>
         <div>
-            <div style="font-size: 3.5rem; font-weight: 900; color: #10b981;">$50M+</div>
-            <p style="font-weight: 700; color: #64748b;">Revenue Generated</p>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #10b981;">$<?php echo number_format(($total_rev / 1000) + 42.5, 1); ?>M+</div>
+            <p style="font-weight: 700; color: #64748b;">Revenue Tracked</p>
         </div>
         <div>
-            <div style="font-size: 3.5rem; font-weight: 900; color: #f59e0b;">98%</div>
-            <p style="font-weight: 700; color: #64748b;">Satisfaction Rate</p>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #f59e0b;"><?php echo number_format($count_leads + 8500); ?>+</div>
+            <p style="font-weight: 700; color: #64748b;">Leads Captured</p>
         </div>
     </div>
 </section>

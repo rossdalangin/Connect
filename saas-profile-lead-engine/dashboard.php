@@ -1001,6 +1001,7 @@ class Saas_Dashboard {
                                     <?php endif; ?>
 
                                 <button id="saas-demo-upgrade-btn" class="button" style="width:100%; margin-top:10px; background:var(--accent-soft); border-color:var(--accent); color:var(--accent);">⚡ Instant Demo Upgrade (UID: <?php echo $user_id; ?>)</button>
+                                <button id="saas-simulate-payment-btn" class="button" style="width:100%; margin-top:10px; background:var(--secondary-soft); border-color:var(--secondary); color:var(--secondary);">💸 Simulate Stripe Success ($19)</button>
 
                                     <?php if ($gateway_mode === 'none') : ?>
                                         <p style="color:var(--text-muted); font-size:0.8rem;">Online payments are currently disabled. Please contact support to upgrade.</p>
@@ -1133,12 +1134,14 @@ class Saas_Dashboard {
                 <span class="close-modal">&times;</span>
                 <div class="wizard-step active" data-step="1">
                     <h3>Welcome! Let's build your profile 🚀</h3>
-                    <p>What is your primary goal?</p>
+                    <p>What is your primary niche?</p>
                     <select id="wizard-niche" class="field">
-                        <option value="coach">Capture Coaching Leads</option>
-                        <option value="creator">Share Content & Links</option>
-                        <option value="realtor">Real Estate Showcasing</option>
-                        <option value="business">Business Networking</option>
+                        <option value="coach">🚀 Business Coach</option>
+                        <option value="freelancer">🎨 Creative Freelancer</option>
+                        <option value="realtor">🏡 Real Estate Pro</option>
+                        <option value="business">🏢 Corporate Entity</option>
+                        <option value="tiktok">📱 Social Influencer</option>
+                        <option value="luxury">⚜️ Luxury Private Advisory</option>
                     </select>
                     <button class="btn-primary next-step" style="width:100%;">Next Step</button>
                 </div>
@@ -1277,8 +1280,10 @@ class Saas_Dashboard {
                         </div>
 
                             <div class="field">
-                                <label>Icon/Thumb Image ID</label>
-                                <input type="number" name="link_image_id" id="edit-link-image-id">
+                                <label>Icon/Thumb Image</label>
+                                <div id="edit-link-image-preview" style="width:60px; height:60px; border-radius:10px; background:#eee; margin-bottom:10px; overflow:hidden; border:1px solid #ddd;"></div>
+                                <input type="hidden" name="link_image_id" id="edit-link-image-id">
+                                <button type="button" class="button select-media" data-target="link-image">Select Icon</button>
                             </div>
 
                         <div class="field">
