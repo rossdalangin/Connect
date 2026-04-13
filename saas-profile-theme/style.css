@@ -39,18 +39,27 @@ body.theme-vibrant {
 }
 
 body.theme-luxury {
-    background: #0a0a0a fixed;
+    background: #000000 fixed;
+    background-image: radial-gradient(circle at 50% -20%, #1a1a1a 0%, #000000 100%);
     --primary-color: #d4af37;
     --text-color: #ffffff;
-    --text-light: #888888;
-    --glass-bg: rgba(212, 175, 55, 0.05);
+    --text-light: #b5985a;
+    --glass-bg: rgba(26, 26, 26, 0.8);
     --font-family: 'Playfair Display', serif;
 }
+body.theme-luxury #profile-container { border: 1px solid rgba(212, 175, 55, 0.1); background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); margin-top: 40px; border-radius: 40px; margin-bottom: 40px; }
 body.theme-luxury .saas-link-btn {
     border: 1px solid #d4af37;
     color: #d4af37;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
+    background: transparent;
+    transition: all 0.5s ease;
+}
+body.theme-luxury .saas-link-btn:hover {
+    background: #d4af37;
+    color: #000;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
 }
 body.theme-luxury .saas-link-btn:hover {
     background: #d4af37;

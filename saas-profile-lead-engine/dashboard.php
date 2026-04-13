@@ -186,6 +186,7 @@ class Saas_Dashboard {
                     <button data-tab="referrals">💸 Earn</button>
                     <button data-tab="automation">⚙️ Settings</button>
                     <button data-tab="share">📱 Share</button>
+                    <button data-tab="templates">🎨 Templates</button>
                     <button data-tab="billing">💳 Pro</button>
                     <button data-tab="seo">🔍 SEO</button>
                     <button data-tab="tracking">📊 Tracking</button>
@@ -269,6 +270,46 @@ class Saas_Dashboard {
                         <h3>Identity Settings</h3>
                         <form id="saas-profile-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="form_context" value="profile">
+
+                            <div style="display:flex; gap:30px; margin-bottom:30px; align-items:center;">
+                                <div class="image-select-wrapper" style="text-align:center;">
+                                    <label>Profile Image</label>
+                                    <div id="profile-image-preview" class="image-preview-circle" style="width:100px; height:100px; border-radius:50%; background:#eee; margin:10px auto; overflow:hidden; border:2px solid var(--border); cursor:pointer;">
+                                        <?php if ( has_post_thumbnail( $profile_id ) ) : ?>
+                                            <?php echo get_the_post_thumbnail( $profile_id, 'thumbnail', ['style' => 'width:100%; height:100%; object-fit:cover;'] ); ?>
+                                        <?php else : ?>
+                                            <span style="line-height:100px; color:#aaa; font-size:2rem;">+</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <input type="hidden" name="profile_image_id" id="profile-image-id" value="<?php echo get_post_thumbnail_id($profile_id); ?>">
+                                    <button type="button" class="button select-media" data-target="profile-image">Change</button>
+                                </div>
+
+                                <div class="image-select-wrapper" style="flex:1;">
+                                    <label>Cover Banner</label>
+                                    <?php $cover_id = get_post_meta($profile_id, '_saas_cover_id', true); ?>
+                                    <div id="cover-image-preview" class="image-preview-rect" style="width:100%; height:100px; border-radius:12px; background:#eee; margin:10px 0; overflow:hidden; border:2px solid var(--border); cursor:pointer;">
+                                        <?php if ( $cover_id ) : ?>
+                                            <?php echo wp_get_attachment_image( $cover_id, 'medium', false, ['style' => 'width:100%; height:100%; object-fit:cover;'] ); ?>
+                                        <?php else : ?>
+                                            <span style="display:block; text-align:center; line-height:100px; color:#aaa;">Upload Banner</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <input type="hidden" name="cover_image_id" id="cover-image-id" value="<?php echo $cover_id; ?>">
+                                    <button type="button" class="button select-media" data-target="cover-image">Select Banner</button>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label>Vanity URL (Username)</label>
+                                <div style="display:flex; align-items:center; background:var(--bg-main); border:1px solid var(--border); border-radius:12px; padding:0 15px;">
+                                    <span style="color:var(--text-muted); font-weight:700;"><?php echo parse_url(home_url(), PHP_URL_HOST); ?>/</span>
+                                    <input type="text" name="profile_slug" value="<?php echo esc_attr($profile_obj->post_name); ?>" style="border:none; background:transparent; padding:12px 5px; flex:1; font-weight:700;">
+                                </div>
+                                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:5px;">Changing this will break your old links. Use with caution.</p>
+                            </div>
+
                             <div class="field">
                                 <label>Profile Headline</label>
                                 <div style="display:flex; gap:10px;">
@@ -291,18 +332,36 @@ class Saas_Dashboard {
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="field">
-                                <label>Company / Organization</label>
-                                <input type="text" name="company" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_company', true)); ?>">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                                <div class="field">
+                                    <label>Company / Organization</label>
+                                    <input type="text" name="company" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_company', true)); ?>">
+                                </div>
+                                <div class="field">
+                                    <label>Public Phone (for vCard)</label>
+                                    <input type="text" name="phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_phone', true)); ?>" placeholder="+1 234 567 890">
+                                </div>
                             </div>
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                                 <label>Custom Domain / Subdomain (Pro)</label>
                                 <input type="text" name="custom_domain" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_custom_domain', true)); ?>" placeholder="profile.yourdomain.com">
                                 <p style="font-size:0.7rem; color:var(--text-muted); margin-top:5px;">Point your CNAME record to our server to use your own domain.</p>
                             </div>
-                            <div class="field">
-                                <label><input type="checkbox" name="show_in_directory" value="1" <?php checked(get_post_meta($profile_id, '_saas_show_in_directory', true), 1); ?>> Show in Public Discovery Directory</label>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                                <div class="field">
+                                    <label><input type="checkbox" name="show_in_directory" value="1" <?php checked(get_post_meta($profile_id, '_saas_show_in_directory', true), 1); ?>> Show in Directory</label>
+                                </div>
+                                <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                    <label><input type="checkbox" name="verified_badge" value="1" <?php checked(get_post_meta($profile_id, '_saas_verified_badge', true), 1); ?>> Verified Badge (Pro)</label>
+                                </div>
                             </div>
+
+                            <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                <label>Profile Password Protection (Pro)</label>
+                                <input type="text" name="profile_password" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_profile_password', true)); ?>" placeholder="Leave blank for public access">
+                            </div>
+
                             <button type="submit" class="btn-primary">Update Profile</button>
                         </form>
                     </div>
@@ -313,6 +372,7 @@ class Saas_Dashboard {
                         <h3>Style & Identity</h3>
                         <form id="saas-branding-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="form_context" value="branding">
 
                             <div class="field">
                                 <label>Base Theme</label>
@@ -462,12 +522,23 @@ class Saas_Dashboard {
                         <div class="saas-ab-testing-results" style="margin-bottom: 40px;">
                             <h4>A/B Testing Insights</h4>
                             <div style="height: 200px;"><canvas id="saas-ab-chart"></canvas></div>
+                            <?php
+                            $total_a = 0; $total_b = 0;
+                            foreach($link_stats as $ls) {
+                                $total_a += $ls->clicks;
+                                $total_b += $ls->clicks_b;
+                            }
+                            ?>
+                            <script>
+                                var saas_ab_data = { a: <?php echo $total_a; ?>, b: <?php echo $total_b; ?> };
+                            </script>
                         </div>
 
                         <?php $stats = $analytics->get_user_summary($user_id); ?>
                         <div class="stats-grid">
                             <div class="stat-card"><small>VIEWS</small><div class="value"><?php echo number_format($stats['views']); ?></div></div>
                             <div class="stat-card"><small>CLICKS</small><div class="value"><?php echo number_format($stats['clicks']); ?></div></div>
+                            <div class="stat-card"><small>NFC TAPS</small><div class="value" style="color:var(--primary);"><?php echo number_format($stats['nfc']); ?></div></div>
                             <div class="stat-card"><small>CONV. RATE</small><div class="value" style="color:var(--secondary);"><?php echo ($stats['views'] > 0) ? round(($stats['leads'] / $stats['views']) * 100, 1) : 0; ?>%</div></div>
                             <div class="stat-card"><small>LEADS</small><div class="value" style="color:var(--accent);"><?php echo number_format($stats['leads']); ?></div></div>
                         </div>
@@ -525,6 +596,49 @@ class Saas_Dashboard {
                                 </table>
                             </div>
                         </div>
+
+                        <div style="margin-top:40px;">
+                            <h4>Revenue & Orders</h4>
+                            <div class="stats-grid" style="margin-bottom:20px;">
+                                <div class="stat-card" style="background:var(--secondary-soft);">
+                                    <small>TOTAL REVENUE</small>
+                                    <?php
+                                    $total_rev = 0;
+                                    $all_orders = get_posts(['post_type' => 'saas_order', 'post_author' => $user_id, 'meta_key' => '_saas_order_status', 'meta_value' => 'completed', 'numberposts' => -1]);
+                                    foreach($all_orders as $o) $total_rev += floatval(get_post_meta($o->ID, '_saas_order_amount', true));
+                                    ?>
+                                    <div class="value" style="color:var(--secondary);">$<?php echo number_format($total_rev, 2); ?></div>
+                                </div>
+                                <div class="stat-card">
+                                    <small>COMPLETED SALES</small>
+                                    <div class="value"><?php echo count($all_orders); ?></div>
+                                </div>
+                            </div>
+                            <div class="saas-table-wrapper">
+                                <table class="saas-table">
+                                    <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
+                                    <tbody>
+                                        <?php
+                                        $recent_orders = get_posts(['post_type' => 'saas_order', 'post_author' => $user_id, 'numberposts' => 10]);
+                                        if ($recent_orders) :
+                                            foreach($recent_orders as $o) :
+                                                $amt = get_post_meta($o->ID, '_saas_order_amount', true);
+                                                $st = get_post_meta($o->ID, '_saas_order_status', true);
+                                                ?>
+                                                <tr>
+                                                    <td><?php echo get_the_date('M j', $o->ID); ?></td>
+                                                    <td><?php echo esc_html($o->post_title); ?></td>
+                                                    <td>$<?php echo number_format($amt, 2); ?></td>
+                                                    <td><span class="pro-badge" style="background:<?php echo ($st==='completed') ? 'var(--secondary)' : '#94a3b8'; ?>"><?php echo ucfirst($st); ?></span></td>
+                                                </tr>
+                                            <?php endforeach;
+                                        else : ?>
+                                            <tr><td colspan="4" style="text-align:center; color:#999;">No sales recorded yet.</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -532,9 +646,19 @@ class Saas_Dashboard {
                     <div class="dashboard-card" style="text-align:center;">
                         <h3>Share Your Identity</h3>
                         <div style="margin:20px 0;">
-                            <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name, get_post_meta($profile_id, '_saas_theme_color', true)); ?>" style="max-width:200px; border-radius:15px; border:5px solid #fff; box-shadow:var(--shadow);">
+                            <img src="<?php echo saas_get_profile_qr_url($profile_obj->post_name, get_post_meta($profile_id, '_saas_qr_color', true) ?: '#000000'); ?>" style="max-width:200px; border-radius:15px; border:5px solid #fff; box-shadow:var(--shadow);">
                         </div>
                         <p>Download your custom QR code for business cards and marketing materials.</p>
+
+                        <form id="saas-qr-form" style="max-width:300px; margin:0 auto 20px;">
+                            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="form_context" value="qr">
+                            <div class="field">
+                                <label>QR Code Color</label>
+                                <input type="color" name="qr_color" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_qr_color', true) ?: '#000000'); ?>" onchange="$(this).closest('form').submit()">
+                            </div>
+                        </form>
+
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:400px; margin:20px auto;">
                             <a href="<?php echo home_url('/?saas_action=vcard&profile='.$profile_id); ?>" class="button" style="width:100%;">📥 Get vCard</a>
                             <button class="button" onclick="window.print()">🖨️ Print Card</button>
@@ -586,6 +710,7 @@ class Saas_Dashboard {
                         <h3>Search Engine Optimization</h3>
                         <form id="saas-seo-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="form_context" value="seo">
                             <div class="field">
                                 <label>Meta Title</label>
                                 <input type="text" name="meta_title" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_seo_title', true)); ?>" placeholder="Example: John Doe | Digital Marketing Consultant">
@@ -684,12 +809,19 @@ class Saas_Dashboard {
                         <h3>Third-Party Sync</h3>
                         <form id="saas-integrations-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <input type="hidden" name="form_context" value="tracking">
+                            <input type="hidden" name="form_context" value="automation">
+                            <input type="hidden" name="form_context" value="integrations">
                             <div class="field">
                                 <label>Mailchimp API Key</label>
                                 <div style="display:flex; gap:10px;">
                                     <input type="password" name="mailchimp_api" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_api', true)); ?>" style="flex:1;">
                                     <button type="button" class="button check-integration" data-platform="mailchimp">Test</button>
                                 </div>
+                            </div>
+                            <div class="field">
+                                <label>Mailchimp Audience ID (List ID)</label>
+                                <input type="text" name="mailchimp_list" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_list', true)); ?>" placeholder="e.g. 1a2b3c4d5e">
                             </div>
                             <div class="field">
                                 <label>HubSpot Access Token</label>
@@ -849,8 +981,19 @@ class Saas_Dashboard {
                                 <button id="saas-cancel-sub" class="button" style="width:100%; color:var(--danger);">Cancel Subscription</button>
                             <?php else : ?>
                                 <div class="payment-options" style="display:flex; flex-direction:column; gap:10px;">
-                                    <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="pro" style="width:100%;">Upgrade with Stripe</button>
-                                    <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="pro" style="width:100%; background:#0070ba;">Upgrade with PayPal</button>
+                                    <?php
+                                    $gateway_mode = $payments->get_active_gateway();
+                                    if ($gateway_mode === 'stripe' || $gateway_mode === 'user_select') : ?>
+                                        <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="pro" style="width:100%;">Upgrade with Stripe</button>
+                                    <?php endif; ?>
+
+                                    <?php if ($gateway_mode === 'paypal' || $gateway_mode === 'user_select') : ?>
+                                        <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="pro" style="width:100%; background:#0070ba;">Upgrade with PayPal</button>
+                                    <?php endif; ?>
+
+                                    <?php if ($gateway_mode === 'none') : ?>
+                                        <p style="color:var(--text-muted); font-size:0.8rem;">Online payments are currently disabled. Please contact support to upgrade.</p>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -876,6 +1019,35 @@ class Saas_Dashboard {
                         <?php else: ?>
                             <p style="color:var(--text-muted);">No transactions found.</p>
                         <?php endif; ?>
+                    </div>
+                </div>
+
+                <div id="tab-templates" class="saas-tab-content">
+                    <div class="dashboard-card">
+                        <h3>Template Library</h3>
+                        <p style="margin-bottom:20px; color:var(--text-muted);">Choose a high-converting template to jumpstart your profile. ⚠️ Warning: Applying a template will replace your current blocks.</p>
+
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                            <?php
+                            $tpls = [
+                                'coach' => ['name' => 'Executive Coach', 'icon' => '🚀'],
+                                'freelancer' => ['name' => 'Creative Freelancer', 'icon' => '🎨'],
+                                'realtor' => ['name' => 'Luxury Realtor', 'icon' => '🏡'],
+                                'business' => ['name' => 'Corporate Entity', 'icon' => '🏢'],
+                                'politician' => ['name' => 'Public Official', 'icon' => '🏛️'],
+                                'elite_card' => ['name' => 'Digital Card Pro', 'icon' => '💳'],
+                                'tiktok' => ['name' => 'Viral Influencer', 'icon' => '📱'],
+                                'consultant' => ['name' => 'Strategy Expert', 'icon' => '🧠'],
+                                'luxury' => ['name' => 'Luxury Private', 'icon' => '⚜️']
+                            ];
+                            foreach($tpls as $id => $t) : ?>
+                                <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s;">
+                                    <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $t['icon']; ?></div>
+                                    <h4 style="margin:0 0 15px;"><?php echo $t['name']; ?></h4>
+                                    <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none;">Apply Template</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
 

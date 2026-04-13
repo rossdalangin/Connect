@@ -128,6 +128,18 @@ function saas_ajax_save_profile() {
 
     saas_update_profile_meta( $profile_id, $data );
 
+    // Update Slug (Username)
+    if (isset($_POST['profile_slug'])) {
+        $new_slug = sanitize_title($_POST['profile_slug']);
+        if ($new_slug && $new_slug !== $profile->post_name) {
+            // Check if slug is taken
+            $exists = get_posts(['name' => $new_slug, 'post_type' => 'saas_profile', 'post_status' => 'publish', 'numberposts' => 1]);
+            if (empty($exists)) {
+                wp_update_post(['ID' => $profile_id, 'post_name' => $new_slug]);
+            }
+        }
+    }
+
     // Profile specific
     if (isset($_POST['niche'])) {
         update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
@@ -184,6 +196,14 @@ function saas_ajax_save_profile() {
     }
     if (isset($_POST['custom_css'])) {
         update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
+    }
+    if (isset($_POST['verified_badge'])) {
+        update_post_meta($profile_id, '_saas_verified_badge', 1);
+    } else {
+        update_post_meta($profile_id, '_saas_verified_badge', 0);
+    }
+    if (isset($_POST['profile_password'])) {
+        update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
     }
 
     // Automation specific
@@ -1048,6 +1068,68 @@ function saas_ajax_clone_link() {
         wp_send_json_success( 'Block duplicated' );
     }
     wp_send_json_error( 'Failed to duplicate' );
+}
+
+// 25. AJAX: AI Profile Assistant
+add_action( 'wp_ajax_saas_ai_assist', 'saas_ajax_ai_assist' );
+function saas_ajax_ai_assist() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+
+    $target = sanitize_text_field( $_POST['target'] );
+    $niche  = sanitize_text_field( $_POST['niche'] );
+
+    $suggestions = [
+        'coach' => [
+            'headline' => [
+                "Helping Founders Scale from 6 to 7 Figures 🚀",
+                "Unlock Your Peak Performance with Elite Systems",
+                "Strategic Advisory for High-Impact Entrepreneurs"
+            ],
+            'bio' => [
+                "Ex-SaaS Founder turned Performance Coach. I help seed-stage startups optimize their unit economics and reduce churn through proven psychological frameworks.",
+                "Helping you reclaim 20+ hours a week while doubling your revenue. Certified high-performance coach for busy CEOs."
+            ]
+        ],
+        'creator' => [
+            'headline' => [
+                "Exclusive Insights & Behind-the-Scenes 🎥",
+                "Building the Next Generation of Digital Brands",
+                "Sharing My Journey to 1M Followers"
+            ],
+            'bio' => [
+                "Daily tips on content strategy, community building, and monetization. Join 50k+ other creators on the journey to creative independence.",
+                "Documenting the process of building a multi-channel media empire. I share what works (and what doesn't) in the attention economy."
+            ]
+        ],
+        'realtor' => [
+            'headline' => [
+                "Luxury Living in the Heart of the City 🏡",
+                "Your Gateway to Off-Market Luxury Listings",
+                "Modern Homes for Modern Families"
+            ],
+            'bio' => [
+                "Top 1% Global Agent specializing in luxury residential properties. I help discerning buyers find their dream home through data-driven advisory.",
+                "Specializing in bespoke real estate investment. Helping you build a legacy through high-yield property acquisition."
+            ]
+        ],
+        'business' => [
+            'headline' => [
+                "Driving Results through Strategic Design 📈",
+                "Scaling Brands with Innovative Tech Solutions",
+                "Your Partner in Digital Transformation"
+            ],
+            'bio' => [
+                "Streamlining operations for modern enterprises. We provide the infrastructure you need to scale globally with confidence.",
+                "Innovation-first consultancy helping legacy brands transition to the digital-first economy. We build the future of commerce."
+            ]
+        ]
+    ];
+
+    $niche_data = $suggestions[$niche] ?? $suggestions['business'];
+    $list = $niche_data[$target] ?? $niche_data['headline'];
+    $suggestion = $list[array_rand($list)];
+
+    wp_send_json_success( $suggestion );
 }
 
 // 18. AJAX: Clone Profile

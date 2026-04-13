@@ -50,6 +50,18 @@ class Saas_Payments {
         $plan_id = sanitize_text_field( $_POST['plan_id'] );
         $gateway = sanitize_text_field( $_POST['gateway'] );
         $user_id = get_current_user_id();
+        $block_id = isset($_POST['block_id']) ? intval($_POST['block_id']) : 0;
+
+        $amount = 19.00;
+        $is_product = false;
+
+        if (strpos($plan_id, 'product_') === 0) {
+            $is_product = true;
+            $amount = floatval(get_post_meta($block_id, '_saas_price', true));
+            if (!$amount) $amount = 99.00; // Fallback
+        } elseif ($plan_id === 'agency') {
+            $amount = 49.00;
+        }
 
         if ( $gateway === 'stripe' ) {
             $secret_key = get_option('saas_stripe_secret_key');
@@ -59,12 +71,16 @@ class Saas_Payments {
             // For Pro Plan checkouts in this elite system, we create a pending order
             $order_id = wp_insert_post([
                 'post_type' => 'saas_order',
-                'post_title' => 'Pending Order - ' . $plan_id,
+                'post_title' => ($is_product ? 'Product Sale: ' : 'Plan Upgrade: ') . $plan_id,
                 'post_status' => 'publish',
-                'post_author' => get_current_user_id()
+                'post_author' => $is_product ? get_post_field('post_author', $block_id) : $user_id
             ]);
-            update_post_meta($order_id, '_saas_order_amount', $plan_id === 'pro' ? 19.00 : 49.00);
+            update_post_meta($order_id, '_saas_order_amount', $amount);
             update_post_meta($order_id, '_saas_order_status', 'pending');
+            if ($is_product) {
+                update_post_meta($order_id, '_saas_product_id', $block_id);
+                update_post_meta($order_id, '_saas_customer_id', $user_id);
+            }
 
             wp_send_json_success([ 'redirect_url' => $session['url'] ]);
         } elseif ( $gateway === 'paypal' ) {
@@ -101,19 +117,28 @@ class Saas_Payments {
         $data = $request->get_json_params();
 
         // Mock verification logic
-        $user_id = $data['user_id'] ?? 0;
-        $status  = $data['status'] ?? '';
-        $plan    = $data['plan'] ?? 'pro';
+        $user_id  = $data['user_id'] ?? 0;
+        $status   = $data['status'] ?? '';
+        $plan     = $data['plan'] ?? 'pro';
+        $order_id = isset($data['order_id']) ? intval($data['order_id']) : 0;
 
-        if ( $user_id && $status === 'succeeded' ) {
-            update_user_meta( $user_id, '_saas_subscription_plan', $plan );
-            update_user_meta( $user_id, '_saas_subscription_expiry', strtotime('+1 year') );
+        if ( $status === 'succeeded' ) {
+            $amount = 19.00;
+            if ($order_id) {
+                update_post_meta($order_id, '_saas_order_status', 'completed');
+                $amount = get_post_meta($order_id, '_saas_order_amount', true) ?: 19.00;
+            }
 
-            // Handle Affiliate Commission
-            $referrer_id = get_user_meta($user_id, '_saas_referred_by', true);
-            if ($referrer_id) {
-                $aff = new Saas_Affiliates();
-                $aff->record_referral_sale($referrer_id, 19.00); // Dynamic amount in production
+            if ($user_id) {
+                update_user_meta( $user_id, '_saas_subscription_plan', $plan );
+                update_user_meta( $user_id, '_saas_subscription_expiry', strtotime('+1 year') );
+
+                // Handle Affiliate Commission
+                $referrer_id = get_user_meta($user_id, '_saas_referred_by', true);
+                if ($referrer_id) {
+                    $aff = new Saas_Affiliates();
+                    $aff->record_referral_sale($referrer_id, floatval($amount));
+                }
             }
 
             return new WP_REST_Response( [ 'success' => true ], 200 );

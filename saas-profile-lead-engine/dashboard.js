@@ -124,6 +124,7 @@
             $('#edit-link-custom-text').val($li.attr('data-custom-text') || '#ffffff');
             $('#edit-link-hour-from').val($li.attr('data-hour-from'));
             $('#edit-link-hour-to').val($li.attr('data-hour-to'));
+            $('#edit-link-image-id').val($li.attr('data-link-image-id'));
 
             $('#saas-edit-modal').css('display', 'flex');
             $('body').css('overflow', 'hidden');
@@ -178,18 +179,12 @@
 
             $btn.text('🤖...').prop('disabled', true);
 
-            setTimeout(function() {
-                var suggestions = {
-                    coach: { h: "Helping Founders Scale with Proven Systems 🚀", b: "Elite high-performance coach specializing in sustainable growth for 7-figure entrepreneurs." },
-                    creator: { h: "Exclusive Content & Daily Insights 🎥", b: "Sharing daily tips on digital growth and community building for the next generation of creators." },
-                    realtor: { h: "Modern Homes for Modern Families 🏡", b: "Helping you find your dream luxury property in the city's most exclusive neighborhoods." },
-                    business: { h: "Driving Results through Strategic Design 📈", b: "Providing high-impact solutions for modern organizations ready to scale their digital infrastructure." }
-                };
-
-                var content = (target === 'headline') ? suggestions[niche].h : suggestions[niche].b;
-                $input.val(content).trigger('input');
-                $btn.text(oldText).prop('disabled', false);
-            }, 800);
+            saasFetch('saas_ai_assist', { target: target, niche: niche }, $(this))
+                .done(function(res) {
+                    $input.val(res).trigger('input');
+                    updatePreview(target, res);
+                    $btn.text(oldText).prop('disabled', false);
+                });
         });
 
         // 5. Form Submissions
@@ -204,6 +199,21 @@
             saasFetch('saas_save_link', new FormData(this), $(this).find('button[type="submit"]'))
                 .done(function() { location.reload(); });
         });
+
+        // Live Preview Bridge (postMessage)
+        function updatePreview(key, value) {
+            var frame = document.getElementById('saas-preview-frame');
+            if (frame && frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'live_update', key: key, value: value }, '*');
+            }
+        }
+
+        $('#saas-profile-form [name="headline"]').on('input', function() { updatePreview('headline', $(this).val()); });
+        $('#saas-profile-form [name="bio"]').on('input', function() { updatePreview('bio', $(this).val()); });
+        $('#saas-branding-form [name="theme_color"]').on('change', function() { updatePreview('theme_color', $(this).val()); });
+        $('#saas-branding-form [name="bg_value"]').on('input', function() { updatePreview('bg_value', $(this).val()); });
+        $('#saas-branding-form [name="profile_theme"]').on('change', function() { updatePreview('profile_theme', $(this).val()); });
+        $('#saas-branding-form [name="container_shadow"]').on('change', function() { updatePreview('container_shadow', $(this).val()); });
 
         // Global Settings Forms
         $('#saas-profile-form, #saas-branding-form, #saas-automation-form, #saas-integrations-form, #saas-seo-form, #saas-tracking-form').on('submit', function(e) {
@@ -297,6 +307,37 @@
         });
 
         // 8. Advanced Toggle
+        // Style Presets
+        $(document).on('click', '.preset-btn', function() {
+            var p = $(this).data('preset');
+            var $form = $('#saas-branding-form');
+            var presets = {
+                midnight: { theme: 'dark', bg_type: 'flat', bg_value: '#0f172a', accent: '#6366f1', shadow: 'soft', font: "'Inter', sans-serif" },
+                glassy: { theme: 'light', bg_type: 'gradient', bg_value: 'linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%)', accent: '#4f46e5', shadow: 'soft', font: "'Inter', sans-serif" },
+                vibrant: { theme: 'vibrant', bg_type: 'gradient', bg_value: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', accent: '#ffffff', shadow: 'hard', font: "'Montserrat', sans-serif" },
+                minimal: { theme: 'light', bg_type: 'flat', bg_value: '#ffffff', accent: '#000000', shadow: 'none', font: "'Inter', sans-serif" },
+                luxury: { theme: 'luxury', bg_type: 'flat', bg_value: '#000000', accent: '#d4af37', shadow: 'soft', font: "'Playfair Display', serif" }
+            };
+
+            var data = presets[p];
+            if (data) {
+                $form.find('[name="profile_theme"]').val(data.theme);
+                $form.find('[name="bg_type"]').val(data.bg_type);
+                $form.find('[name="bg_value"]').val(data.bg_value);
+                $form.find('[name="theme_color"]').val(data.accent);
+                $form.find('[name="container_shadow"]').val(data.shadow);
+                $form.find('[name="font_family"]').val(data.font);
+
+                // Trigger live updates
+                updatePreview('profile_theme', data.theme);
+                updatePreview('bg_value', data.bg_value);
+                updatePreview('theme_color', data.accent);
+                updatePreview('container_shadow', data.shadow);
+
+                alert('Preset "' + p + '" applied! Click "Apply Styles" to save permanently.');
+            }
+        });
+
         $(document).on('click', '.toggle-advanced', function() {
             $('#edit-advanced-fields').slideToggle();
             var isVisible = $('#edit-advanced-fields').is(':visible');
@@ -305,9 +346,34 @@
 
         // 9. Block Picker
         $('.picker-item').on('click', function() {
+            if ($(this).hasClass('pro-locked')) return;
             $('.picker-item').removeClass('active');
             $(this).addClass('active');
             $('#saas-block-type-hidden').val($(this).attr('data-type'));
+
+            // Adjust form placeholders based on type
+            var type = $(this).attr('data-type');
+            var $extra = $('#saas-add-link-form [name="extra"]');
+            if (type === 'faq') $extra.attr('placeholder', 'FAQ Answer');
+            else if (type === 'testimonial') $extra.attr('placeholder', 'The Quote');
+            else if (type === 'pricing') $extra.attr('placeholder', 'Price (e.g. $99/mo) and Features (one per line)');
+            else if (type === 'social_icons') $extra.attr('placeholder', 'Platform:URL (e.g. twitter:https://...)');
+            else $extra.attr('placeholder', 'Extra content / Description');
+        });
+
+        $(document).on('click', '.check-integration', function() {
+            var platform = $(this).data('platform');
+            saasFetch('saas_check_integration', { platform: platform }, $(this)).done(function(msg) {
+                alert(msg);
+            });
+        });
+
+        $(document).on('click', '#saas-test-webhook-btn', function() {
+            var url = $('[name="lead_webhook"]').val();
+            if (!url) return alert('Please enter a webhook URL first.');
+            saasFetch('saas_test_webhook', { webhook_url: url }, $(this)).done(function(msg) {
+                alert(msg);
+            });
         });
 
         // 10. Preview Controls
@@ -319,6 +385,27 @@
         $('#saas-close-preview').on('click', function() {
             $('.saas-preview-pane').removeClass('show').fadeOut();
             $('body').css('overflow', 'auto');
+        });
+
+        // Media Library Integration
+        $(document).on('click', '.select-media', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var target = $btn.data('target');
+            var custom_uploader = wp.media({
+                title: 'Select Image',
+                button: { text: 'Use Image' },
+                multiple: false
+            }).on('select', function() {
+                var attachment = custom_uploader.state().get('selection').first().toJSON();
+                if (target === 'profile-image') {
+                    $('#profile-image-id').val(attachment.id);
+                    $('#profile-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                } else if (target === 'cover-image') {
+                    $('#cover-image-id').val(attachment.id);
+                    $('#cover-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                }
+            }).open();
         });
 
         // 10.1 Marketing Material Copy
@@ -351,6 +438,25 @@
                     $('#lead-details-content').html(html);
                     $('#saas-lead-modal').css('display', 'flex');
                 });
+        });
+
+        // Bulk Lead Actions
+        $('#leads-select-all').on('change', function() {
+            $('.lead-checkbox').prop('checked', $(this).is(':checked')).trigger('change');
+        });
+
+        $(document).on('change', '.lead-checkbox', function() {
+            var anyChecked = $('.lead-checkbox:checked').length > 0;
+            $('#saas-bulk-delete-leads').toggle(anyChecked);
+        });
+
+        $('#saas-bulk-delete-leads').on('click', function() {
+            var ids = [];
+            $('.lead-checkbox:checked').each(function() { ids.push($(this).val()); });
+            if(!confirm('Delete ' + ids.length + ' leads forever?')) return;
+            saasFetch('saas_bulk_delete_leads', { lead_ids: ids }, $(this)).done(function() {
+                location.reload();
+            });
         });
 
         // Update Lead Details
@@ -386,6 +492,15 @@
             var progress = (step / 3) * 100;
             $('.progress-bar-fill').css('width', progress + '%');
         }
+        $(document).on('click', '.apply-template-btn', function() {
+            var t = $(this).data('template');
+            if(!confirm('This will delete all current blocks and apply the ' + t + ' template. Continue?')) return;
+            saasFetch('saas_apply_template', { template: t, profile_id: $('[name="profile_id"]').val() }, $(this)).done(function(msg) {
+                alert(msg);
+                location.reload();
+            });
+        });
+
         $('#wizard-finish').on('click', function() {
             var data = {
                 profile_id: $('[name="profile_id"]').val(),
@@ -426,14 +541,14 @@
             });
         }
 
-        if ($('#saas-ab-chart').length && typeof Chart !== 'undefined') {
+        if ($('#saas-ab-chart').length && typeof Chart !== 'undefined' && typeof saas_ab_data !== 'undefined') {
             new Chart(document.getElementById('saas-ab-chart'), {
                 type: 'bar',
                 data: {
                     labels: ['Variant A', 'Variant B'],
                     datasets: [{
-                        label: 'Click-through Rate (%)',
-                        data: [12.5, 18.2],
+                        label: 'Total Clicks',
+                        data: [saas_ab_data.a, saas_ab_data.b],
                         backgroundColor: ['#6366f1', '#10b981'],
                         borderRadius: 10
                     }]

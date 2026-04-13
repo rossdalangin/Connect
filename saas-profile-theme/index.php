@@ -643,8 +643,17 @@ window.addEventListener('message', function(event) {
             else document.body.style.backgroundColor = value;
         }
         if (key === 'profile_theme') {
-            document.body.classList.remove('theme-light', 'theme-dark', 'theme-vibrant');
+            document.body.classList.remove('theme-light', 'theme-dark', 'theme-vibrant', 'theme-luxury');
             document.body.classList.add('theme-' + value);
+        }
+        if (key === 'font_family') {
+            document.documentElement.style.setProperty('--font-family', value);
+        }
+        if (key === 'btn_shape') {
+            let radius = '0px';
+            if (value === 'pill') radius = '50px';
+            else if (value === 'rounded') radius = '12px';
+            document.documentElement.style.setProperty('--btn-radius', radius);
         }
         if (key === 'container_shadow') {
             let shadow = 'none';
