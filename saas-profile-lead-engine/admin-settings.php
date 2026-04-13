@@ -115,6 +115,9 @@ class Saas_Admin_Settings {
                 if ($title === 'Directory') {
                     update_post_meta($id, '_wp_page_template', 'template-directory.php');
                 }
+                if ($title === 'Story Card') {
+                    update_post_meta($id, '_wp_page_template', 'template-story-card.php');
+                }
             } else {
                 if ($title === 'Home') $home_id = $page->ID;
             }
@@ -543,8 +546,21 @@ class Saas_Admin_Settings {
             <h2>Sample Data Generator</h2>
             <p>Generate 5+ sample profiles (Coach, Realtor, Influencer) to test the system and demo to clients.</p>
             <button id="saas-generate-samples-btn" class="button button-secondary">Generate Sample Profiles</button>
+            <button id="saas-test-payment-btn" class="button button-secondary" style="background:#f59e0b; color:#fff; border:none;">Simulate Success Payment (UID: 1)</button>
 
             <script>
+            document.getElementById('saas-test-payment-btn')?.addEventListener('click', function() {
+                if(!confirm('This will simulate a successful $19 payment for user ID 1. Continue?')) return;
+                fetch('<?php echo get_rest_url(null, "/saas/v1/webhook"); ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: 1, status: 'succeeded', plan: 'pro' })
+                }).then(r => r.json()).then(d => {
+                    alert('Webhook processed: ' + JSON.stringify(d));
+                    location.reload();
+                });
+            });
+
             document.getElementById('saas-generate-samples-btn')?.addEventListener('click', function() {
                 if (!confirm('This will create new sample profiles and links. Continue?')) return;
                 const btn = this;

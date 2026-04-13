@@ -467,7 +467,7 @@ class Saas_Dashboard {
                                 <p style="font-size:0.8rem; margin-top:10px; font-weight:bold;">Scan to Connect</p>
                              </div>
                         </div>
-                        <button class="button" onclick="alert('Story Card Downloaded (Simulated)')">📥 Download Story Card</button>
+                        <a href="<?php echo home_url('/story-card?profile_id='.$profile_id); ?>" target="_blank" class="button">📥 View & Download Story Card</a>
 
                         <hr>
                         <h4>NFC Configuration</h4>

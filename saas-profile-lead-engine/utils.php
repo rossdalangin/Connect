@@ -39,7 +39,7 @@ function saas_handle_vcard_download() {
             if ( $path && file_exists($path) ) {
                 $type = pathinfo($path, PATHINFO_EXTENSION);
                 $data = file_get_contents($path);
-                $vcard .= "PHOTO;ENCODING=b;TYPE=" . strtoupper($type) . ":" . base64_encode($data) . "\n";
+                $vcard .= "PHOTO;TYPE=" . strtoupper($type) . ";ENCODING=B:" . base64_encode($data) . "\n";
             }
         }
 

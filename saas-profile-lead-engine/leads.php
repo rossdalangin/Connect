@@ -78,13 +78,20 @@ function saas_ajax_submit_lead() {
         $mc_api = get_post_meta($profile_id, '_saas_mailchimp_api', true);
         $mc_list = get_post_meta($profile_id, '_saas_mailchimp_list', true);
         if ($mc_api && $mc_list) {
-            // Mock Mailchimp API call: Syncing lead to list
+            $dc = substr($mc_api, strpos($mc_api, '-') + 1);
+            wp_remote_post("https://{$dc}.api.mailchimp.com/3.0/lists/{$mc_list}/members", [
+                'headers' => [ 'Authorization' => 'apikey ' . $mc_api, 'Content-Type' => 'application/json' ],
+                'body' => json_encode([ 'email_address' => $email, 'status' => 'subscribed', 'merge_fields' => ['FNAME' => $name] ])
+            ]);
         }
 
         // Elite Integration: HubSpot
         $hs_token = get_post_meta($profile_id, '_saas_hubspot_token', true);
         if ($hs_token) {
-            // Mock HubSpot API call: Syncing lead to CRM
+            wp_remote_post("https://api.hubapi.com/crm/v3/objects/contacts", [
+                'headers' => [ 'Authorization' => 'Bearer ' . $hs_token, 'Content-Type' => 'application/json' ],
+                'body' => json_encode([ 'properties' => [ 'email' => $email, 'firstname' => $name ] ])
+            ]);
         }
 
         // Email Notification

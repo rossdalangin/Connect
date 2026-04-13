@@ -87,23 +87,28 @@ $h_img   = get_option('saas_home_image');
                 <?php endforeach; ?>
             </ul>
         </div>
-        <div style="flex: 1; min-width: 340px; background: #0f172a; padding: 50px; border-radius: 60px; border: 12px solid #1e293b; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);">
-            <div style="text-align: center; color: #fff; margin-bottom: 30px;">
-                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); border-radius: 50%; margin: 0 auto 15px; border: 4px solid #fff;"></div>
-                <h4 style="margin: 0; font-size: 1.5rem; font-weight: 800;">@yourname</h4>
-                <p style="font-size: 0.9rem; opacity: 0.6;">Digital Architect & Creator</p>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div style="height: 50px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0f172a;">🚀 Work with Me</div>
-                <div style="height: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;">🎬 Latest Masterclass</div>
-                <div style="height: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;">📦 My Products</div>
-
-                <div style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2); text-align: center;">
-                    <p style="color: #39e09b; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px;">New Lead Captured!</p>
-                    <div style="height: 8px; background: #39e09b; border-radius: 10px; width: 80%; margin: 0 auto;"></div>
+        <div style="flex: 1; min-width: 340px; background: #0f172a; padding: 50px; border-radius: 60px; border: 12px solid #1e293b; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); position: relative; overflow: hidden;">
+            <?php
+            $latest_profile = get_posts(['post_type' => 'saas_profile', 'post_status' => 'publish', 'numberposts' => 1]);
+            if ($latest_profile) : ?>
+                <iframe src="<?php echo home_url('/' . $latest_profile[0]->post_name); ?>" style="width: 100%; height: 500px; border: none; border-radius: 30px; background: #fff;"></iframe>
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;" onclick="window.location.href='<?php echo home_url('/directory'); ?>'"></div>
+            <?php else : ?>
+                <div style="text-align: center; color: #fff; margin-bottom: 30px;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); border-radius: 50%; margin: 0 auto 15px; border: 4px solid #fff;"></div>
+                    <h4 style="margin: 0; font-size: 1.5rem; font-weight: 800;">@yourname</h4>
+                    <p style="font-size: 0.9rem; opacity: 0.6;">Digital Architect & Creator</p>
                 </div>
-            </div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="height: 50px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0f172a;">🚀 Work with Me</div>
+                    <div style="height: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;">🎬 Latest Masterclass</div>
+                    <div style="height: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;">📦 My Products</div>
+                    <div style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2); text-align: center;">
+                        <p style="color: #39e09b; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px;">New Lead Captured!</p>
+                        <div style="height: 8px; background: #39e09b; border-radius: 10px; width: 80%; margin: 0 auto;"></div>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
