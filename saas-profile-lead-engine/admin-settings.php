@@ -449,6 +449,7 @@ class Saas_Admin_Settings {
 
     public function add_user_columns( $columns ) {
         $columns['saas_plan'] = 'SaaS Plan';
+        $columns['saas_earnings'] = 'Earnings';
         return $columns;
     }
 
@@ -457,6 +458,10 @@ class Saas_Admin_Settings {
             $plan = get_user_meta($user_id, '_saas_subscription_plan', true) ?: 'Free';
             $color = ($plan === 'pro') ? '#39e09b' : '#666';
             return '<strong style="color:'.$color.';">'.strtoupper($plan).'</strong>';
+        }
+        if ( $column === 'saas_earnings' ) {
+            $earned = get_user_meta($user_id, '_saas_affiliate_earned', true) ?: 0;
+            return '$' . number_format($earned, 2);
         }
         return $val;
     }
@@ -593,6 +598,28 @@ class Saas_Admin_Settings {
                     <li><strong>User:</strong> Share your unique link (domain.com/username).</li>
                 </ol>
             </div>
+
+            <hr>
+            <h2>System Broadcast</h2>
+            <p>Send a message to every user's inbox in the system.</p>
+            <form id="saas-broadcast-form">
+                <p><input type="text" name="subject" placeholder="Broadcast Subject" style="width:100%;" required></p>
+                <p><textarea name="message" placeholder="System update, promotion, or announcement..." style="width:100%;" rows="5" required></textarea></p>
+                <p><button type="submit" class="button button-primary">Send to All Users</button></p>
+            </form>
+            <script>
+            jQuery('#saas-broadcast-form').on('submit', function(e) {
+                e.preventDefault();
+                if(!confirm('This will send a message to EVERY user. Continue?')) return;
+                var $btn = jQuery(this).find('button');
+                $btn.prop('disabled', true).text('Sending...');
+                jQuery.post(ajaxurl, jQuery(this).serialize() + '&action=saas_send_broadcast&security=<?php echo wp_create_nonce("saas_dashboard_nonce"); ?>', function(res) {
+                    alert(res.data);
+                    $btn.prop('disabled', false).text('Send to All Users');
+                    if(res.success) jQuery('#saas-broadcast-form').find('input, textarea').val('');
+                });
+            });
+            </script>
             </div>
         </div>
         <?php

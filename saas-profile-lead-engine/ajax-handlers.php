@@ -182,6 +182,9 @@ function saas_ajax_save_profile() {
     if (isset($_POST['profile_theme'])) {
         update_post_meta($profile_id, '_saas_profile_theme', sanitize_text_field($_POST['profile_theme']));
     }
+    if (isset($_POST['custom_css'])) {
+        update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
+    }
 
     // Automation specific
     if (isset($_POST['lead_magnet_url'])) {

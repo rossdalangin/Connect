@@ -10,6 +10,7 @@ class Saas_Messaging {
         add_action( 'init', [ $this, 'register_message_cpt' ] );
         add_action( 'wp_ajax_saas_send_message', [ $this, 'handle_send_message' ] );
         add_action( 'wp_ajax_saas_get_message_content', [ $this, 'get_message_content' ] );
+        add_action( 'wp_ajax_saas_send_broadcast', [ $this, 'handle_send_broadcast' ] );
         add_action( 'add_meta_boxes', [ $this, 'add_admin_meta_boxes' ] );
     }
 
@@ -67,6 +68,30 @@ class Saas_Messaging {
 
     public function add_admin_meta_boxes() {
         add_meta_box( 'saas_msg_details', 'Message Details', [ $this, 'render_admin_meta_box' ], 'saas_message', 'normal', 'high' );
+    }
+
+    public function handle_send_broadcast() {
+        if(!current_user_can('manage_options')) wp_send_json_error('Unauthorized');
+        check_ajax_referer('saas_dashboard_nonce', 'security');
+
+        $content = sanitize_textarea_field($_POST['message']);
+        $subject = sanitize_text_field($_POST['subject']);
+        $users = get_users(['fields' => 'ID']);
+
+        foreach($users as $u_id) {
+            $msg_id = wp_insert_post([
+                'post_type' => 'saas_message',
+                'post_title' => $subject . ' [BROADCAST]',
+                'post_content' => $content,
+                'post_status' => 'publish',
+                'post_author' => get_current_user_id(),
+            ]);
+            update_post_meta($msg_id, '_saas_msg_recipient', $u_id);
+            update_post_meta($msg_id, '_saas_msg_status', 'unread');
+            update_post_meta($msg_id, '_saas_is_broadcast', 1);
+        }
+
+        wp_send_json_success('Broadcast sent to ' . count($users) . ' users!');
     }
 
     public function render_admin_meta_box( $post ) {

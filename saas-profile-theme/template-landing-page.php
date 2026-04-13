@@ -415,6 +415,37 @@ $h_img   = get_option('saas_home_image');
 </section>
 
 <style>
+    .phone-frame {
+        width: 320px;
+        height: 640px;
+        background: #000;
+        border-radius: 40px;
+        padding: 10px;
+        box-shadow: 0 50px 100px -20px rgba(0,0,0,0.3);
+        border: 8px solid #1e293b;
+        position: relative;
+        margin: 0 auto;
+    }
+    .phone-frame:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 25px;
+        background: #1e293b;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+        z-index: 10;
+    }
+    .phone-frame iframe {
+        width: 100%;
+        height: 100%;
+        border-radius: 30px;
+        background: #fff;
+    }
+
     .saas-cta-btn-vibrant {
         display: inline-block;
         margin-top: 40px;

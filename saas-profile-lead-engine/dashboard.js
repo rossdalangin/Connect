@@ -43,6 +43,15 @@
             switchTab(tabId);
         });
 
+        $(document).on('click', '.pro-locked, .pro-gated-inline', function(e) {
+            if ($(this).hasClass('pro-gated-inline') && !$(e.target).is('input, select, textarea')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (confirm('This feature is only available for Elite Pro users. Would you like to view our Pro plans?')) {
+                switchTab('billing');
+            }
+        });
+
         // Initialize from URL
         var currentTab = new URLSearchParams(window.location.search).get('tab');
         if (currentTab) {
@@ -137,6 +146,52 @@
                 .done(function() { location.reload(); });
         });
 
+        $(document).on('click', '.clone-profile-btn', function(e) {
+            e.stopPropagation();
+            if(!confirm('Clone this profile and all its blocks?')) return;
+            saasFetch('saas_clone_profile', { profile_id: $(this).attr('data-id') }, $(this))
+                .done(function(res) { window.location.href = '?profile_id=' + res.id; });
+        });
+
+        $(document).on('click', '#saas-add-profile-trigger', function() {
+            var t = prompt('Profile Title:');
+            if (t) saasFetch('saas_create_profile', { profile_title: t }, $(this)).done(function(res) {
+                window.location.href = '?profile_id=' + res.id;
+            });
+        });
+
+        $(document).on('click', '.profile-title', function(e) {
+            e.stopPropagation();
+            $('.profile-dropdown').toggle();
+        });
+        $(document).on('click', function() {
+            $('.profile-dropdown').hide();
+        });
+
+        // AI Assist Logic
+        $(document).on('click', '.ai-assist-btn', function() {
+            var $btn = $(this);
+            var target = $btn.data('target');
+            var $input = $('[name="' + target + '"]');
+            var niche = $('#profile-niche').val() || 'business';
+            var oldText = $btn.text();
+
+            $btn.text('🤖...').prop('disabled', true);
+
+            setTimeout(function() {
+                var suggestions = {
+                    coach: { h: "Helping Founders Scale with Proven Systems 🚀", b: "Elite high-performance coach specializing in sustainable growth for 7-figure entrepreneurs." },
+                    creator: { h: "Exclusive Content & Daily Insights 🎥", b: "Sharing daily tips on digital growth and community building for the next generation of creators." },
+                    realtor: { h: "Modern Homes for Modern Families 🏡", b: "Helping you find your dream luxury property in the city's most exclusive neighborhoods." },
+                    business: { h: "Driving Results through Strategic Design 📈", b: "Providing high-impact solutions for modern organizations ready to scale their digital infrastructure." }
+                };
+
+                var content = (target === 'headline') ? suggestions[niche].h : suggestions[niche].b;
+                $input.val(content).trigger('input');
+                $btn.text(oldText).prop('disabled', false);
+            }, 800);
+        });
+
         // 5. Form Submissions
         $('#saas-add-link-form').on('submit', function(e) {
             e.preventDefault();
@@ -151,7 +206,7 @@
         });
 
         // Global Settings Forms
-        $('#saas-profile-form, #saas-branding-form, #saas-automation-form, #saas-integrations-form').on('submit', function(e) {
+        $('#saas-profile-form, #saas-branding-form, #saas-automation-form, #saas-integrations-form, #saas-seo-form, #saas-tracking-form').on('submit', function(e) {
             e.preventDefault();
             var $form = $(this);
             saasFetch('saas_save_profile', new FormData(this), $form.find('button'))
@@ -316,7 +371,32 @@
             });
         });
 
-        // 12. Sortable Initializer
+        // 12. Wizard Logic
+        var currentStep = 1;
+        $(document).on('click', '.next-step', function() {
+            currentStep++;
+            updateWizard(currentStep);
+        });
+        $(document).on('click', '.prev-step', function() {
+            currentStep--;
+            updateWizard(currentStep);
+        });
+        function updateWizard(step) {
+            $('.wizard-step').hide().filter('[data-step="' + step + '"]').show();
+            var progress = (step / 3) * 100;
+            $('.progress-bar-fill').css('width', progress + '%');
+        }
+        $('#wizard-finish').on('click', function() {
+            var data = {
+                profile_id: $('[name="profile_id"]').val(),
+                headline: $('#wizard-headline').val(),
+                bio: $('#wizard-bio').val(),
+                niche: $('#wizard-niche').val()
+            };
+            saasFetch('saas_save_profile', data, $(this)).done(function() { location.reload(); });
+        });
+
+        // 13. Sortable Initializer
         if ($('#saas-links-list').length && typeof Sortable !== 'undefined') {
             new Sortable(document.getElementById('saas-links-list'), {
                 animation: 150,

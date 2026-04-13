@@ -82,17 +82,71 @@ class Saas_Dashboard {
         <div id="saas-dashboard">
             <div class="dashboard-main-area">
                 <!-- Onboarding Checklist -->
-                <div class="saas-onboarding-card dashboard-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
-                        <div>
-                            <h4 style="margin:0;">🚀 Get Started Checklist</h4>
-                            <div style="display:flex; gap:15px; margin-top:8px; font-size:0.8rem; flex-wrap:wrap;">
-                                <span><?php echo $meta['headline'] ? '[✓]' : '[ ]'; ?> Bio</span>
-                                <span><?php echo count($links) > 0 ? '[✓]' : '[ ]'; ?> Blocks</span>
-                                <span><?php echo $is_pro ? '[✓]' : '[ ]'; ?> Pro Upgrade</span>
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom:20px;">
+                    <div class="saas-onboarding-card dashboard-card" style="margin-bottom:0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+                            <div>
+                                <h4 style="margin:0;">🚀 Get Started Checklist</h4>
+                                <div style="display:flex; gap:15px; margin-top:8px; font-size:0.8rem; flex-wrap:wrap;">
+                                    <span><?php echo $meta['headline'] ? '[✓]' : '[ ]'; ?> Bio</span>
+                                    <span><?php echo count($links) > 0 ? '[✓]' : '[ ]'; ?> Blocks</span>
+                                    <span><?php echo $is_pro ? '[✓]' : '[ ]'; ?> Pro Upgrade</span>
+                                </div>
                             </div>
+                            <button class="button" onclick="document.getElementById('saas-wizard-modal').style.display='flex'">Launch Setup Wizard</button>
                         </div>
-                        <button class="button" onclick="document.getElementById('saas-wizard-modal').style.display='flex'">Launch Setup Wizard</button>
+                    </div>
+
+                    <div class="dashboard-card" style="margin-bottom:0; padding:15px; border-left: 4px solid var(--secondary);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-muted);">Pulse: Recent Activity</h4>
+                            <span class="pulse-dot"></span>
+                        </div>
+                        <div class="recent-activity-list" style="font-size:0.75rem;">
+                            <?php
+                            global $wpdb;
+                            $table = $wpdb->prefix . 'saas_analytics';
+                            // Combine analytics and recent leads
+                            $recent_activity = [];
+
+                            $events = $wpdb->get_results($wpdb->prepare("SELECT event_type as type, target_id, created_at FROM $table WHERE user_id = %d ORDER BY id DESC LIMIT 5", $user_id));
+                            foreach($events as $e) {
+                                $recent_activity[] = [
+                                    'type' => $e->type,
+                                    'target' => ($e->type === 'view') ? 'Profile' : get_the_title($e->target_id),
+                                    'time' => strtotime($e->created_at),
+                                    'icon' => ($e->type === 'view') ? '👁️' : '🖱️'
+                                ];
+                            }
+
+                            $recent_leads = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'numberposts' => 3]);
+                            foreach($recent_leads as $rl) {
+                                $recent_activity[] = [
+                                    'type' => 'lead',
+                                    'target' => get_post_meta($rl->ID, '_saas_lead_name', true),
+                                    'time' => get_post_time('U', true, $rl),
+                                    'icon' => '🚀'
+                                ];
+                            }
+
+                            usort($recent_activity, function($a, $b) { return $b['time'] - $a['time']; });
+                            $recent_activity = array_slice($recent_activity, 0, 4);
+
+                            if ($recent_activity) :
+                                foreach($recent_activity as $act) :
+                                    ?>
+                                    <div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #f1f5f9; display:flex; gap:10px; align-items:start;">
+                                        <span style="font-size:1rem;"><?php echo $act['icon']; ?></span>
+                                        <div style="flex:1;">
+                                            <strong><?php echo esc_html(ucfirst($act['type'])); ?></strong>: <?php echo esc_html($act['target']); ?>
+                                            <br><span style="color:#94a3b8; font-size:0.7rem;"><?php echo human_time_diff($act['time'], current_time('timestamp')); ?> ago</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach;
+                            else : ?>
+                                <p style="color:#94a3b8; margin:0;">Waiting for first visitor...</p>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
 
@@ -133,6 +187,8 @@ class Saas_Dashboard {
                     <button data-tab="automation">⚙️ Settings</button>
                     <button data-tab="share">📱 Share</button>
                     <button data-tab="billing">💳 Pro</button>
+                    <button data-tab="seo">🔍 SEO</button>
+                    <button data-tab="tracking">📊 Tracking</button>
                     <button data-tab="inbox">📩 Inbox</button>
                 </nav>
 
@@ -275,6 +331,32 @@ class Saas_Dashboard {
                             </div>
 
                             <div class="field">
+                                <label>Card Elevation (Shadow)</label>
+                                <select name="container_shadow">
+                                    <option value="soft" <?php selected(get_post_meta($profile_id, '_saas_container_shadow', true), 'soft'); ?>>Soft Glow</option>
+                                    <option value="hard" <?php selected(get_post_meta($profile_id, '_saas_container_shadow', true), 'hard'); ?>>Hard Edge (Brutalism)</option>
+                                    <option value="none" <?php selected(get_post_meta($profile_id, '_saas_container_shadow', true), 'none'); ?>>Flat (Minimalist)</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label>Typography</label>
+                                <select name="font_family">
+                                    <option value="'Inter', sans-serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Inter', sans-serif"); ?>>Inter (Modern)</option>
+                                    <option value="'Montserrat', sans-serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Montserrat', sans-serif"); ?>>Montserrat (Bold)</option>
+                                    <option value="'Playfair Display', serif" <?php selected(get_post_meta($profile_id, '_saas_font_family', true), "'Playfair Display', serif"); ?>>Playfair (Elegant)</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label><input type="checkbox" name="social_proof" value="1" <?php checked(get_post_meta($profile_id, '_saas_social_proof', true), 1); ?>> Show Social Proof Bubble (e.g. "100 people viewed")</label>
+                            </div>
+
+                            <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                <label><input type="checkbox" name="hide_branding" value="1" <?php checked(get_post_meta($profile_id, '_saas_hide_branding', true), 1); ?>> Hide "Powered by" Branding (Pro)</label>
+                            </div>
+
+                            <div class="field">
                                 <label>Theme Accent Color</label>
                                 <input type="color" name="theme_color" value="<?php echo esc_attr( $meta['theme_color'] ); ?>">
                             </div>
@@ -308,6 +390,11 @@ class Saas_Dashboard {
                                     <button type="button" class="preset-btn button" data-preset="luxury">⚜️ Luxury</button>
                                 </div>
                             </div>
+                            <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                <label>Custom CSS (Pro)</label>
+                                <textarea name="custom_css" rows="6" placeholder="/* Custom styles for your profile */" style="font-family:monospace; font-size:0.8rem;"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_custom_css', true)); ?></textarea>
+                            </div>
+
                             <button type="submit" class="btn-primary">Apply Styles</button>
                         </form>
                     </div>
@@ -475,11 +562,96 @@ class Saas_Dashboard {
                     </div>
                 </div>
 
+                <div id="tab-tracking" class="saas-tab-content">
+                    <div class="dashboard-card">
+                        <h3>Tracking & Pixels</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Add Google Analytics, Facebook Pixel, or custom tracking scripts. (Elite Pro Feature)</p>
+                        <form id="saas-tracking-form">
+                            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                <label>Header Scripts (e.g. Google Tag Manager)</label>
+                                <textarea name="header_scripts" rows="5" placeholder="<script>...</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_header_scripts', true)); ?></textarea>
+                            </div>
+                            <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                <label>Footer Scripts (e.g. Conversion Pixels)</label>
+                                <textarea name="footer_scripts" rows="5" placeholder="<script>...</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_footer_scripts', true)); ?></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Save Scripts</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="tab-seo" class="saas-tab-content">
+                    <div class="dashboard-card">
+                        <h3>Search Engine Optimization</h3>
+                        <form id="saas-seo-form">
+                            <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+                            <div class="field">
+                                <label>Meta Title</label>
+                                <input type="text" name="meta_title" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_seo_title', true)); ?>" placeholder="Example: John Doe | Digital Marketing Consultant">
+                            </div>
+                            <div class="field">
+                                <label>Meta Description</label>
+                                <textarea name="meta_desc" rows="3" placeholder="A short summary of your profile for search engines."><?php echo esc_textarea(get_post_meta($profile_id, '_saas_seo_desc', true)); ?></textarea>
+                            </div>
+                            <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                <label>Custom Favicon URL (Pro)</label>
+                                <input type="url" name="favicon" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_favicon', true)); ?>" placeholder="https://yoursite.com/favicon.ico">
+                            </div>
+
+                            <div style="background:#f8fafc; padding:20px; border-radius:15px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                                <h4 style="margin:0 0 10px; font-size:0.9rem; color:#64748b;">Google Search Preview</h4>
+                                <div style="color:#1a0dab; font-size:1.2rem; margin-bottom:2px;"><?php echo get_post_meta($profile_id, '_saas_seo_title', true) ?: $profile_obj->post_title; ?></div>
+                                <div style="color:#006621; font-size:0.9rem; margin-bottom:5px;"><?php echo home_url('/' . $profile_obj->post_name); ?></div>
+                                <div style="color:#545454; font-size:0.85rem; line-height:1.4;"><?php echo get_post_meta($profile_id, '_saas_seo_desc', true) ?: 'Check out my digital identity and conversion funnel.'; ?></div>
+                            </div>
+
+                            <button type="submit" class="btn-primary">Save SEO Settings</button>
+                        </form>
+                    </div>
+                </div>
+
                 <div id="tab-automation" class="saas-tab-content">
                     <div class="dashboard-card">
                         <h3>Settings & Rules</h3>
                         <form id="saas-automation-form">
                             <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
+
+                            <h4>Lead Form Customization</h4>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+                                <div>
+                                    <div class="field">
+                                        <label><input type="checkbox" name="form_field_phone" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_phone', true), 1); ?>> Enable Phone Field</label>
+                                    </div>
+                                    <div class="field">
+                                        <label>Phone Label</label>
+                                        <input type="text" name="form_label_phone" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_form_label_phone', true) ?: 'Phone Number'); ?>">
+                                    </div>
+                                    <div class="field">
+                                        <label><input type="checkbox" name="form_req_phone" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_req_phone', true), 1); ?>> Phone Required</label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="field">
+                                        <label><input type="checkbox" name="form_field_msg" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_msg', true), 1); ?>> Enable Message Field</label>
+                                    </div>
+                                    <div class="field">
+                                        <label>Message Label</label>
+                                        <input type="text" name="form_label_msg" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_form_label_msg', true) ?: 'Your Message'); ?>">
+                                    </div>
+                                    <div class="field">
+                                        <label><input type="checkbox" name="form_req_msg" value="1" <?php checked(get_post_meta($profile_id, '_saas_form_req_msg', true), 1); ?>> Message Required</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label>Success Message</label>
+                                <input type="text" name="lead_success_msg" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_lead_success_msg', true) ?: 'Thank you! We will be in touch soon.'); ?>">
+                            </div>
+
+                            <hr>
+                            <h4>Advanced Triggers</h4>
                             <div class="field">
                                 <label>Webhook URL (Zapier/Make)</label>
                                 <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>">
@@ -638,14 +810,34 @@ class Saas_Dashboard {
                 <div id="tab-billing" class="saas-tab-content">
                     <div class="dashboard-card" style="text-align:center;">
                         <h3>Plan Management</h3>
-                        <div class="plan-card" style="background:var(--primary-soft); padding:32px; border-radius:20px; border:2px solid var(--primary); max-width:320px; margin:20px auto;">
-                            <h4 style="font-size:1.5rem; margin:0;">Elite Pro</h4>
-                            <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$19<small style="font-size:1rem;">/mo</small></div>
-                            <ul style="list-style:none; padding:0; margin-bottom: 24px; line-height:2; font-size: 0.9rem;">
-                                <li>✓ Deep Analytics</li>
-                                <li>✓ Pro Backgrounds</li>
-                                <li>✓ No Branding</li>
-                            </ul>
+
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:30px; margin-top:30px;">
+                            <div class="plan-card" style="background:#fff; padding:32px; border-radius:24px; border:1px solid #e2e8f0; position:relative; overflow:hidden;">
+                                <h4 style="font-size:1.2rem; margin:0; color:#64748b;">Free Plan</h4>
+                                <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$0<small style="font-size:1rem;">/forever</small></div>
+                                <ul style="list-style:none; padding:0; margin-bottom: 24px; line-height:2.2; font-size: 0.9rem; text-align:left;">
+                                    <li>✓ 1 Profile</li>
+                                    <li>✓ Standard Blocks</li>
+                                    <li>✓ Basic Analytics</li>
+                                    <li>✗ Custom Domains</li>
+                                    <li>✗ Pro Backgrounds</li>
+                                    <li>✗ Tracking Pixels</li>
+                                </ul>
+                                <button class="button" style="width:100%; pointer-events:none; opacity:0.6;">Current Plan</button>
+                            </div>
+
+                            <div class="plan-card" style="background:var(--primary-soft); padding:32px; border-radius:24px; border:2px solid var(--primary); position:relative; overflow:hidden;">
+                                <div style="position:absolute; top:20px; right:-35px; background:var(--primary); color:#fff; padding:5px 40px; transform:rotate(45deg); font-size:0.7rem; font-weight:bold;">POPULAR</div>
+                                <h4 style="font-size:1.5rem; margin:0; color:var(--primary);">Elite Pro</h4>
+                                <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$19<small style="font-size:1rem;">/mo</small></div>
+                                <ul style="list-style:none; padding:0; margin-bottom: 24px; line-height:2.2; font-size: 0.9rem; text-align:left;">
+                                    <li>✓ Unlimited Profiles</li>
+                                    <li>✓ All Premium Blocks</li>
+                                    <li>✓ Real-time Deep Analytics</li>
+                                    <li>✓ Custom Domain Mapping</li>
+                                    <li>✓ Remove All Branding</li>
+                                    <li>✓ Priority 24/7 Support</li>
+                                </ul>
                             <?php if ($is_pro) :
                                 $expiry = get_user_meta($user_id, '_saas_subscription_expiry', true);
                                 ?>
@@ -900,6 +1092,11 @@ class Saas_Dashboard {
                                 <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To" min="0" max="23" style="flex:1;">
                             </div>
                         </div>
+
+                            <div class="field">
+                                <label>Icon/Thumb Image ID</label>
+                                <input type="number" name="link_image_id" id="edit-link-image-id">
+                            </div>
 
                         <div class="field">
                             <label>Password Unlock</label>
