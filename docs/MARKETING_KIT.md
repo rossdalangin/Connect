@@ -10,16 +10,40 @@ Standard link tools are just lists. We are a **Conversion Engine.** We bridge th
 ---
 
 ## 2. 30-Day "Authority Builder" Content Plan
+*Focus: Heart-Centered, Helpful, and Consultant-to-Consultant.*
 
-| Day | Platform | Format | Hook / Angle |
+| Day | Platform | Format | Hook / Script Outline |
 | :--- | :--- | :--- | :--- |
-| 1 | LinkedIn | Text/Image | "The 'Link in Bio' Mistake costing you 90% of your leads." |
-| 2 | TikTok | Video | Side-by-side: Linktree vs. Your Elite Funnel. |
-| 3 | Facebook Group | Post | "I'm a consultant too. I saw a problem, so I built a solution for us." |
-| 4 | Instagram | Story | Real-time lead notification walkthrough. |
-| 5 | LinkedIn | Article | "Why physical business cards are dead (and what to use instead)." |
-| ... | ... | ... | ... |
-| 30 | All | Video | "30 Days of Growth: My results from switching to a Funnel-in-Bio." |
+| 1 | LinkedIn | Text | "The 'Link in Bio' Mistake costing you 90% of your leads. Most link tools are lists. Consultants need funnels. Here is why..." |
+| 2 | TikTok/Reels | Video | **Hook:** "I deleted my Linktree and my leads tripled." Show the difference between a list and a lead-capture funnel. |
+| 3 | FB Groups | Post | "I'm a consultant just like you. I got tired of losing clients at the last step, so I built this fix. Want to see?" |
+| 4 | IG Story | Video | Walkthrough: "Just got a lead notification while I was working on a client project. This is the power of a digital salesman." |
+| 5 | LinkedIn | Image | Infographic: "The Journey of a Follower to a Client." Show how the Elite Bio bridges the gap. |
+| 6 | All | Video | Tutorial: "How to set up your NFC business card in 60 seconds." |
+| 7 | LinkedIn | Text | "The Consultant's Paradox: Give value for free to get paid for your time. My new bio link makes this automatic." |
+| 8 | FB/LI Groups | Poll | "What's your biggest struggle with converting social media traffic?" (Follow up with helpful tips + link). |
+| 9 | TikTok/Reels | Video | "Stop wasting paper cards." Show yourself tapping a phone and the vCard popping up instantly. |
+| 10 | LinkedIn | Article | "Why I stopped using a traditional website for my consulting business and moved to a high-converting profile." |
+| 11 | All | Video | Case Study: "How Sarah captured 42 leads in her first week." |
+| 12 | IG Story | Story | "Sunday Strategy: Why your bio link should have an IQ (Smart Routing)." |
+| 13 | FB Groups | Post | "Free Giveaway: I'm giving away 5 ELITE licenses to coaches who are working hard to scale. Comment 'ME' below." |
+| 14 | LinkedIn | Text | "Choice Overload: Why having 10 links in your bio is killing your business." |
+| 15 | TikTok/Reels | Video | **Hook:** "The secret to booking calls while you're at the gym." Show the calendar integration. |
+| 16 | All | Image | Showcase: "The 3 Best Themes for High-Ticket Coaches." |
+| 17 | LinkedIn | Text | "I built this system to honor your hard work. You spend hours on skills, don't lose the client at the finish line." |
+| 18 | IG Story | Video | "Behind the scenes: Developing the new AI Assistant for copy." |
+| 19 | FB Groups | Post | "Helping Realtor friends today: Here is how to use the 'Off-Market Gallery' to get more buyer leads." |
+| 20 | All | Video | "The psychology of the 'Featured' pulse button." |
+| 21 | LinkedIn | Text | "Why I'm betting on the 'Funnel-in-Bio' economy." |
+| 22 | TikTok/Reels | Video | "How to use A/B testing to find your best offer." |
+| 23 | IG Story | Story | "Quick Tip: Use the 'Verified Badge' to build instant trust." |
+| 24 | All | Image | Testimonial Spotlight: "Another coach hits $10k month thanks to the lead engine." |
+| 25 | FB/LI Groups | Post | "Consultant-to-Consultant: What features are we missing? I'm building this for US." |
+| 26 | LinkedIn | Text | "The importance of owning your digital identity." |
+| 27 | TikTok/Reels | Video | "3 Hacks for a high-converting bio." |
+| 28 | IG Story | Story | "Monday Motivation: Turn those followers into a real email list." |
+| 29 | All | Video | "Final Call: Launching the Elite Pro tier for the founding members." |
+| 30 | All | Video | "30 Days of Growth: My results and what's coming next." |
 
 ---
 

@@ -255,13 +255,15 @@
         $('#saas-profile-form [name="verified_badge"]').on('change', function() { updatePreview('verified_badge', $(this).is(':checked')); });
 
         // Global Settings Forms
-        $('#saas-profile-form, #saas-branding-form, #saas-automation-form, #saas-integrations-form, #saas-seo-form, #saas-tracking-form').on('submit', function(e) {
+        $('#saas-profile-form, #saas-branding-form, #saas-automation-form, #saas-integrations-form, #saas-seo-form, #saas-tracking-form, #saas-account-form').on('submit', function(e) {
             e.preventDefault();
             var $form = $(this);
             var isProfileTab = $form.attr('id') === 'saas-profile-form';
+            var isAccountTab = $form.attr('id') === 'saas-account-form';
             var newSlug = isProfileTab ? $form.find('[name="profile_slug"]').val() : null;
+            var action = isAccountTab ? 'saas_save_account' : 'saas_save_profile';
 
-            saasFetch('saas_save_profile', new FormData(this), $form.find('button'))
+            saasFetch(action, new FormData(this), $form.find('button'))
                 .done(function(msg) {
                     alert(msg);
                     var frame = document.getElementById('saas-preview-frame');

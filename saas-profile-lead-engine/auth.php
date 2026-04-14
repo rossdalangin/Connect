@@ -23,21 +23,27 @@ class Saas_Auth {
     }
 
     public function register_form() {
-        if ( is_user_logged_in() ) return '<p>You already have an account.</p>';
+        if ( is_user_logged_in() ) return '<p>You already have an account. <a href="'.home_url('/dashboard').'">Go to Dashboard</a></p>';
 
         $requested_username = isset($_GET['username']) ? sanitize_user($_GET['username']) : '';
+        $plan = isset($_GET['plan']) ? sanitize_text_field($_GET['plan']) : 'free';
 
         // Simple registration form
         ob_start();
         ?>
-        <form id="saas-registration-form" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
-            <?php wp_nonce_field( 'saas_register_nonce', 'saas_register_security' ); ?>
-            <input type="hidden" name="action" value="saas_register_user">
-            <p><input type="text" name="user_login" placeholder="Username" value="<?php echo esc_attr($requested_username); ?>" required></p>
-            <p><input type="email" name="user_email" placeholder="Email" required></p>
-            <p><input type="password" name="user_pass" placeholder="Password" required></p>
-            <p><button type="submit" class="button button-primary">Create Account</button></p>
-        </form>
+        <div class="saas-auth-card" style="max-width:400px; margin:60px auto; background:#fff; padding:40px; border-radius:24px; box-shadow:0 15px 40px rgba(0,0,0,0.05); border:1px solid #eee;">
+            <h2 style="text-align:center; margin-bottom:30px;"><?php echo get_option('saas_register_title') ?: 'Create Your Elite Account'; ?></h2>
+            <form id="saas-registration-form" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
+                <?php wp_nonce_field( 'saas_register_nonce', 'saas_register_security' ); ?>
+                <input type="hidden" name="action" value="saas_register_user">
+                <input type="hidden" name="target_plan" value="<?php echo esc_attr($plan); ?>">
+                <div class="field" style="margin-bottom:15px;"><input type="text" name="user_login" placeholder="Pick a Username" value="<?php echo esc_attr($requested_username); ?>" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
+                <div class="field" style="margin-bottom:15px;"><input type="email" name="user_email" placeholder="Email Address" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
+                <div class="field" style="margin-bottom:20px;"><input type="password" name="user_pass" placeholder="Create Password" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
+                <p><button type="submit" class="btn-primary" style="width:100%;">Create Account & Continue</button></p>
+                <p style="text-align:center; margin-top:20px; font-size:0.9rem;">Already have an account? <a href="<?php echo home_url('/login'); ?>" style="color:var(--primary); font-weight:700;">Login</a></p>
+            </form>
+        </div>
         <?php
         return ob_get_clean();
     }
@@ -69,6 +75,11 @@ class Saas_Auth {
         $user_id = wp_create_user( $user_login, $user_pass, $user_email );
 
         if ( ! is_wp_error($user_id) ) {
+            // Store target plan from registration form
+            if ( isset($_POST['target_plan']) ) {
+                update_user_meta($user_id, '_saas_registration_target_plan', sanitize_text_field($_POST['target_plan']));
+            }
+
             // Handle Referral attribution
             if ( isset($_COOKIE['saas_ref']) ) {
                 $referrer = get_user_by('login', $_COOKIE['saas_ref']);

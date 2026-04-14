@@ -66,3 +66,21 @@ SaaS Admin - Vibrant & Modern UI
 .saas-admin-main {
     flex: 1;
 }
+
+/* Financial Dashboard Badges */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #fff;
+}
+.status-pending { background: #f59e0b; }
+.status-paid { background: #10b981; }
+.status-completed { background: #6366f1; }
+.status-active { background: #10b981; }
+.status-used { background: #64748b; }
+.status-expired { background: #ef4444; }
+
+.nav-tab-wrapper { margin-bottom: 30px !important; }
+.tab-content { padding: 20px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; }

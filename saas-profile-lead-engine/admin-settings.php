@@ -21,47 +21,81 @@ class Saas_Admin_Settings {
         if ( ! current_user_can( 'manage_options' ) ) wp_die('Unauthorized');
 
         $features = [
-            ['icon' => '🎯', 'title' => 'Lead Capture Engine', 'desc' => 'Stop losing traffic. Capture names and emails directly on your profile with our integrated conversion forms.'],
-            ['icon' => '📳', 'title' => 'NFC Digital Cards', 'desc' => 'Network like a pro. Tap any phone to instantly share your contact info and save your vCard with zero friction.'],
-            ['icon' => '📈', 'title' => 'Real-Time Insights', 'desc' => 'Track views, clicks, and conversion rates. Know exactly which links are driving revenue for your business.'],
-            ['icon' => '🎨', 'title' => 'Elite Branding', 'desc' => 'Fully customizable themes, fonts, and colors. Whitelabel your profile to keep the focus on YOUR brand, not ours.']
+            ['icon' => '🎯', 'title' => 'Lead Generation Funnel', 'desc' => 'Don\'t just list links. Capture leads directly in your bio with high-converting forms that sync with your CRM.'],
+            ['icon' => '📳', 'title' => 'Elite Networking (vCard)', 'desc' => 'Share your contact info instantly at events. One tap, and you are saved in their phone. No app required.'],
+            ['icon' => '📈', 'title' => 'Conversion Analytics', 'desc' => 'Track views, clicks, and actual lead conversion rates. Know exactly what drives revenue for your business.'],
+            ['icon' => '🎨', 'title' => 'Elite Whitelabeling', 'desc' => 'Your brand is the star. Remove our logos and use your own custom domain for a truly professional presence.']
         ];
 
         $benefits = [
-            'One-click niche templates for Coaches, Realtors, and Creators',
-            'Automated lead magnet delivery after form submission',
-            'Verified badge to build instant authority and trust',
-            'Webhook integration with Zapier, Make, and your favorite CRMs'
+            'Niche-specific templates designed for coaches and consultants',
+            'Smart device-based routing (iOS/Android/Desktop)',
+            'Automated email auto-responders for new leads',
+            'Sticky A/B testing to optimize your best offers'
         ];
 
         $testimonials = [
-            ['name' => 'Alex Rivera', 'role' => 'Strategic Coach', 'text' => 'I switched from Linktree and my consultation bookings increased by 40% in the first month.'],
-            ['name' => 'Jordan Smith', 'role' => 'Real Estate Mogul', 'text' => 'The NFC business card feature is the ultimate conversation starter at events.'],
-            ['name' => 'Elena Chen', 'role' => 'TikTok Creator', 'text' => 'Finally, a link hub that actually looks high-end. The analytics helped me double my affiliate revenue.']
+            ['name' => 'Sarah Jenkins', 'role' => 'Executive Coach', 'text' => 'I was losing clients because my bio was too cluttered. Since switching, my discovery call bookings have doubled.'],
+            ['name' => 'Marcus Thorne', 'role' => 'Strategy Consultant', 'text' => 'The NFC card feature is a game-changer at networking events. It built instant authority for my brand.'],
+            ['name' => 'Elena Rodriguez', 'role' => 'Real Estate Advisor', 'text' => 'Finally, a digital card that actually captures leads. The automated sync with HubSpot saves me hours every week.']
         ];
 
         $faqs = [
-            ['q' => 'How does the lead capture work?', 'a' => 'You can add a specialized "Lead Form" block to your profile. When someone submits their info, it is saved in your dashboard.'],
-            ['q' => 'Can I use it as my main website?', 'a' => 'Yes! Many of our elite users use their profile as a minimalist, high-converting landing page.'],
-            ['q' => 'Does the NFC feature require an app?', 'a' => 'No apps required. Just tap an NFC-enabled card and your profile opens instantly.']
+            ['q' => 'Is this better than a standard link-in-bio tool?', 'a' => 'Yes. Standard tools are just lists. We are a conversion system designed to capture contact info and build trust.'],
+            ['q' => 'Can I use my own domain?', 'a' => 'Absolutely. Elite Pro users can map their own custom domain or subdomain (e.g., links.yourbrand.com).'],
+            ['q' => 'How does the lead capture work?', 'a' => 'You can add a form block to your profile. All submissions are saved in your dashboard and can be sent to your CRM via webhooks.']
         ];
 
         $logos = [
             'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
             'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
-            'https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg',
-            'https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png'
+            'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg',
+            'https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg'
+        ];
+
+        $pricing = [
+            [
+                'name' => 'Free', 'price' => '$0', 'period' => 'forever', 'cta' => 'Join for Free', 'link' => '/register', 'style' => 'light',
+                'features' => ['1 Profile', 'Standard Blocks', 'Basic Analytics', 'Community Support']
+            ],
+            [
+                'name' => 'Elite Pro', 'price' => '$19', 'period' => '/mo', 'cta' => 'Upgrade to Pro', 'link' => '/register?plan=pro', 'style' => 'featured', 'badge' => 'FOR THE ELITE 1%',
+                'features' => ['Everything in Free', 'Unlimited Premium Blocks', 'Lead Generation CRM', 'Custom Domain Mapping', 'Whitelabel Branding', 'Priority Support']
+            ]
+        ];
+
+        $how_it_works = [
+            ['title' => 'Claim Your Link', 'desc' => 'Register your unique URL in seconds. My system makes it easy to claim your digital home.'],
+            ['title' => 'Build Your Funnel', 'desc' => 'Drag and drop blocks designed for consultants. Video, forms, and trust elements in one place.'],
+            ['title' => 'Launch & Help More People', 'desc' => 'Start capturing leads on autopilot. Turn your skills into a system that scales your impact.']
+        ];
+
+        $comparison = [
+            ['label' => 'Lead Capture Forms', 'basic' => '✗ No', 'elite' => '✓ Integrated CRM'],
+            ['label' => 'A/B Testing CTAs', 'basic' => '✗ No', 'elite' => '✓ Smart Logic'],
+            ['label' => 'NFC Card Sync', 'basic' => '✗ No', 'elite' => '✓ Native Support'],
+            ['label' => 'Custom Domains', 'basic' => '✗ No', 'elite' => '✓ Full CNAME Support'],
+            ['label' => 'Consultant Branding', 'basic' => 'Basic', 'elite' => '✓ Premium Glassy/Luxury Themes']
         ];
 
         update_option('saas_home_title', 'Your "Link in Bio" is Leaking Leads. Here is the Fix.');
-        update_option('saas_home_hero', 'As a consultant, you are working too hard to lose clients at the last step. Turn your digital identity into a high-converting funnel that captures leads, books calls, and builds trust on autopilot.');
+        update_option('saas_home_hero', 'As a consultant, you are working too hard to lose clients at the last step. Turn your digital identity into a high-converting funnel that captures leads and builds trust on autopilot.');
         update_option('saas_home_cta', 'Launch My Elite Profile');
-        update_option('saas_home_founder_letter', 'Hey, I am a consultant just like you. I know how hard you work to sharpen your skills and help your clients. But I saw so many of us losing 90% of our social traffic because we were using "link lists" instead of "sales funnels." That is why I built this. Not just to give you a link, but to give you a system that honors your hard work and actually grows your business. Let’s help more people together.');
+        update_option('saas_home_founder_letter', "Hey, I am a consultant just like you. I know how hard you work to sharpen your skills and help your clients. You spend hours creating content and showing up for people. But I saw so many of us losing 90% of our social traffic because we were using 'link lists' instead of 'sales funnels.' That is why I built this. Not just to give you a link, but to give you a system that honors your hard work and actually grows your business. Let's help more people together.");
+        update_option('saas_home_testimonials_title', 'What Elite Consultants Are Saying');
         update_option('saas_home_features', json_encode($features));
         update_option('saas_home_benefits', json_encode($benefits));
         update_option('saas_home_testimonials', json_encode($testimonials));
         update_option('saas_home_faq', json_encode($faqs));
         update_option('saas_home_trusted_logos', json_encode($logos));
+        update_option('saas_home_pricing_json', json_encode($pricing));
+        update_option('saas_home_how_it_works_json', json_encode($how_it_works));
+        update_option('saas_home_comparison_json', json_encode($comparison));
+        update_option('saas_about_vision', "We believe that every consultant deserves a digital identity that works as hard as they do. Our platform is built to bridge the gap between social media attention and business results.\n\nBuilt by consultants, for consultants, we understand the long hours you put into sharpening your skills. Our mission is to ensure those skills are represented by a world-class conversion funnel that honors your expertise.");
+        update_option('saas_contact_title', "Let's Connect and Grow Together");
+        update_option('saas_login_title', "Welcome Back, Elite");
+        update_option('saas_register_title', "Start Your 60-Second Launch");
+        update_option('saas_pricing_title', "Invest in Your Growth");
 
         wp_redirect( admin_url('admin.php?page=saas_settings&pro_content_applied=1') );
         exit;
@@ -224,17 +258,24 @@ class Saas_Admin_Settings {
         register_setting( 'saas_settings_group', 'saas_stripe_secret_key' );
         register_setting( 'saas_settings_group', 'saas_paypal_enabled' );
         register_setting( 'saas_settings_group', 'saas_paypal_email' );
+        register_setting( 'saas_settings_group', 'saas_affiliate_percentage' );
         register_setting( 'saas_settings_group', 'saas_global_logo' );
 
         // Homepage Content
         register_setting( 'saas_settings_group', 'saas_home_title' );
         register_setting( 'saas_settings_group', 'saas_home_hero' );
         register_setting( 'saas_settings_group', 'saas_home_cta' );
+        register_setting( 'saas_settings_group', 'saas_home_founder_letter' );
+        register_setting( 'saas_settings_group', 'saas_home_founder_image' );
         register_setting( 'saas_settings_group', 'saas_home_image' );
         register_setting( 'saas_settings_group', 'saas_home_faq' );
         register_setting( 'saas_settings_group', 'saas_home_testimonials' );
         register_setting( 'saas_settings_group', 'saas_home_trusted_logos' );
         register_setting( 'saas_settings_group', 'saas_home_benefits' );
+        register_setting( 'saas_settings_group', 'saas_home_pricing_json' );
+        register_setting( 'saas_settings_group', 'saas_home_how_it_works_json' );
+        register_setting( 'saas_settings_group', 'saas_home_comparison_json' );
+        register_setting( 'saas_settings_group', 'saas_home_testimonials_title' );
         register_setting( 'saas_settings_group', 'saas_login_title' );
         register_setting( 'saas_settings_group', 'saas_register_title' );
         register_setting( 'saas_settings_group', 'saas_about_vision' );
@@ -245,13 +286,22 @@ class Saas_Admin_Settings {
         add_settings_section(
             'saas_payment_section',
             'Payment Gateway Configuration',
-            null,
+            function() { echo '<p>Configure how you receive payments from Elite subscribers. <strong>Pro Tip:</strong> Enabling both Stripe and PayPal increases conversion by 15%.</p>'; },
             'saas_settings'
         );
 
         add_settings_field(
+            'home_founder_image',
+            'Founder Image URL',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_founder_image' ]
+        );
+
+        add_settings_field(
             'stripe_enabled',
-            'Enable Stripe',
+            'Enable Stripe Payments',
             [ $this, 'checkbox_render' ],
             'saas_settings',
             'saas_payment_section',
@@ -264,13 +314,13 @@ class Saas_Admin_Settings {
             [ $this, 'text_render' ],
             'saas_settings',
             'saas_payment_section',
-            [ 'id' => 'saas_stripe_secret_key' ]
+            [ 'id' => 'saas_stripe_secret_key', 'desc' => 'Found in your Stripe Dashboard (Developers > API Keys).' ]
         );
 
         add_settings_section(
             'saas_branding_section',
-            'Global Branding',
-            null,
+            'Global Platform Branding',
+            function() { echo '<p>These settings affect the main SaaS website and the administrative dashboard. User profiles have their own independent branding.</p>'; },
             'saas_settings'
         );
 
@@ -280,7 +330,16 @@ class Saas_Admin_Settings {
             [ $this, 'text_render' ],
             'saas_settings',
             'saas_branding_section',
-            [ 'id' => 'saas_global_logo' ]
+            [ 'id' => 'saas_global_logo', 'desc' => 'Recommended: PNG with transparent background, 200x50px.' ]
+        );
+
+        add_settings_field(
+            'affiliate_percentage',
+            'Default Affiliate Commission (%)',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_payment_section',
+            [ 'id' => 'saas_affiliate_percentage', 'desc' => 'Percentage of sale given to referrer (e.g. 30)' ]
         );
 
         add_settings_section(
@@ -318,6 +377,15 @@ class Saas_Admin_Settings {
         );
 
         add_settings_field(
+            'home_founder_letter',
+            'Founder Letter',
+            [ $this, 'textarea_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_founder_letter' ]
+        );
+
+        add_settings_field(
             'home_image',
             'Hero Image URL',
             [ $this, 'text_render' ],
@@ -329,37 +397,73 @@ class Saas_Admin_Settings {
         add_settings_field(
             'home_faq',
             'Homepage FAQ (JSON)',
+            [ $this, 'textarea_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_faq', 'desc' => 'JSON array of objects with "q" and "a" keys.' ]
+        );
+
+        add_settings_field(
+            'home_pricing',
+            'Pricing Table (JSON)',
+            [ $this, 'textarea_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_pricing_json', 'desc' => 'JSON array of plan objects.' ]
+        );
+
+        add_settings_field(
+            'home_how_it_works',
+            'How It Works (JSON)',
+            [ $this, 'textarea_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_how_it_works_json', 'desc' => 'JSON array of steps.' ]
+        );
+
+        add_settings_field(
+            'home_comparison',
+            'Comparison Table (JSON)',
+            [ $this, 'textarea_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_comparison_json', 'desc' => 'JSON array of comparison rows.' ]
+        );
+
+        add_settings_field(
+            'home_testimonials_title',
+            'Testimonials Section Title',
             [ $this, 'text_render' ],
             'saas_settings',
             'saas_homepage_section',
-            [ 'id' => 'saas_home_faq' ]
+            [ 'id' => 'saas_home_testimonials_title' ]
         );
 
         add_settings_field(
             'home_testimonials',
             'Homepage Testimonials (JSON)',
-            [ $this, 'text_render' ],
+            [ $this, 'textarea_render' ],
             'saas_settings',
             'saas_homepage_section',
-            [ 'id' => 'saas_home_testimonials' ]
+            [ 'id' => 'saas_home_testimonials', 'desc' => 'JSON array of objects with "name", "role", and "text".' ]
         );
 
         add_settings_field(
             'home_trusted_logos',
             'Trusted Logos (JSON URL List)',
-            [ $this, 'text_render' ],
+            [ $this, 'textarea_render' ],
             'saas_settings',
             'saas_homepage_section',
-            [ 'id' => 'saas_home_trusted_logos' ]
+            [ 'id' => 'saas_home_trusted_logos', 'desc' => 'JSON array of image URLs.' ]
         );
 
         add_settings_field(
             'home_benefits',
             'Homepage Benefits (JSON)',
-            [ $this, 'text_render' ],
+            [ $this, 'textarea_render' ],
             'saas_settings',
             'saas_homepage_section',
-            [ 'id' => 'saas_home_benefits' ]
+            [ 'id' => 'saas_home_benefits', 'desc' => 'JSON array of strings.' ]
         );
 
         add_settings_field(
@@ -410,10 +514,10 @@ class Saas_Admin_Settings {
         add_settings_field(
             'home_features',
             'Homepage Features (JSON)',
-            [ $this, 'text_render' ],
+            [ $this, 'textarea_render' ],
             'saas_settings',
             'saas_homepage_section',
-            [ 'id' => 'saas_home_features' ]
+            [ 'id' => 'saas_home_features', 'desc' => 'JSON array of objects with "icon", "title", and "desc".' ]
         );
 
         add_settings_section(
@@ -467,7 +571,14 @@ class Saas_Admin_Settings {
 
     public function text_render( $args ) {
         $value = get_option( $args['id'] );
+        $desc = $args['desc'] ?? '';
         echo '<input type="text" name="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" class="regular-text" />';
+        if ($desc) echo '<p class="description">' . esc_html($desc) . '</p>';
+    }
+
+    public function textarea_render( $args ) {
+        $value = get_option( $args['id'] );
+        echo '<textarea name="' . esc_attr( $args['id'] ) . '" rows="5" class="large-text">' . esc_textarea( $value ) . '</textarea>';
     }
 
     public function add_user_columns( $columns ) {
@@ -492,8 +603,8 @@ class Saas_Admin_Settings {
     public function finances_page_html() {
         if ( ! current_user_can( 'manage_options' ) ) return;
 
-        $payouts = get_posts(['post_type' => 'saas_payout', 'post_status' => 'publish', 'numberposts' => -1]);
-        $orders  = get_posts(['post_type' => 'saas_order', 'post_status' => 'publish', 'numberposts' => -1]);
+        $payouts = get_posts(['post_type' => 'saas_payout', 'post_status' => 'any', 'numberposts' => -1]);
+        $orders  = get_posts(['post_type' => 'saas_order', 'post_status' => 'any', 'numberposts' => -1]);
         ?>
         <div class="wrap saas-admin-wrapper">
             <h1>Financial & Affiliate Management</h1>
@@ -584,7 +695,7 @@ class Saas_Admin_Settings {
     public function license_factory_html() {
         if ( ! current_user_can( 'manage_options' ) ) return;
         $users = get_users(['fields' => ['ID', 'display_name']]);
-        $licenses = get_posts(['post_type' => 'saas_license', 'post_status' => 'publish', 'numberposts' => -1]);
+        $licenses = get_posts(['post_type' => 'saas_license', 'post_status' => 'any', 'numberposts' => -1]);
         ?>
         <div class="wrap saas-admin-wrapper">
             <h1>License Factory</h1>

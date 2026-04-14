@@ -66,8 +66,22 @@ class Saas_Dashboard {
 
         $meta = saas_get_profile_meta( $profile_id );
         $is_pro = saas_is_profile_licensed($profile_id);
+
+        // Nudge for intended Pro users
+        if ( ! $is_pro && get_user_meta($user_id, '_saas_registration_target_plan', true) === 'pro' ) {
+            echo '<div class="saas-onboarding-card dashboard-card" style="background:var(--accent); margin-bottom:20px; border:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <p style="margin:0; font-weight:700; color:#fff;">🌟 Ready to complete your Elite Pro upgrade? Unlock all features now.</p>
+                    <button class="button" onclick="window.location.search=\'?tab=billing\'">Complete Upgrade</button>
+                </div>
+            </div>';
+        }
+
         $analytics = new Saas_Analytics();
         $link_stats = $analytics->get_user_link_stats($user_id);
+
+        // Auto-launch Wizard for new profiles
+        $show_wizard = empty($meta['headline']) && empty($links);
 
         $links = get_posts([
             'post_type'   => 'saas_link',
@@ -205,6 +219,8 @@ class Saas_Dashboard {
                     <button data-tab="seo">🔍 SEO</button>
                     <button data-tab="tracking">📊 Tracking</button>
                     <button data-tab="inbox">📩 Inbox</button>
+                    <button data-tab="training">🎓 Training</button>
+                    <button data-tab="account">👤 Account</button>
                 </nav>
 
                 <div id="tab-links" class="saas-tab-content active">
@@ -212,6 +228,7 @@ class Saas_Dashboard {
                         <div class="block-picker-sidebar">
                             <div class="dashboard-card">
                                 <h3>Manage Blocks</h3>
+                                <p class="field-hint">Blocks are the building blocks of your funnel. Use them to share links, capture leads, or showcase testimonials.</p>
                                 <div class="saas-block-picker">
                                     <div class="picker-item active" data-type="button"><span>🔗</span> Button</div>
                                     <div class="picker-item" data-type="video"><span>🎬</span> Video</div>
@@ -329,13 +346,15 @@ class Saas_Dashboard {
                             <div class="field">
                                 <label>Profile Headline</label>
                                 <div style="display:flex; gap:10px;">
-                                    <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" style="flex:1;">
-                                    <button type="button" class="ai-assist-btn button" data-target="headline">✨</button>
+                                    <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" style="flex:1;" placeholder="e.g. Scaling Founders from 6 to 7 Figures">
+                                    <button type="button" class="ai-assist-btn button" data-target="headline" title="AI Generate Headline">✨</button>
                                 </div>
+                                <p class="field-hint"><strong>Pro Tip:</strong> Focus on the <em>result</em> you provide, not just your title.</p>
                             </div>
                             <div class="field">
                                 <label>Short Biography</label>
-                                <textarea name="bio" rows="4"><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
+                                <textarea name="bio" rows="4" placeholder="Briefly describe your expertise and how you help clients..."><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
+                                <p class="field-hint">Use 2-3 sentences to build authority and trust quickly.</p>
                             </div>
 
                             <div class="field">
@@ -403,11 +422,12 @@ class Saas_Dashboard {
                             <div class="field">
                                 <label>Base Theme</label>
                                 <select name="profile_theme" id="profile-theme-select">
-                                    <option value="light" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'light'); ?>>Light Mode</option>
-                                    <option value="dark" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'dark'); ?>>Dark Mode</option>
-                                    <option value="vibrant" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'vibrant'); ?>>Vibrant (Gradient)</option>
-                                    <option value="luxury" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'luxury'); ?>>Luxury (Gold/Black)</option>
+                                    <option value="light" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'light'); ?>>Light Mode (Clean & Minimal)</option>
+                                    <option value="dark" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'dark'); ?>>Dark Mode (Modern & Bold)</option>
+                                    <option value="vibrant" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'vibrant'); ?>>Vibrant (Creative & Energetic)</option>
+                                    <option value="luxury" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'luxury'); ?>>Luxury (Elite & Premium)</option>
                                 </select>
+                                <p class="field-hint"><strong>Recommendation:</strong> Use "Luxury" if you sell high-ticket services ($2,000+).</p>
                             </div>
 
                             <div class="field" id="saas-bg-value-wrapper">
@@ -841,13 +861,15 @@ class Saas_Dashboard {
                             <div class="field">
                                 <label>Mailchimp API Key</label>
                                 <div style="display:flex; gap:10px;">
-                                    <input type="password" name="mailchimp_api" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_api', true)); ?>" style="flex:1;">
-                                    <button type="button" class="button check-integration" data-platform="mailchimp">Test</button>
+                                    <input type="password" name="mailchimp_api" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_api', true)); ?>" style="flex:1;" placeholder="Paste your API key here">
+                                    <button type="button" class="button check-integration" data-platform="mailchimp">Test Connection</button>
                                 </div>
+                                <p class="field-hint">Automatically sync new leads to your Mailchimp audience. Found in Account > Extras > API keys.</p>
                             </div>
                             <div class="field">
                                 <label>Mailchimp Audience ID (List ID)</label>
                                 <input type="text" name="mailchimp_list" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_mailchimp_list', true)); ?>" placeholder="e.g. 1a2b3c4d5e">
+                                <p class="field-hint">The unique ID for your subscriber list.</p>
                             </div>
                             <div class="field">
                                 <label>HubSpot Access Token</label>
@@ -864,8 +886,11 @@ class Saas_Dashboard {
 
                 <div id="tab-referrals" class="saas-tab-content">
                     <div class="dashboard-card" style="background:var(--secondary-soft); border-color:var(--secondary);">
-                        <h3 style="color:var(--secondary);">Affiliate Program</h3>
-                        <p>Share your link and earn <strong>30% recurring commission</strong> on every user you refer.</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="color:var(--secondary); margin:0;">Affiliate Program</h3>
+                            <span class="pro-badge" style="background:var(--secondary);">ACTIVE</span>
+                        </div>
+                        <p style="margin-top:15px; line-height:1.6;">I built this tool to help consultants, and I want to reward you for spreading the word. Share your unique referral link and earn <strong><?php echo get_option('saas_affiliate_percentage') ?: 30; ?>% recurring commission</strong> for the lifetime of every user you refer.</p>
 
                         <?php
                         $earned = get_user_meta($user_id, '_saas_affiliate_earned', true) ?: 0;
@@ -921,32 +946,6 @@ class Saas_Dashboard {
                         <?php endif; ?>
                     </div>
 
-                    <div class="dashboard-card">
-                        <h4>Apply Elite License</h4>
-                        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Have a promotional code or license key? Activate it here to upgrade your account instantly.</p>
-                        <form id="saas-license-activate-form">
-                            <div class="field" style="display:flex; gap:10px;">
-                                <input type="text" name="license_key" placeholder="ELITE-XXXX-XXXX-XXXX" required style="flex:1;">
-                                <button type="submit" class="button">Activate</button>
-                            </div>
-                        </form>
-                        <script>
-                        jQuery('#saas-license-activate-form').on('submit', function(e) {
-                            e.preventDefault();
-                            var $btn = jQuery(this).find('button');
-                            $btn.prop('disabled', true).text('Verifying...');
-                            jQuery.post(saas_dashboard_data.ajax_url, jQuery(this).serialize() + '&action=saas_validate_license&security=' + saas_dashboard_data.nonce, function(res) {
-                                if(res.success) {
-                                    alert(res.data);
-                                    location.reload();
-                                } else {
-                                    alert('Error: ' + res.data);
-                                }
-                                $btn.prop('disabled', false).text('Activate');
-                            });
-                        });
-                        </script>
-                    </div>
 
                     <div class="dashboard-card">
                         <h4>Request Payout</h4>
@@ -993,8 +992,46 @@ class Saas_Dashboard {
                 </div>
 
                 <div id="tab-billing" class="saas-tab-content">
-                    <div class="dashboard-card" style="text-align:center;">
-                        <h3>Plan Management</h3>
+                    <div class="dashboard-card">
+                        <div style="background:var(--primary-soft); padding:30px; border-radius:20px; border:1px solid var(--primary); margin-bottom:40px; display:flex; gap:30px; align-items:center; flex-wrap:wrap;">
+                            <div style="font-size:3rem;">👑</div>
+                            <div style="flex:1; min-width:300px;">
+                                <h3 style="margin:0; color:var(--primary);">Ready to Join the Elite 1%?</h3>
+                                <p style="margin:10px 0 0; color:var(--text-dark); line-height:1.6;">As a consultant, your time is your most valuable asset. Stop wasting it managing fragmented links. Upgrade to <strong>Elite Pro</strong> to unlock advanced lead capture, whitelabeling, and smart routing.</p>
+                            </div>
+                            <div style="flex-shrink:0;">
+                                <button class="btn-primary" onclick="window.scrollTo({top: document.getElementById('plans-anchor').offsetTop, behavior: 'smooth'})">See Pro Benefits ↓</button>
+                            </div>
+                        </div>
+
+                        <h3 id="plans-anchor" style="text-align:center;">Choose Your Path to Growth</h3>
+
+                        <div style="max-width:500px; margin:20px auto 40px; text-align:center;" class="dashboard-card">
+                            <h4 style="margin-top:0;">Apply Elite License</h4>
+                            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Have a promotional code or license key? Activate it here to upgrade your account instantly.</p>
+                            <form id="saas-license-activate-form">
+                                <div class="field" style="display:flex; gap:10px;">
+                                    <input type="text" name="license_key" placeholder="ELITE-XXXX-XXXX-XXXX" required style="flex:1;">
+                                    <button type="submit" class="button">Activate Key</button>
+                                </div>
+                            </form>
+                            <script>
+                            jQuery('#saas-license-activate-form').on('submit', function(e) {
+                                e.preventDefault();
+                                var $btn = jQuery(this).find('button');
+                                $btn.prop('disabled', true).text('Verifying...');
+                                jQuery.post(saas_dashboard_data.ajax_url, jQuery(this).serialize() + '&action=saas_validate_license&security=' + saas_dashboard_data.nonce, function(res) {
+                                    if(res.success) {
+                                        alert(res.data);
+                                        location.reload();
+                                    } else {
+                                        alert('Error: ' + res.data);
+                                    }
+                                    $btn.prop('disabled', false).text('Activate Key');
+                                });
+                            });
+                            </script>
+                        </div>
 
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:30px; margin-top:30px;">
                             <div class="plan-card" style="background:#fff; padding:32px; border-radius:24px; border:1px solid #e2e8f0; position:relative; overflow:hidden;">
@@ -1107,6 +1144,65 @@ class Saas_Dashboard {
                     </div>
                 </div>
 
+                <div id="tab-training" class="saas-tab-content">
+                    <div class="dashboard-card">
+                        <h3>Elite Training Academy 🎓</h3>
+                        <p>I want you to succeed. That's why I've put together these short, high-impact tutorials to help you master your new digital salesman.</p>
+
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-top:30px;">
+                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
+                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
+                                <h4>The 60-Second Setup</h4>
+                                <p class="field-hint">I'll show you how to go from zero to a live, high-converting funnel in under a minute.</p>
+                                <button class="button" style="width:100%;">Watch Now</button>
+                            </div>
+                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
+                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
+                                <h4>Lead Magnet Magic</h4>
+                                <p class="field-hint">Learn how to use Lead Forms to capture contact info and build your email list on autopilot.</p>
+                                <button class="button" style="width:100%;">Watch Now</button>
+                            </div>
+                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
+                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
+                                <h4>NFC & Real-World Sales</h4>
+                                <p class="field-hint">How to use your digital business card at networking events to close more deals.</p>
+                                <button class="button" style="width:100%;">Watch Now</button>
+                            </div>
+                        </div>
+
+                        <hr style="margin:40px 0;">
+                        <h4>Knowledge Base</h4>
+                        <ul style="list-style:none; padding:0;">
+                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">How to connect my own domain?</a></li>
+                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">Setting up Stripe for product sales</a></li>
+                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">A/B Testing: How many variants should I use?</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="tab-account" class="saas-tab-content">
+                    <div class="dashboard-card">
+                        <h3>Account Settings</h3>
+                        <p class="field-hint">Manage your personal information and security.</p>
+
+                        <form id="saas-account-form">
+                            <div class="field">
+                                <label>Display Name</label>
+                                <input type="text" name="display_name" value="<?php echo esc_attr(wp_get_current_user()->display_name); ?>">
+                            </div>
+                            <div class="field">
+                                <label>Email Address</label>
+                                <input type="email" name="user_email" value="<?php echo esc_attr(wp_get_current_user()->user_email); ?>">
+                            </div>
+                            <div class="field">
+                                <label>New Password (Leave blank to keep current)</label>
+                                <input type="password" name="new_password">
+                            </div>
+                            <button type="submit" class="btn-primary">Save Account Details</button>
+                        </form>
+                    </div>
+                </div>
+
                 <div id="tab-inbox" class="saas-tab-content">
                     <div class="dashboard-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -1117,7 +1213,8 @@ class Saas_Dashboard {
                             <?php
                             $messages = get_posts([
                                 'post_type' => 'saas_message',
-                                'meta_query' => [['key' => '_saas_msg_recipient', 'value' => $user_id]],
+                                'meta_key' => '_saas_msg_recipient',
+                                'meta_value' => $user_id,
                                 'numberposts' => 20
                             ]);
                             if($messages) :
@@ -1173,7 +1270,7 @@ class Saas_Dashboard {
             </div>
         </div>
 
-        <div id="saas-wizard-modal" class="saas-modal">
+        <div id="saas-wizard-modal" class="saas-modal" style="<?php echo $show_wizard ? 'display:flex;' : ''; ?>">
             <div class="saas-modal-content" style="max-width:600px;">
                 <span class="close-modal">&times;</span>
                 <div class="wizard-step active" data-step="1">
@@ -1246,7 +1343,8 @@ class Saas_Dashboard {
         <div id="saas-edit-modal" class="saas-modal">
             <div class="saas-modal-content">
                 <span class="close-modal">&times;</span>
-                <h3>Modify Block</h3>
+                <h3>Edit Block Content</h3>
+                <p class="field-hint" style="margin-bottom:20px;">Optimize this block for maximum conversion. Use the advanced options to add A/B testing or device-specific routing.</p>
                 <form id="saas-edit-link-form">
                     <input type="hidden" name="link_id" id="edit-link-id">
 
@@ -1310,9 +1408,10 @@ class Saas_Dashboard {
                         <div class="field">
                             <label>Visibility Scheduling</label>
                             <div style="display:flex; gap:10px;">
-                                <input type="date" name="start_date" id="edit-link-start" style="flex:1;">
-                                <input type="date" name="end_date" id="edit-link-end" style="flex:1;">
+                                <input type="date" name="start_date" id="edit-link-start" style="flex:1;" title="Start Date">
+                                <input type="date" name="end_date" id="edit-link-end" style="flex:1;" title="End Date">
                             </div>
+                            <p class="field-hint">Automate your promotions. This block will only be visible between these dates.</p>
                         </div>
 
                         <div class="field">

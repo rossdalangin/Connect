@@ -20,7 +20,36 @@ Version: 1.0
 }
 
 /* Base Styles Improvement */
-h1, h2, h3, h4 { font-weight: 800; line-height: 1.2; color: var(--text-color); }
+h1, h2, h3, h4 { font-weight: 900; line-height: 1.1; color: var(--text-color); letter-spacing: -1.5px; }
+
+/* Elite Glassmorphism & Effects */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.saas-cta-btn-vibrant {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #a29bfe 100%);
+    color: #fff !important;
+    padding: 20px 48px;
+    border-radius: 50px;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(108, 92, 231, 0.3);
+    border: none;
+    cursor: pointer;
+}
+
+.saas-cta-btn-vibrant:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 15px 35px rgba(108, 92, 231, 0.4);
+}
 
 /* Theme Presets */
 body.theme-dark {

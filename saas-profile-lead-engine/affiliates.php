@@ -19,10 +19,11 @@ class Saas_Affiliates {
     }
 
     /**
-     * Calculate recurring commissions (30%)
+     * Calculate recurring commissions
      */
     public function record_referral_sale( $referrer_id, $order_amount ) {
-        $commission = $order_amount * 0.30;
+        $percentage = get_option('saas_affiliate_percentage') ?: 30;
+        $commission = $order_amount * ($percentage / 100);
         $total_earned = get_user_meta( $referrer_id, '_saas_affiliate_earned', true ) ?: 0;
         update_user_meta( $referrer_id, '_saas_affiliate_earned', $total_earned + $commission );
     }

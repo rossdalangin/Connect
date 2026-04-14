@@ -222,6 +222,35 @@ function saas_ajax_save_profile() {
     wp_send_json_success( 'Data saved successfully!' );
 }
 
+// 27. AJAX: Save Account Settings
+add_action( 'wp_ajax_saas_save_account', 'saas_ajax_save_account' );
+function saas_ajax_save_account() {
+    check_ajax_referer( 'saas_dashboard_nonce', 'security' );
+    $user_id = get_current_user_id();
+
+    $display_name = sanitize_text_field( $_POST['display_name'] );
+    $user_email   = sanitize_email( $_POST['user_email'] );
+    $new_password = $_POST['new_password'];
+
+    $userdata = [
+        'ID'           => $user_id,
+        'display_name' => $display_name,
+        'user_email'   => $user_email,
+    ];
+
+    if ( ! empty($new_password) ) {
+        $userdata['user_pass'] = $new_password;
+    }
+
+    $updated = wp_update_user( $userdata );
+
+    if ( is_wp_error($updated) ) {
+        wp_send_json_error( $updated->get_error_message() );
+    }
+
+    wp_send_json_success( 'Account settings updated successfully!' );
+}
+
 // 4. AJAX: Delete Link
 add_action( 'wp_ajax_saas_delete_link', 'saas_ajax_delete_link' );
 function saas_ajax_delete_link() {
@@ -332,7 +361,8 @@ function saas_ajax_apply_template() {
     if ($profile_id) {
         $old_blocks = get_posts([
             'post_type' => 'saas_link',
-            'meta_key' => '_saas_profile_id',
+            'author'    => $user_id,
+            'meta_key'  => '_saas_profile_id',
             'meta_value' => $profile_id,
             'numberposts' => -1
         ]);
@@ -1150,6 +1180,7 @@ function saas_ajax_clone_profile() {
     // 4. Clone Associated Links
     $links = get_posts([
         'post_type'  => 'saas_link',
+        'author'     => $user_id,
         'meta_query' => [['key' => '_saas_profile_id', 'value' => $profile_id]],
         'numberposts' => -1
     ]);
@@ -1195,6 +1226,7 @@ function saas_ajax_delete_profile() {
     // 2. Delete Profile and associated links
     $links = get_posts([
         'post_type'  => 'saas_link',
+        'author'     => $user_id,
         'meta_key'   => '_saas_profile_id',
         'meta_value' => $profile_id,
         'numberposts' => -1,

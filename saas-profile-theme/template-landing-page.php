@@ -127,26 +127,21 @@ $h_img   = get_option('saas_home_image');
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 25px 30px; font-weight: 700;">Lead Generation Forms</td>
-                        <td style="padding: 25px 30px; color: #ef4444;">✗ No</td>
-                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Integrated</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 25px 30px; font-weight: 700;">A/B Split Testing</td>
-                        <td style="padding: 25px 30px; color: #ef4444;">✗ No</td>
-                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Automated</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 25px 30px; font-weight: 700;">NFC Digital Business Card</td>
-                        <td style="padding: 25px 30px; color: #ef4444;">✗ No</td>
-                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Native Sync</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 25px 30px; font-weight: 700;">CRM & Email Integrations</td>
-                        <td style="padding: 25px 30px; color: #94a3b8;">Limited</td>
-                        <td style="padding: 25px 30px; color: #10b981; font-weight: 700;">✓ Full Suite</td>
-                    </tr>
+                    <?php
+                    $comparison_json = get_option('saas_home_comparison_json');
+                    $rows = json_decode($comparison_json, true) ?: [
+                        ['label' => 'Lead Generation Forms', 'basic' => '✗ No', 'elite' => '✓ Integrated'],
+                        ['label' => 'A/B Split Testing', 'basic' => '✗ No', 'elite' => '✓ Automated'],
+                        ['label' => 'NFC Digital Business Card', 'basic' => '✗ No', 'elite' => '✓ Native Sync'],
+                        ['label' => 'CRM & Email Integrations', 'basic' => 'Limited', 'elite' => '✓ Full Suite']
+                    ];
+                    foreach ($rows as $row) : ?>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 25px 30px; font-weight: 700;"><?php echo esc_html($row['label']); ?></td>
+                            <td style="padding: 25px 30px; color: <?php echo strpos($row['basic'], '✗') !== false ? '#ef4444' : '#94a3b8'; ?>;"><?php echo esc_html($row['basic']); ?></td>
+                            <td style="padding: 25px 30px; color: #10b981; font-weight: 700;"><?php echo esc_html($row['elite']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
@@ -182,21 +177,21 @@ $h_img   = get_option('saas_home_image');
     <div style="max-width: 1100px; margin: 0 auto; text-align: center;">
         <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 60px;">Your elite presence in 3 simple steps</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
-            <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
-                <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;">1</div>
-                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Claim Your Link</h3>
-                <p>Register your unique URL and customize your digital identity.</p>
-            </div>
-            <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
-                <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;">2</div>
-                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Build Your Funnel</h3>
-                <p>Drag and drop links, forms, and galleries to showcase your best work.</p>
-            </div>
-            <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
-                <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;">3</div>
-                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Launch & Grow</h3>
-                <p>Share your link everywhere and watch your conversion rates skyrocket.</p>
-            </div>
+            <?php
+            $how_it_works_json = get_option('saas_home_how_it_works_json');
+            $steps = json_decode($how_it_works_json, true) ?: [
+                ['title' => 'Claim Your Link', 'desc' => 'Register your unique URL and customize your digital identity.'],
+                ['title' => 'Build Your Funnel', 'desc' => 'Drag and drop links, forms, and galleries to showcase your best work.'],
+                ['title' => 'Launch & Grow', 'desc' => 'Share your link everywhere and watch your conversion rates skyrocket.']
+            ];
+            $step_num = 1;
+            foreach ($steps as $s) : ?>
+                <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
+                    <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;"><?php echo $step_num++; ?></div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 15px;"><?php echo esc_html($s['title']); ?></h3>
+                    <p><?php echo esc_html($s['desc']); ?></p>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
@@ -331,7 +326,7 @@ $h_img   = get_option('saas_home_image');
 <!-- Testimonials Section -->
 <section style="padding: 120px 20px; background: #fff;">
     <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
-        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 80px;">What elite creators are saying</h2>
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 80px;"><?php echo get_option('saas_home_testimonials_title') ?: 'What elite creators are saying'; ?></h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
             <?php
             $t_json = get_option('saas_home_testimonials');
@@ -367,28 +362,37 @@ $h_img   = get_option('saas_home_image');
     <div style="max-width: 1000px; margin: 0 auto; text-align: center;">
         <h2 style="font-size: 2.5rem; margin-bottom: 60px;">Choose your plan</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-            <div style="padding: 40px; border-radius: 32px; border: 1px solid #eee; background: #fff;">
-                <h3>Free</h3>
-                <div style="font-size: 3rem; font-weight: 800; margin: 20px 0;">$0</div>
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; color: #666;">
-                    <li>Basic Link Hub</li>
-                    <li>Standard Analytics</li>
-                    <li>Community Support</li>
-                </ul>
-                <a href="<?php echo home_url('/register'); ?>" style="display: block; padding: 15px; border: 2px solid #6c5ce7; border-radius: 50px; color: #6c5ce7; text-decoration: none; font-weight: 700;">Join for Free</a>
-            </div>
-            <div style="padding: 40px; border-radius: 32px; background: #6c5ce7; color: #fff; position: relative; transform: scale(1.05); box-shadow: 0 20px 50px rgba(108, 92, 231, 0.2);">
-                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #39e09b; padding: 5px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; color: #1e2329;">MOST POPULAR</div>
-                <h3>Pro</h3>
-                <div style="font-size: 3rem; font-weight: 800; margin: 20px 0;">$19<small>/mo</small></div>
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; color: rgba(255,255,255,0.8);">
-                    <li>Everything in Free</li>
-                    <li><strong>Unlimited Premium Blocks</strong></li>
-                    <li><strong>Lead Generation Forms</strong></li>
-                    <li>Custom Branding & Fonts</li>
-                </ul>
-                <a href="<?php echo home_url('/register?plan=pro'); ?>" style="display: block; padding: 15px; background: #fff; border-radius: 50px; color: #6c5ce7; text-decoration: none; font-weight: 700;">Upgrade to Pro</a>
-            </div>
+            <?php
+            $pricing_json = get_option('saas_home_pricing_json');
+            $plans = json_decode($pricing_json, true) ?: [
+                [
+                    'name' => 'Free', 'price' => '$0', 'period' => 'forever', 'cta' => 'Join for Free', 'link' => '/register', 'style' => 'light',
+                    'features' => ['Basic Link Hub', 'Standard Analytics', 'Community Support']
+                ],
+                [
+                    'name' => 'Pro', 'price' => '$19', 'period' => '/mo', 'cta' => 'Upgrade to Pro', 'link' => '/register?plan=pro', 'style' => 'featured', 'badge' => 'MOST POPULAR',
+                    'features' => ['Everything in Free', 'Unlimited Premium Blocks', 'Lead Generation Forms', 'Custom Branding & Fonts']
+                ]
+            ];
+            foreach ($plans as $p) :
+                $is_featured = ($p['style'] === 'featured');
+            ?>
+                <div style="padding: 40px; border-radius: 32px; <?php echo $is_featured ? 'background: #6c5ce7; color: #fff; position: relative; transform: scale(1.05); box-shadow: 0 20px 50px rgba(108, 92, 231, 0.2);' : 'border: 1px solid #eee; background: #fff;'; ?>">
+                    <?php if (isset($p['badge'])) : ?>
+                        <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #39e09b; padding: 5px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; color: #1e2329;"><?php echo esc_html($p['badge']); ?></div>
+                    <?php endif; ?>
+                    <h3><?php echo esc_html($p['name']); ?></h3>
+                    <div style="font-size: 3rem; font-weight: 800; margin: 20px 0;"><?php echo esc_html($p['price']); ?><small style="font-size:1rem; opacity:0.7;"><?php echo esc_html($p['period']); ?></small></div>
+                    <ul style="list-style: none; padding: 0; margin-bottom: 30px; <?php echo $is_featured ? 'color: rgba(255,255,255,0.8);' : 'color: #666;'; ?>">
+                        <?php foreach ($p['features'] as $f) : ?>
+                            <li style="margin-bottom:10px;">✓ <?php echo esc_html($f); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <a href="<?php echo home_url($p['link']); ?>" style="display: block; padding: 15px; border-radius: 50px; text-decoration: none; font-weight: 700; <?php echo $is_featured ? 'background: #fff; color: #6c5ce7;' : 'border: 2px solid #6c5ce7; color: #6c5ce7;'; ?>">
+                        <?php echo esc_html($p['cta']); ?>
+                    </a>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
@@ -397,7 +401,13 @@ $h_img   = get_option('saas_home_image');
 <section style="padding: 100px 20px; background: #fff;">
     <div style="max-width: 800px; margin: 0 auto; background: #f8fafc; padding: 60px; border-radius: 40px; border: 1px solid #e2e8f0;">
         <div style="display: flex; gap: 30px; align-items: center; margin-bottom: 30px;">
-            <div style="width: 80px; height: 80px; border-radius: 50%; background: #6c5ce7; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"></div>
+            <?php
+            $founder_img = get_option('saas_home_founder_image');
+            if ($founder_img) : ?>
+                <img src="<?php echo esc_url($founder_img); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+            <?php else : ?>
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: #6c5ce7; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"></div>
+            <?php endif; ?>
             <div>
                 <h3 style="margin: 0; font-size: 1.5rem;">A Message from the Founder</h3>
                 <p style="margin: 0; color: #64748b;">Consultant & Digital Architect</p>

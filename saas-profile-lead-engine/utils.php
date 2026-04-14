@@ -158,6 +158,7 @@ function saas_is_profile_licensed( $profile_id ) {
     if ( ! empty($license_key) ) {
         $licenses = get_posts([
             'post_type'   => 'saas_license',
+            'author'      => $author_id,
             'title'       => $license_key,
             'post_status' => 'publish',
             'numberposts' => 1

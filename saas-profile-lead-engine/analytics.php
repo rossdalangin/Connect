@@ -115,8 +115,10 @@ class Saas_Analytics {
      * Get Recent Social Proof (Leads) for FOMO popups
      */
     public function get_recent_leads( $profile_id, $limit = 5 ) {
+        $owner_id = get_post_field('post_author', $profile_id);
         $leads = get_posts([
             'post_type'  => 'saas_lead',
+            'author'     => $owner_id,
             'meta_query' => [
                 ['key' => '_saas_lead_source_id', 'value' => $profile_id]
             ],
