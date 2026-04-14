@@ -53,8 +53,17 @@ class Saas_Auth {
         $user_email = sanitize_email( $_POST['user_email'] );
         $user_pass  = $_POST['user_pass'];
 
-        if ( username_exists($user_login) || email_exists($user_email) ) {
-            wp_die('User already exists');
+        // Cross-check against WordPress users AND existing SaaS profile slugs
+        $profile_exists = get_posts([
+            'name'        => $user_login,
+            'post_type'   => 'saas_profile',
+            'post_status' => 'publish',
+            'fields'      => 'ids',
+            'numberposts' => 1
+        ]);
+
+        if ( username_exists($user_login) || email_exists($user_email) || !empty($profile_exists) ) {
+            wp_die('This username or email is already associated with an account or profile. Please try another.');
         }
 
         $user_id = wp_create_user( $user_login, $user_pass, $user_email );

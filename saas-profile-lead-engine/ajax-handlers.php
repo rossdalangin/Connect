@@ -867,6 +867,7 @@ function saas_ajax_generate_samples() {
                 'menu_order'  => $idx
             ]);
             update_post_meta($l_id, '_saas_profile_id', $p_id); // Critical: Associate with profile
+            update_post_meta($l_id, '_saas_block_animation', 'fadeinup');
             update_post_meta($l_id, '_saas_link_url', $l['u']);
             update_post_meta($l_id, '_saas_block_type', $l['type']);
             if (isset($l['style'])) update_post_meta($l_id, '_saas_block_style', $l['style']);

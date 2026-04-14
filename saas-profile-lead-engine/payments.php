@@ -80,9 +80,10 @@ class Saas_Payments {
             if ($is_product) {
                 update_post_meta($order_id, '_saas_product_id', $block_id);
                 update_post_meta($order_id, '_saas_customer_id', $user_id);
+                update_post_meta($order_id, '_saas_is_direct_sale', 1);
             }
 
-            wp_send_json_success([ 'redirect_url' => $session['url'] ]);
+            wp_send_json_success([ 'redirect_url' => $session['url'] . '?order_id=' . $order_id ]);
         } elseif ( $gateway === 'paypal' ) {
             $paypal_email = get_option('saas_paypal_email');
             $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id);

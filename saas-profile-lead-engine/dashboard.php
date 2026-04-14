@@ -39,9 +39,11 @@ class Saas_Dashboard {
         $payments = new Saas_Payments();
 
         if ( empty( $all_user_profiles ) ) {
+            $user = wp_get_current_user();
             $profile_id = wp_insert_post([
                 'post_type'   => 'saas_profile',
-                'post_title'  => wp_get_current_user()->display_name,
+                'post_title'  => $user->display_name,
+                'post_name'   => $user->user_login, // Use username as initial slug
                 'post_status' => 'publish',
                 'post_author' => $user_id,
             ]);
@@ -81,7 +83,10 @@ class Saas_Dashboard {
         ?>
         <div id="saas-dashboard">
             <div class="saas-top-utility-nav" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <a href="<?php echo home_url('/'); ?>" style="color:var(--text-muted); text-decoration:none; font-weight:700; font-size:0.85rem;">← Back to Website</a>
+                <div style="display:flex; gap:20px;">
+                    <a href="<?php echo home_url('/'); ?>" style="color:var(--text-muted); text-decoration:none; font-weight:700; font-size:0.85rem;">← Back to Website</a>
+                    <a href="<?php echo home_url('/' . $profile_obj->post_name); ?>" target="_blank" style="color:var(--primary); text-decoration:none; font-weight:700; font-size:0.85rem;">🌍 View Live Profile</a>
+                </div>
                 <a href="<?php echo wp_logout_url(home_url()); ?>" style="color:var(--danger); text-decoration:none; font-weight:700; font-size:0.85rem;">Logout 👋</a>
             </div>
             <div class="dashboard-main-area">
@@ -329,6 +334,16 @@ class Saas_Dashboard {
                             <div class="field">
                                 <label>Short Biography</label>
                                 <textarea name="bio" rows="4"><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
+                            </div>
+
+                            <div class="field">
+                                <label>Social Links (for vCard & Discovery)</label>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                    <input type="url" name="social_links[twitter]" value="<?php echo esc_url($meta['social_links']['twitter'] ?? ''); ?>" placeholder="𝕏 / Twitter URL">
+                                    <input type="url" name="social_links[linkedin]" value="<?php echo esc_url($meta['social_links']['linkedin'] ?? ''); ?>" placeholder="LinkedIn URL">
+                                    <input type="url" name="social_links[instagram]" value="<?php echo esc_url($meta['social_links']['instagram'] ?? ''); ?>" placeholder="Instagram URL">
+                                    <input type="url" name="social_links[youtube]" value="<?php echo esc_url($meta['social_links']['youtube'] ?? ''); ?>" placeholder="YouTube URL">
+                                </div>
                             </div>
                             <div class="field">
                                 <label>Your Niche / Category</label>
