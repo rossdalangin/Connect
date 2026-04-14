@@ -28,6 +28,7 @@ require_once SAAS_PLUGIN_DIR . 'leads.php';
 require_once SAAS_PLUGIN_DIR . 'payments.php';
 require_once SAAS_PLUGIN_DIR . 'affiliates.php';
 require_once SAAS_PLUGIN_DIR . 'messaging.php';
+require_once SAAS_PLUGIN_DIR . 'licenses.php';
 require_once SAAS_PLUGIN_DIR . 'utils.php';
 
 // 4. Admin Interface

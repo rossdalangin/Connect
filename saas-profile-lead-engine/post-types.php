@@ -51,11 +51,12 @@ function saas_register_post_types() {
         'labels' => [
             'name' => 'Licenses',
             'singular_name' => 'License',
+            'add_new' => 'Generate New License',
         ],
         'public' => false,
         'show_ui' => true,
         'menu_icon' => 'dashicons-id-alt',
-        'supports' => [ 'title', 'editor' ],
+        'supports' => [ 'title', 'editor', 'author' ],
         'show_in_rest' => true,
     ]);
 
@@ -71,6 +72,32 @@ function saas_register_post_types() {
         'supports' => [ 'title', 'author' ],
         'show_in_rest' => true,
     ]);
+
+    // 6. Payouts CPT (Affiliates)
+    register_post_type( 'saas_payout', [
+        'labels' => [
+            'name' => 'Payouts',
+            'singular_name' => 'Payout',
+        ],
+        'public' => false,
+        'show_ui' => true,
+        'menu_icon' => 'dashicons-money-alt',
+        'supports' => [ 'title', 'author' ],
+        'show_in_rest' => true,
+    ]);
+
+    // 7. Messages CPT (Internal)
+    register_post_type( 'saas_message', [
+        'labels' => [
+            'name' => 'Messages',
+            'singular_name' => 'Message',
+        ],
+        'public' => false,
+        'show_ui' => true,
+        'menu_icon' => 'dashicons-email-alt',
+        'supports' => [ 'title', 'editor', 'author' ],
+        'show_in_rest' => true,
+    ]);
 }
 add_action( 'init', 'saas_register_post_types' );
 
@@ -79,9 +106,18 @@ add_action( 'init', 'saas_register_post_types' );
  */
 function saas_enforce_data_isolation( $query ) {
     if ( is_admin() && ! current_user_can( 'manage_options' ) && $query->is_main_query() ) {
-        $post_types = ['saas_profile', 'saas_link', 'saas_lead', 'saas_order'];
+        $post_types = ['saas_profile', 'saas_link', 'saas_lead', 'saas_order', 'saas_payout', 'saas_message', 'saas_license'];
         if ( in_array( $query->get( 'post_type' ), $post_types ) ) {
-            $query->set( 'author', get_current_user_id() );
+            // For messages, we also need to consider recipient meta
+            if ($query->get('post_type') === 'saas_message') {
+                $query->set('meta_query', [
+                    'relation' => 'OR',
+                    [ 'key' => '_saas_msg_recipient', 'value' => get_current_user_id() ],
+                    [ 'author' => get_current_user_id() ]
+                ]);
+            } else {
+                $query->set( 'author', get_current_user_id() );
+            }
         }
     }
 }

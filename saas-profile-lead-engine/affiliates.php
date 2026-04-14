@@ -15,13 +15,7 @@ class Saas_Affiliates {
     }
 
     public function register_affiliate_post_types() {
-        register_post_type( 'saas_payout', [
-            'labels' => ['name' => 'Payouts', 'singular_name' => 'Payout'],
-            'public' => false,
-            'show_ui' => true,
-            'menu_icon' => 'dashicons-money-alt',
-            'supports' => ['title', 'author'],
-        ]);
+        // CPTs now handled centrally in post-types.php to avoid duplicates
     }
 
     /**

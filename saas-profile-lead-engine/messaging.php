@@ -15,13 +15,7 @@ class Saas_Messaging {
     }
 
     public function register_message_cpt() {
-        register_post_type( 'saas_message', [
-            'labels' => ['name' => 'Messages', 'singular_name' => 'Message'],
-            'public' => false,
-            'show_ui' => true,
-            'menu_icon' => 'dashicons-email-alt',
-            'supports' => ['title', 'editor', 'author'],
-        ]);
+        // CPTs now handled centrally in post-types.php
     }
 
     public function handle_send_message() {

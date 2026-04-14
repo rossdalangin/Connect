@@ -532,6 +532,21 @@
         // 12. Wizard Logic
         var currentStep = 1;
         $(document).on('click', '.next-step', function() {
+            if (currentStep === 1) {
+                var niche = $('#wizard-niche').val();
+                var suggestions = {
+                    'coach': { headline: 'Scaling Founders from 6 to 7 Figures 🚀', bio: 'Certified high-performance coach. I work with CEOs and founders to scale their impact.' },
+                    'freelancer': { headline: 'Visual Identity & Web Experience Design', bio: 'Helping DTC brands stand out through minimalist design and high-converting interfaces.' },
+                    'realtor': { headline: 'Bespoke Advisory for Elite Homeowners', bio: 'Specializing in off-market luxury listings. Member of the Top 0.1% Global Network.' },
+                    'tiktok': { headline: 'Shop My Top Tech & Setup Finds 🛍️', bio: 'Sharing the best tech deals and home office aesthetic finds. Check my links for exclusive discounts!' },
+                    'business': { headline: 'Operational Efficiency for Modern SaaS', bio: 'I help seed-stage startups optimize their unit economics and reduce churn.' },
+                    'luxury': { headline: 'Bespoke Private Advisory', bio: 'Curating exclusive opportunities for the discerning individual.' }
+                };
+                if (suggestions[niche]) {
+                    $('#wizard-headline').val(suggestions[niche].headline);
+                    $('#wizard-bio').val(suggestions[niche].bio);
+                }
+            }
             currentStep++;
             updateWizard(currentStep);
         });

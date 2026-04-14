@@ -31,37 +31,38 @@ class Saas_Dashboard {
         $user_id = get_current_user_id();
         $all_user_profiles = get_posts([
             'post_type'   => 'saas_profile',
-            'post_author' => $user_id,
+            'author'      => $user_id,
             'numberposts' => -1,
         ]);
 
         $active_profile_id = isset($_GET['profile_id']) ? intval($_GET['profile_id']) : 0;
         $payments = new Saas_Payments();
 
-        if ( empty( $all_user_profiles ) ) {
-            $user = wp_get_current_user();
-            $profile_id = wp_insert_post([
-                'post_type'   => 'saas_profile',
-                'post_title'  => $user->display_name,
-                'post_name'   => $user->user_login, // Use username as initial slug
-                'post_status' => 'publish',
-                'post_author' => $user_id,
-            ]);
-            $profile_obj = get_post($profile_id);
-            $active_profile_id = $profile_id;
-        } else {
-            $profile_obj = null;
-            if ($active_profile_id) {
-                foreach($all_user_profiles as $p) {
-                    if ($p->ID === $active_profile_id) { $profile_obj = $p; break; }
-                }
+        // Explicit ownership check for security
+        $profile_obj = null;
+        if ($active_profile_id) {
+            $test_post = get_post($active_profile_id);
+            if ($test_post && $test_post->post_author == $user_id && $test_post->post_type === 'saas_profile') {
+                $profile_obj = $test_post;
             }
-            if (!$profile_obj) {
-                $profile_obj = $all_user_profiles[0];
-                $active_profile_id = $profile_obj->ID;
-            }
-            $profile_id = $active_profile_id;
         }
+
+        if ( ! $profile_obj ) {
+            if ( ! empty( $all_user_profiles ) ) {
+                $profile_obj = $all_user_profiles[0];
+            } else {
+                $user = wp_get_current_user();
+                $new_id = wp_insert_post([
+                    'post_type'   => 'saas_profile',
+                    'post_title'  => $user->display_name,
+                    'post_name'   => $user->user_login,
+                    'post_status' => 'publish',
+                    'post_author' => $user_id,
+                ]);
+                $profile_obj = get_post($new_id);
+            }
+        }
+        $profile_id = $profile_obj->ID;
 
         $meta = saas_get_profile_meta( $profile_id );
         $is_pro = saas_is_profile_licensed($profile_id);
@@ -70,6 +71,7 @@ class Saas_Dashboard {
 
         $links = get_posts([
             'post_type'   => 'saas_link',
+            'author'      => $user_id,
             'meta_query' => [['key' => '_saas_profile_id', 'value' => $profile_id]],
             'orderby'     => 'menu_order',
             'order'       => 'ASC',
@@ -128,7 +130,7 @@ class Saas_Dashboard {
                                 ];
                             }
 
-                            $recent_leads = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'numberposts' => 3]);
+                            $recent_leads = get_posts(['post_type' => 'saas_lead', 'author' => $user_id, 'numberposts' => 3]);
                             foreach($recent_leads as $rl) {
                                 $recent_activity[] = [
                                     'type' => 'lead',
@@ -178,7 +180,7 @@ class Saas_Dashboard {
                     </div>
                     <div class="saas-share-bar">
                         <?php
-                        $new_leads_count = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'meta_key' => '_saas_lead_status', 'meta_value' => 'New', 'fields' => 'ids', 'numberposts' => -1]);
+                        $new_leads_count = get_posts(['post_type' => 'saas_lead', 'author' => $user_id, 'meta_key' => '_saas_lead_status', 'meta_value' => 'New', 'fields' => 'ids', 'numberposts' => -1]);
                         $count = count($new_leads_count);
                         ?>
                         <div class="saas-notif-bell" onclick="document.getElementById('saas-notif-modal').style.display='flex'">🔔<?php if($count > 0) echo '<span class="notif-count">'.$count.'</span>'; ?></div>
@@ -495,7 +497,7 @@ class Saas_Dashboard {
                         </div>
                         <div class="saas-table-wrapper">
                             <?php
-                            $leads = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'numberposts' => 50]);
+                            $leads = get_posts(['post_type' => 'saas_lead', 'author' => $user_id, 'numberposts' => 50]);
                             if ($leads) : ?>
                                 <button id="saas-bulk-delete-leads" class="button" style="margin-bottom:10px; color:var(--danger); display:none;">🗑️ Delete Selected</button>
                                 <table class="saas-table">
@@ -628,7 +630,7 @@ class Saas_Dashboard {
                                     <small>TOTAL REVENUE</small>
                                     <?php
                                     $total_rev = 0;
-                                    $all_orders = get_posts(['post_type' => 'saas_order', 'post_author' => $user_id, 'meta_key' => '_saas_order_status', 'meta_value' => 'completed', 'numberposts' => -1]);
+                                    $all_orders = get_posts(['post_type' => 'saas_order', 'author' => $user_id, 'meta_key' => '_saas_order_status', 'meta_value' => 'completed', 'numberposts' => -1]);
                                     foreach($all_orders as $o) $total_rev += floatval(get_post_meta($o->ID, '_saas_order_amount', true));
                                     ?>
                                     <div class="value" style="color:var(--secondary);">$<?php echo number_format($total_rev, 2); ?></div>
@@ -643,7 +645,7 @@ class Saas_Dashboard {
                                     <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
                                     <tbody>
                                         <?php
-                                        $recent_orders = get_posts(['post_type' => 'saas_order', 'post_author' => $user_id, 'numberposts' => 10]);
+                                        $recent_orders = get_posts(['post_type' => 'saas_order', 'author' => $user_id, 'numberposts' => 10]);
                                         if ($recent_orders) :
                                             foreach($recent_orders as $o) :
                                                 $amt = get_post_meta($o->ID, '_saas_order_amount', true);
@@ -884,7 +886,7 @@ class Saas_Dashboard {
                     <div class="dashboard-card">
                         <h4>Recent Payouts</h4>
                         <?php
-                        $payouts = get_posts(['post_type' => 'saas_payout', 'post_author' => $user_id, 'numberposts' => 10]);
+                        $payouts = get_posts(['post_type' => 'saas_payout', 'author' => $user_id, 'numberposts' => 10]);
                         if($payouts) : ?>
                             <table class="saas-table">
                                 <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
@@ -917,6 +919,33 @@ class Saas_Dashboard {
                         <?php else: ?>
                             <p style="color:var(--text-muted); font-size:0.9rem;">No referrals yet. Time to share your link!</p>
                         <?php endif; ?>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h4>Apply Elite License</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Have a promotional code or license key? Activate it here to upgrade your account instantly.</p>
+                        <form id="saas-license-activate-form">
+                            <div class="field" style="display:flex; gap:10px;">
+                                <input type="text" name="license_key" placeholder="ELITE-XXXX-XXXX-XXXX" required style="flex:1;">
+                                <button type="submit" class="button">Activate</button>
+                            </div>
+                        </form>
+                        <script>
+                        jQuery('#saas-license-activate-form').on('submit', function(e) {
+                            e.preventDefault();
+                            var $btn = jQuery(this).find('button');
+                            $btn.prop('disabled', true).text('Verifying...');
+                            jQuery.post(saas_dashboard_data.ajax_url, jQuery(this).serialize() + '&action=saas_validate_license&security=' + saas_dashboard_data.nonce, function(res) {
+                                if(res.success) {
+                                    alert(res.data);
+                                    location.reload();
+                                } else {
+                                    alert('Error: ' + res.data);
+                                }
+                                $btn.prop('disabled', false).text('Activate');
+                            });
+                        });
+                        </script>
                     </div>
 
                     <div class="dashboard-card">
@@ -1029,7 +1058,7 @@ class Saas_Dashboard {
                     <div class="dashboard-card">
                         <h4>Payment History</h4>
                         <?php
-                        $orders = get_posts(['post_type' => 'saas_order', 'post_author' => $user_id, 'numberposts' => 10]);
+                        $orders = get_posts(['post_type' => 'saas_order', 'author' => $user_id, 'numberposts' => 10]);
                         if($orders) : ?>
                             <table class="saas-table">
                                 <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
@@ -1133,7 +1162,7 @@ class Saas_Dashboard {
                 <div id="notif-list" style="max-height:300px; overflow-y:auto;">
                     <div style="padding:12px; border-bottom:1px solid #eee;">🚀 Welcome to your new dashboard!</div>
                     <?php
-                    $recent = get_posts(['post_type' => 'saas_lead', 'post_author' => $user_id, 'numberposts' => 5]);
+                    $recent = get_posts(['post_type' => 'saas_lead', 'author' => $user_id, 'numberposts' => 5]);
                     foreach($recent as $r) : ?>
                         <div style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem;">
                             <strong>New Lead:</strong> <?php echo esc_html(get_post_meta($r->ID, '_saas_lead_name', true)); ?>

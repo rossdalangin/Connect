@@ -53,9 +53,10 @@ class Saas_Admin_Settings {
             'https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png'
         ];
 
-        update_option('saas_home_title', 'The Only Link-in-Bio Built for Real Conversions');
-        update_option('saas_home_hero', 'Turn your social media followers into loyal clients. A complete digital identity system with built-in lead generation, digital business cards, and advanced analytics.');
-        update_option('saas_home_cta', 'Claim My Link');
+        update_option('saas_home_title', 'Your "Link in Bio" is Leaking Leads. Here is the Fix.');
+        update_option('saas_home_hero', 'As a consultant, you are working too hard to lose clients at the last step. Turn your digital identity into a high-converting funnel that captures leads, books calls, and builds trust on autopilot.');
+        update_option('saas_home_cta', 'Launch My Elite Profile');
+        update_option('saas_home_founder_letter', 'Hey, I am a consultant just like you. I know how hard you work to sharpen your skills and help your clients. But I saw so many of us losing 90% of our social traffic because we were using "link lists" instead of "sales funnels." That is why I built this. Not just to give you a link, but to give you a system that honors your hard work and actually grows your business. Let’s help more people together.');
         update_option('saas_home_features', json_encode($features));
         update_option('saas_home_benefits', json_encode($benefits));
         update_option('saas_home_testimonials', json_encode($testimonials));
@@ -197,6 +198,24 @@ class Saas_Admin_Settings {
             'saas_settings',
             [ $this, 'settings_page_html' ],
             'dashicons-admin-generic'
+        );
+
+        add_submenu_page(
+            'saas_settings',
+            'Financial Dashboard',
+            'Finances',
+            'manage_options',
+            'saas_finances',
+            [ $this, 'finances_page_html' ]
+        );
+
+        add_submenu_page(
+            'saas_settings',
+            'License Factory',
+            'Licenses',
+            'manage_options',
+            'saas_license_factory',
+            [ $this, 'license_factory_html' ]
         );
     }
 
@@ -468,6 +487,181 @@ class Saas_Admin_Settings {
             return '$' . number_format($earned, 2);
         }
         return $val;
+    }
+
+    public function finances_page_html() {
+        if ( ! current_user_can( 'manage_options' ) ) return;
+
+        $payouts = get_posts(['post_type' => 'saas_payout', 'post_status' => 'publish', 'numberposts' => -1]);
+        $orders  = get_posts(['post_type' => 'saas_order', 'post_status' => 'publish', 'numberposts' => -1]);
+        ?>
+        <div class="wrap saas-admin-wrapper">
+            <h1>Financial & Affiliate Management</h1>
+            <p>Monitor global revenue and process affiliate commission requests.</p>
+
+            <div class="saas-tabs-container">
+                <h2 class="nav-tab-wrapper">
+                    <a href="#tab-payouts" class="nav-tab nav-tab-active">Affiliate Payouts</a>
+                    <a href="#tab-orders" class="nav-tab">Customer Orders</a>
+                </h2>
+
+                <div id="tab-payouts" class="tab-content">
+                    <h3>Pending & Recent Payouts</h3>
+                    <table class="wp-list-table widefat fixed striped">
+                        <thead>
+                            <tr>
+                                <th>Affiliate</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($payouts as $p):
+                                $status = get_post_meta($p->ID, '_status', true);
+                                $user = get_userdata($p->post_author);
+                            ?>
+                            <tr>
+                                <td><strong><?php echo $user->display_name; ?></strong></td>
+                                <td>$<?php echo number_format(get_post_meta($p->ID, '_amount', true), 2); ?></td>
+                                <td><?php echo strtoupper(get_post_meta($p->ID, '_method', true)); ?> (<?php echo get_post_meta($p->ID, '_method_email', true); ?>)</td>
+                                <td><span class="status-badge status-<?php echo $status; ?>"><?php echo strtoupper($status); ?></span></td>
+                                <td><?php echo get_the_date('', $p->ID); ?></td>
+                                <td>
+                                    <?php if($status === 'pending'): ?>
+                                        <a href="<?php echo get_edit_post_link($p->ID); ?>" class="button button-small">Process Payout</a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="tab-orders" class="tab-content" style="display:none;">
+                    <h3>Customer Order History</h3>
+                    <table class="wp-list-table widefat fixed striped">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Item</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($orders as $o):
+                                $user = get_userdata($o->post_author);
+                            ?>
+                            <tr>
+                                <td><strong><?php echo $user->display_name; ?></strong></td>
+                                <td><?php echo $o->post_title; ?></td>
+                                <td>$<?php echo number_format(get_post_meta($o->ID, '_saas_order_amount', true), 2); ?></td>
+                                <td><?php echo strtoupper(get_post_meta($o->ID, '_saas_order_status', true)); ?></td>
+                                <td><?php echo get_the_date('', $o->ID); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script>
+        jQuery('.nav-tab').on('click', function(e) {
+            e.preventDefault();
+            jQuery('.nav-tab').removeClass('nav-tab-active');
+            jQuery(this).addClass('nav-tab-active');
+            jQuery('.tab-content').hide();
+            jQuery(jQuery(this).attr('href')).show();
+        });
+        </script>
+        <?php
+    }
+
+    public function license_factory_html() {
+        if ( ! current_user_can( 'manage_options' ) ) return;
+        $users = get_users(['fields' => ['ID', 'display_name']]);
+        $licenses = get_posts(['post_type' => 'saas_license', 'post_status' => 'publish', 'numberposts' => -1]);
+        ?>
+        <div class="wrap saas-admin-wrapper">
+            <h1>License Factory</h1>
+            <p>Generate unique ELITE licenses for promotional use or manual sales.</p>
+
+            <div class="saas-admin-card" style="background:#fff; padding:20px; border-radius:8px; border:1px solid #ddd; margin-bottom:30px;">
+                <h3>Generate New License</h3>
+                <form id="saas-license-gen-form" style="display:flex; gap:10px; align-items: flex-end;">
+                    <div class="field">
+                        <label>Assign to User (Optional)</label><br>
+                        <select name="user_id">
+                            <option value="0">Unassigned (General)</option>
+                            <?php foreach($users as $u): ?>
+                                <option value="<?php echo $u->ID; ?>"><?php echo $u->display_name; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Plan Type</label><br>
+                        <select name="plan">
+                            <option value="pro">ELITE PRO</option>
+                            <option value="agency">AGENCY UNLIMITED</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Expiry Date</label><br>
+                        <input type="date" name="expiry">
+                    </div>
+                    <button type="submit" class="button button-primary">Generate Key</button>
+                </form>
+            </div>
+
+            <h3>Active & Used Licenses</h3>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>License Key</th>
+                        <th>Target Plan</th>
+                        <th>User</th>
+                        <th>Status</th>
+                        <th>Expires</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($licenses as $l):
+                        $user = get_userdata($l->post_author);
+                        $status = get_post_meta($l->ID, '_saas_license_status', true);
+                    ?>
+                    <tr>
+                        <td><code><?php echo $l->post_title; ?></code></td>
+                        <td><?php echo strtoupper(get_post_meta($l->ID, '_saas_license_plan', true)); ?></td>
+                        <td><?php echo $user ? $user->display_name : 'General'; ?></td>
+                        <td><span class="status-badge status-<?php echo $status; ?>"><?php echo strtoupper($status); ?></span></td>
+                        <td><?php
+                            $exp = get_post_meta($l->ID, '_saas_license_expiry', true);
+                            echo $exp ? date('M j, Y', $exp) : 'Never';
+                        ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <script>
+        jQuery('#saas-license-gen-form').on('submit', function(e) {
+            e.preventDefault();
+            var $btn = jQuery(this).find('button');
+            $btn.prop('disabled', true).text('Generating...');
+            jQuery.post(ajaxurl, jQuery(this).serialize() + '&action=saas_generate_license&security=<?php echo wp_create_nonce("saas_dashboard_nonce"); ?>', function(res) {
+                if(res.success) {
+                    alert('New License Created: ' + res.data.key);
+                    location.reload();
+                }
+                $btn.prop('disabled', false).text('Generate Key');
+            });
+        });
+        </script>
+        <?php
     }
 
     public function settings_page_html() {

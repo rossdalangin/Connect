@@ -393,6 +393,23 @@ $h_img   = get_option('saas_home_image');
     </div>
 </section>
 
+<!-- Founder's Letter Section -->
+<section style="padding: 100px 20px; background: #fff;">
+    <div style="max-width: 800px; margin: 0 auto; background: #f8fafc; padding: 60px; border-radius: 40px; border: 1px solid #e2e8f0;">
+        <div style="display: flex; gap: 30px; align-items: center; margin-bottom: 30px;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: #6c5ce7; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"></div>
+            <div>
+                <h3 style="margin: 0; font-size: 1.5rem;">A Message from the Founder</h3>
+                <p style="margin: 0; color: #64748b;">Consultant & Digital Architect</p>
+            </div>
+        </div>
+        <p style="font-size: 1.25rem; line-height: 1.8; color: #475569; font-style: italic;">
+            "<?php echo get_option('saas_home_founder_letter') ?: 'I built this because I saw so many hard-working coaches losing leads to standard link trees. You deserve a system that converts your hard work into results.'; ?>"
+        </p>
+        <p style="margin-top: 20px; font-weight: 700; color: #6c5ce7;">— Let’s help more people, together.</p>
+    </div>
+</section>
+
 <!-- Final CTA Section -->
 <section style="padding: 120px 20px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; text-align: center;">
     <div style="max-width: 800px; margin: 0 auto;">

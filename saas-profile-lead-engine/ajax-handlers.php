@@ -551,7 +551,7 @@ function saas_ajax_export_leads() {
     $user_id = get_current_user_id();
     $leads = get_posts([
         'post_type'   => 'saas_lead',
-        'post_author' => $user_id,
+        'author'      => $user_id,
         'numberposts' => -1,
     ]);
 
@@ -736,7 +736,7 @@ function saas_ajax_create_profile() {
 
     // Limit free users to 1 profile
     $payments = new Saas_Payments();
-    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'numberposts' => -1]);
+    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'numberposts' => -1, 'post_status' => 'any']);
     if ( count($existing) >= 1 && !$payments->is_pro_user($user_id) ) {
         wp_send_json_error( 'Free users are limited to 1 profile. Upgrade to Pro for unlimited profiles.' );
     }
@@ -1122,7 +1122,7 @@ function saas_ajax_clone_profile() {
 
     // 1. Limit Check
     $payments = new Saas_Payments();
-    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'numberposts' => -1]);
+    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'numberposts' => -1, 'post_status' => 'any']);
     if ( count($existing) >= 1 && !$payments->is_pro_user($user_id) ) {
         wp_send_json_error( 'Free users are limited to 1 profile. Upgrade to Pro to clone.' );
     }
@@ -1187,7 +1187,7 @@ function saas_ajax_delete_profile() {
     if ( ! $profile || $profile->post_author != $user_id ) wp_send_json_error( 'Unauthorized' );
 
     // 1. Prevent deleting the only profile
-    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'fields' => 'ids', 'numberposts' => -1]);
+    $existing = get_posts(['post_type' => 'saas_profile', 'author' => $user_id, 'fields' => 'ids', 'numberposts' => -1, 'post_status' => 'any']);
     if ( count($existing) <= 1 ) {
         wp_send_json_error( 'You must have at least one profile. Create a new one before deleting this one.' );
     }
