@@ -35,7 +35,7 @@ class Saas_Payments {
         $plan = get_user_meta( $user_id, '_saas_subscription_plan', true );
         $expiry = get_user_meta( $user_id, '_saas_subscription_expiry', true );
 
-        if ( $plan == 'pro' && ( ! $expiry || $expiry > time() ) ) {
+        if ( in_array($plan, ['pro', 'agency']) && ( ! $expiry || $expiry > time() ) ) {
             return true;
         }
         return false;

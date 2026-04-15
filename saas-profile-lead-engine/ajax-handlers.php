@@ -130,17 +130,22 @@ function saas_ajax_save_profile() {
 
     // IDENTITY & PROFILE CONTEXT
     if ($context === 'profile') {
+        $payments = new Saas_Payments();
+        $is_pro = $payments->is_pro_user($user_id);
+
         if (isset($_POST['headline'])) update_post_meta($profile_id, '_saas_headline', sanitize_text_field($_POST['headline']));
         if (isset($_POST['bio'])) update_post_meta($profile_id, '_saas_bio', sanitize_textarea_field($_POST['bio']));
         if (isset($_POST['niche'])) update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
         if (isset($_POST['phone'])) update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
         if (isset($_POST['company'])) update_post_meta($profile_id, '_saas_company', sanitize_text_field($_POST['company']));
-        if (isset($_POST['custom_domain'])) update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
+
+        if ($is_pro) {
+            if (isset($_POST['custom_domain'])) update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
+            if (isset($_POST['profile_password'])) update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
+            update_post_meta($profile_id, '_saas_verified_badge', isset($_POST['verified_badge']) ? '1' : '0');
+        }
 
         update_post_meta($profile_id, '_saas_show_in_directory', isset($_POST['show_in_directory']) ? '1' : '0');
-        update_post_meta($profile_id, '_saas_verified_badge', isset($_POST['verified_badge']) ? '1' : '0');
-
-        if (isset($_POST['profile_password'])) update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
         if (isset($_POST['profile_image_id'])) set_post_thumbnail($profile_id, intval($_POST['profile_image_id']));
         if (isset($_POST['cover_image_id'])) update_post_meta($profile_id, '_saas_cover_id', intval($_POST['cover_image_id']));
 
@@ -156,12 +161,19 @@ function saas_ajax_save_profile() {
 
     // BRANDING CONTEXT
     if ($context === 'branding') {
+        $payments = new Saas_Payments();
+        $is_pro = $payments->is_pro_user($user_id);
+
         if (isset($_POST['theme_color'])) update_post_meta($profile_id, '_saas_theme_color', sanitize_hex_color($_POST['theme_color']));
         if (isset($_POST['profile_theme'])) update_post_meta($profile_id, '_saas_profile_theme', sanitize_text_field($_POST['profile_theme']));
         if (isset($_POST['font_family'])) update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
         if (isset($_POST['container_shadow'])) update_post_meta($profile_id, '_saas_container_shadow', sanitize_text_field($_POST['container_shadow']));
         if (isset($_POST['btn_shape'])) update_post_meta($profile_id, '_saas_btn_shape', sanitize_text_field($_POST['btn_shape']));
-        if (isset($_POST['custom_css'])) update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
+
+        if ($is_pro) {
+            if (isset($_POST['custom_css'])) update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
+            update_post_meta($profile_id, '_saas_hide_branding', isset($_POST['hide_branding']) ? '1' : '0');
+        }
 
         if (isset($_POST['bg_type'])) {
             $bg_type = sanitize_text_field( $_POST['bg_type'] );
@@ -172,7 +184,6 @@ function saas_ajax_save_profile() {
         }
 
         update_post_meta($profile_id, '_saas_social_proof', isset($_POST['social_proof']) ? '1' : '0');
-        update_post_meta($profile_id, '_saas_hide_branding', isset($_POST['hide_branding']) ? '1' : '0');
     }
 
     // QR CONTEXT
@@ -1048,7 +1059,16 @@ function saas_ajax_apply_coupon() {
     check_ajax_referer( 'saas_dashboard_nonce', 'security' );
     $code = strtoupper(sanitize_text_field($_POST['coupon']));
 
-    // Stub: In production, query a 'saas_coupon' CPT or options table
+    // Check Affiliate Coupons first
+    $aff_coupons = get_option('saas_affiliate_coupons') ?: [];
+    foreach ($aff_coupons as $c) {
+        if (strtoupper($c['code']) === $code) {
+            $discount = floatval($c['discount']);
+            wp_send_json_success("Affiliate coupon applied! You get $discount% off.");
+        }
+    }
+
+    // Standard coupons
     $valid_coupons = ['ELITE20' => 20, 'SAASLAUNCH' => 50];
 
     if (isset($valid_coupons[$code])) {

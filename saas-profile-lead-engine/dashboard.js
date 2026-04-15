@@ -304,11 +304,27 @@
         $('.saas-checkout-btn').on('click', function() {
             var data = {
                 gateway: $(this).data('gateway'),
-                plan_id: $(this).data('plan')
+                plan_id: $(this).data('plan'),
+                coupon: $('#saas-checkout-coupon').val()
             };
             saasFetch('saas_checkout', data, $(this)).done(function(res) {
                 window.location.href = res.redirect_url;
             });
+        });
+
+        $('#saas-apply-checkout-coupon').on('click', function() {
+            var coupon = $('#saas-checkout-coupon').val();
+            if (!coupon) return;
+            var $status = $('#coupon-status');
+            $status.text('Validating...').css('color', '#666');
+
+            saasFetch('saas_apply_coupon', { coupon: coupon }, $(this))
+                .done(function(msg) {
+                    $status.text('✓ ' + msg).css('color', 'var(--secondary)');
+                })
+                .fail(function(err) {
+                    $status.text('✗ ' + err.message).css('color', 'var(--danger)');
+                });
         });
 
         // Affiliate/Support Messaging

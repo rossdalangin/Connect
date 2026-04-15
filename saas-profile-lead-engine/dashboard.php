@@ -1081,6 +1081,15 @@ class Saas_Dashboard {
                                         <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="pro" style="width:100%; background:#0070ba;">Upgrade with PayPal</button>
                                     <?php endif; ?>
 
+                                <div class="field" style="margin-top:20px;">
+                                    <label>Have an affiliate coupon?</label>
+                                    <div style="display:flex; gap:10px;">
+                                        <input type="text" id="saas-checkout-coupon" placeholder="Enter coupon code" style="flex:1;">
+                                        <button type="button" class="button" id="saas-apply-checkout-coupon">Apply</button>
+                                    </div>
+                                    <div id="coupon-status" style="font-size:0.75rem; margin-top:5px; font-weight:bold;"></div>
+                                </div>
+
                                 <button id="saas-demo-upgrade-btn" class="button" style="width:100%; margin-top:10px; background:var(--accent-soft); border-color:var(--accent); color:var(--accent);">⚡ Instant Demo Upgrade (UID: <?php echo $user_id; ?>)</button>
                                 <button id="saas-simulate-payment-btn" class="button" style="width:100%; margin-top:10px; background:var(--secondary-soft); border-color:var(--secondary); color:var(--secondary);">💸 Simulate Stripe Success ($19)</button>
 
