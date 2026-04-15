@@ -49,6 +49,7 @@ class Saas_Payments {
 
         $plan_id = sanitize_text_field( $_POST['plan_id'] );
         $gateway = sanitize_text_field( $_POST['gateway'] );
+        $coupon_code = isset($_POST['coupon']) ? strtoupper(sanitize_text_field($_POST['coupon'])) : '';
         $user_id = get_current_user_id();
         $block_id = isset($_POST['block_id']) ? intval($_POST['block_id']) : 0;
 
@@ -61,6 +62,28 @@ class Saas_Payments {
             if (!$amount) $amount = 99.00; // Fallback
         } elseif ($plan_id === 'agency') {
             $amount = 49.00;
+        }
+
+        // Apply Affiliate Coupon Discount
+        $discount_pct = 0;
+        $affiliate_id = 0;
+        if ($coupon_code) {
+            $coupons = get_option('saas_affiliate_coupons') ?: [];
+            foreach ($coupons as $c) {
+                if (strtoupper($c['code']) === $coupon_code) {
+                    $discount_pct = floatval($c['discount']);
+                    $affiliate_id = intval($c['user_id']);
+                    break;
+                }
+            }
+        }
+
+        if ($discount_pct > 0) {
+            $amount = $amount * (1 - ($discount_pct / 100));
+            // If a coupon is used, it sets/overrides the referrer
+            if ($affiliate_id) {
+                update_user_meta($user_id, '_saas_referred_by', $affiliate_id);
+            }
         }
 
         if ( $gateway === 'stripe' ) {

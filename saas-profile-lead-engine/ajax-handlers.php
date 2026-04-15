@@ -42,6 +42,13 @@ function saas_ajax_add_link() {
     $style = isset($_POST['block_style']) ? sanitize_text_field( $_POST['block_style'] ) : 'regular';
     $animation = isset($_POST['block_animation']) ? sanitize_text_field( $_POST['block_animation'] ) : 'fadeinup';
 
+    // Pro-tier Block Enforcement
+    $pro_only_blocks = ['image_gallery', 'newsletter', 'calendar', 'countdown'];
+    $payments = new Saas_Payments();
+    if (in_array($type, $pro_only_blocks) && !$payments->is_pro_user(get_current_user_id())) {
+        wp_send_json_error('This block type is reserved for Elite Pro users.');
+    }
+
     // Verify ownership of the target profile
     $profile = get_post($profile_id);
     if (!$profile || $profile->post_author != get_current_user_id()) {

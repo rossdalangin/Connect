@@ -24,7 +24,7 @@ class Saas_Affiliates {
     public function record_referral_sale( $referrer_id, $order_amount ) {
         $percentage = get_option('saas_affiliate_percentage') ?: 30;
         $commission = $order_amount * ($percentage / 100);
-        $total_earned = get_user_meta( $referrer_id, '_saas_affiliate_earned', true ) ?: 0;
+        $total_earned = floatval(get_user_meta( $referrer_id, '_saas_affiliate_earned', true )) ?: 0;
         update_user_meta( $referrer_id, '_saas_affiliate_earned', $total_earned + $commission );
     }
 
@@ -79,8 +79,19 @@ class Saas_Affiliates {
         check_ajax_referer( 'saas_dashboard_nonce', 'security' );
 
         $payout_id = intval($_POST['payout_id']);
+        if (!$payout_id || get_post_type($payout_id) !== 'saas_payout') {
+            wp_send_json_error('Invalid payout ID');
+        }
+
+        $current_status = get_post_meta($payout_id, '_status', true);
+        if ($current_status === 'paid') {
+            wp_send_json_error('This payout has already been processed.');
+        }
+
         update_post_meta($payout_id, '_status', 'paid');
-        wp_send_json_success('Payout marked as paid.');
+        update_post_meta($payout_id, '_paid_at', current_time('mysql'));
+
+        wp_send_json_success('Payout marked as paid successfully!');
     }
 
     public function add_admin_meta_boxes() {

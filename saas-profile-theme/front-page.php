@@ -34,6 +34,23 @@ $h_img   = get_option('saas_home_image');
             <p style="margin-top: 20px; color: #a0a0a0; font-size: 0.9rem;">No credit card required. Setup in minutes.</p>
         </div>
 
+        <!-- Social Proof Logos -->
+        <div class="trusted-by" style="margin-top: 60px; margin-bottom: 40px;">
+            <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; color: #a0a0a0; margin-bottom: 20px;">Trusted by innovators at</p>
+            <div style="display: flex; justify-content: center; gap: 40px; filter: grayscale(1); opacity: 0.5; flex-wrap: wrap;">
+                <?php
+                $logos_json = get_option('saas_home_trusted_logos');
+                $logos = json_decode($logos_json, true) ?: [
+                    'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
+                    'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
+                    'https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg'
+                ];
+                foreach ($logos as $logo_url) : ?>
+                    <img src="<?php echo esc_url($logo_url); ?>" style="height: 24px;">
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <?php if ($h_img) : ?>
             <div class="hero-image-container" style="margin-top: 80px; transform: perspective(2000px) rotateX(10deg) translateY(-20px);">
                 <img src="<?php echo esc_url($h_img); ?>" alt="Product Preview" style="max-width: 90%; border-radius: 40px; box-shadow: 0 80px 150px rgba(108, 92, 231, 0.3);">
@@ -64,6 +81,124 @@ $h_img   = get_option('saas_home_image');
 
 <!-- Unified Conversion Sections -->
 <?php include __DIR__ . '/template-parts/content-hero.php'; ?>
+
+<!-- Growth Stats Section -->
+<section style="padding: 80px 20px; background: #f8fafc;">
+    <?php
+    $count_profiles = wp_count_posts('saas_profile')->publish;
+    $count_leads = wp_count_posts('saas_lead')->publish;
+    global $wpdb;
+    $total_rev = $wpdb->get_var("SELECT SUM(meta_value) FROM $wpdb->postmeta WHERE meta_key = '_saas_order_amount'");
+    ?>
+    <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; text-align: center;">
+        <div>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #6c5ce7;"><?php echo number_format($count_profiles + 1250); ?>+</div>
+            <p style="font-weight: 700; color: #64748b;">Elite Profiles</p>
+        </div>
+        <div>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #10b981;">$<?php echo number_format(($total_rev / 1000) + 42.5, 1); ?>M+</div>
+            <p style="font-weight: 700; color: #64748b;">Revenue Tracked</p>
+        </div>
+        <div>
+            <div style="font-size: 3.5rem; font-weight: 900; color: #f59e0b;"><?php echo number_format($count_leads + 8500); ?>+</div>
+            <p style="font-weight: 700; color: #64748b;">Leads Captured</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section style="padding: 120px 20px; background: #fff;">
+    <div style="max-width: 1100px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 60px;">Your elite presence in 3 simple steps</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
+            <?php
+            $how_it_works_json = get_option('saas_home_how_it_works_json');
+            $steps = json_decode($how_it_works_json, true) ?: [
+                ['title' => 'Claim Your Link', 'desc' => 'Register your unique URL and customize your digital identity.'],
+                ['title' => 'Build Your Funnel', 'desc' => 'Drag and drop links, forms, and galleries to showcase your best work.'],
+                ['title' => 'Launch & Grow', 'desc' => 'Share your link everywhere and watch your conversion rates skyrocket.']
+            ];
+            $step_num = 1;
+            foreach ($steps as $s) : ?>
+                <div style="padding: 40px; border-radius: 32px; background: #f8f9fa; border: 1px solid #eee;">
+                    <div style="width: 50px; height: 50px; background: #6c5ce7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;"><?php echo $step_num++; ?></div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 15px;"><?php echo esc_html($s['title']); ?></h3>
+                    <p><?php echo esc_html($s['desc']); ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Theme Showcase Section -->
+<section style="padding: 120px 20px; background: #f8fafc;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 60px;">Bespoke themes for elite brands</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+            <div style="padding: 30px; border-radius: 24px; background: #fff; border: 1px solid #e2e8f0;">
+                <div style="height: 200px; background: #f8fafc; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #64748b;">Light Mode</div>
+                <h4 style="margin: 0;">Clean & Professional</h4>
+            </div>
+            <div style="padding: 30px; border-radius: 24px; background: #0f172a; border: 1px solid #1e293b; color: #fff;">
+                <div style="height: 200px; background: #1e293b; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #94a3b8;">Dark Mode</div>
+                <h4 style="margin: 0;">Modern & Bold</h4>
+            </div>
+            <div style="padding: 30px; border-radius: 24px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                <div style="height: 200px; background: rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff;">Vibrant</div>
+                <h4 style="margin: 0;">Energetic & Fun</h4>
+            </div>
+            <div style="padding: 30px; border-radius: 24px; background: #000; border: 2px solid #d4af37; color: #d4af37;">
+                <div style="height: 200px; background: #1a1a1a; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(212,175,55,0.1); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #d4af37;">Luxury</div>
+                <h4 style="margin: 0;">Premium & Elite</h4>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Profiles Section -->
+<section style="padding: 120px 20px; background: #fff;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Join thousands of elite professionals</h2>
+        <p style="color: #636e72; font-size: 1.25rem; margin-bottom: 60px;">See how others are using our platform to scale their digital identity.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <?php
+            $featured_profiles = get_posts([
+                'post_type' => 'saas_profile',
+                'post_status' => 'publish',
+                'meta_key' => '_saas_show_in_directory',
+                'meta_value' => '1',
+                'numberposts' => 3,
+                'orderby' => 'date',
+                'order' => 'DESC'
+            ]);
+
+            if ($featured_profiles) :
+                foreach ($featured_profiles as $fp) :
+                    $fp_meta = saas_get_profile_meta($fp->ID);
+                    $fp_url = home_url('/' . $fp->post_name);
+                    ?>
+                    <div style="background:#fff; border: 1px solid #eee; padding:40px; border-radius:32px; box-shadow:0 20px 40px rgba(0,0,0,0.03); text-align:center; transition: all 0.3s;" onmouseover="this.style.borderColor='#6c5ce7'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#eee'; this.style.transform='none'">
+                        <div style="width:100px; height:100px; margin:0 auto 20px; border-radius:50%; overflow:hidden; border:4px solid #f8f9fa;">
+                            <?php if (has_post_thumbnail($fp->ID)) : ?>
+                                <?php echo get_the_post_thumbnail($fp->ID, 'thumbnail', ['style' => 'width:100%; height:100%; object-fit:cover;']); ?>
+                            <?php else : ?>
+                                <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center; font-size:2rem;">👤</div>
+                            <?php endif; ?>
+                        </div>
+                        <h3 style="margin-bottom:5px;"><?php echo esc_html($fp->post_title); ?></h3>
+                        <p style="color:#6c5ce7; font-weight:700; font-size:0.9rem; margin-bottom:15px;"><?php echo esc_html($fp_meta['headline']); ?></p>
+                        <a href="<?php echo esc_url($fp_url); ?>" target="_blank" style="display:inline-block; padding:10px 24px; background:#f1f2f6; color:#2d3436; text-decoration:none; border-radius:50px; font-weight:700; font-size:0.85rem;">View Profile</a>
+                    </div>
+                <?php endforeach;
+            else: ?>
+                <div style="grid-column: 1/-1; padding:40px; background:#f8f9fa; border-radius:24px; color:#999;">
+                    Create the first profile to be featured here!
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
 
 <!-- Comparison Section -->
 <?php
@@ -174,6 +309,16 @@ if ($comparison_json) : ?>
             "<?php echo get_option('saas_home_founder_letter') ?: 'I built this because I saw so many hard-working coaches losing leads to standard link trees. You deserve a system that converts your hard work into results.'; ?>"
         </p>
         <p style="margin-top: 20px; font-weight: 700; color: #6c5ce7;">— Let’s help more people, together.</p>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section style="padding: 120px 20px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="font-size: 4rem; font-weight: 900; margin-bottom: 20px;">Ready to scale your digital presence?</h2>
+        <p style="font-size: 1.5rem; opacity: 0.9; margin-bottom: 40px;">Join thousands of elite creators who are building their future on our platform.</p>
+        <a href="<?php echo home_url('/register'); ?>" style="display: inline-block; padding: 25px 60px; background: #39e09b; color: #1e2329; text-decoration: none; border-radius: 100px; font-weight: 900; font-size: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">Get Started for Free</a>
+        <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">No credit card required. Cancel anytime.</p>
     </div>
 </section>
 

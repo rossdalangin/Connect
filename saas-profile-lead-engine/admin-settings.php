@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Saas_Admin_Settings {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
+        add_action( 'wp_ajax_saas_save_affiliate_coupons', [$this, 'ajax_save_affiliate_coupons'] );
         add_filter( 'manage_users_columns', [ $this, 'add_user_columns' ] );
         add_filter( 'manage_users_custom_column', [ $this, 'render_user_columns' ], 10, 3 );
         add_action( 'admin_init', [ $this, 'settings_init' ] );
@@ -600,11 +601,22 @@ class Saas_Admin_Settings {
         return $val;
     }
 
+    public function ajax_save_affiliate_coupons() {
+        if (!current_user_can('manage_options')) wp_send_json_error('Unauthorized');
+        check_ajax_referer('saas_dashboard_nonce', 'security');
+
+        $coupons = $_POST['coupons'] ?? [];
+        update_option('saas_affiliate_coupons', $coupons);
+        wp_send_json_success('Affiliate coupons saved successfully!');
+    }
+
     public function finances_page_html() {
         if ( ! current_user_can( 'manage_options' ) ) return;
 
         $payouts = get_posts(['post_type' => 'saas_payout', 'post_status' => 'any', 'numberposts' => -1]);
         $orders  = get_posts(['post_type' => 'saas_order', 'post_status' => 'any', 'numberposts' => -1]);
+        $aff_coupons = get_option('saas_affiliate_coupons') ?: [];
+        $users = get_users(['fields' => ['ID', 'display_name']]);
         ?>
         <div class="wrap saas-admin-wrapper">
             <h1>Financial & Affiliate Management</h1>
@@ -614,7 +626,72 @@ class Saas_Admin_Settings {
                 <h2 class="nav-tab-wrapper">
                     <a href="#tab-payouts" class="nav-tab nav-tab-active">Affiliate Payouts</a>
                     <a href="#tab-orders" class="nav-tab">Customer Orders</a>
+                    <a href="#tab-coupons" class="nav-tab">Affiliate Discount Codes</a>
                 </h2>
+
+                <div id="tab-coupons" class="tab-content" style="display:none;">
+                    <h3>Affiliate Discount Mappings</h3>
+                    <p>Assign unique coupon codes to affiliates. When used during checkout, the customer gets a discount and the affiliate gets credit.</p>
+                    <form id="saas-affiliate-coupons-form">
+                        <input type="hidden" name="action" value="saas_save_affiliate_coupons">
+                        <input type="hidden" name="security" value="<?php echo wp_create_nonce('saas_dashboard_nonce'); ?>">
+                        <table class="wp-list-table widefat fixed striped" id="coupons-table">
+                            <thead>
+                                <tr>
+                                    <th>Affiliate User</th>
+                                    <th>Coupon Code</th>
+                                    <th>Discount %</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($aff_coupons as $index => $c): ?>
+                                <tr>
+                                    <td>
+                                        <select name="coupons[<?php echo $index; ?>][user_id]">
+                                            <?php foreach($users as $u): ?>
+                                                <option value="<?php echo $u->ID; ?>" <?php selected($c['user_id'], $u->ID); ?>><?php echo $u->display_name; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" name="coupons[<?php echo $index; ?>][code]" value="<?php echo esc_attr($c['code']); ?>" class="regular-text" style="width:100%;"></td>
+                                    <td><input type="number" name="coupons[<?php echo $index; ?>][discount]" value="<?php echo esc_attr($c['discount']); ?>" min="0" max="100" style="width:80px;">%</td>
+                                    <td><button type="button" class="button remove-row">Remove</button></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4"><button type="button" class="button" id="add-coupon-row">+ Add Coupon</button></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <p class="submit"><button type="submit" class="button button-primary">Save Coupon Mappings</button></p>
+                    </form>
+                    <script>
+                    jQuery(document).ready(function($) {
+                        var usersJson = <?php echo json_encode($users); ?>;
+                        $('#add-coupon-row').on('click', function() {
+                            var index = $('#coupons-table tbody tr').length;
+                            var userOptions = usersJson.map(u => `<option value="${u.ID}">${u.display_name}</option>`).join('');
+                            var row = `<tr>
+                                <td><select name="coupons[${index}][user_id]">${userOptions}</select></td>
+                                <td><input type="text" name="coupons[${index}][code]" value="" class="regular-text" style="width:100%;"></td>
+                                <td><input type="number" name="coupons[${index}][discount]" value="10" min="0" max="100" style="width:80px;">%</td>
+                                <td><button type="button" class="button remove-row">Remove</button></td>
+                            </tr>`;
+                            $('#coupons-table tbody').append(row);
+                        });
+                        $(document).on('click', '.remove-row', function() { $(this).closest('tr').remove(); });
+                        $('#saas-affiliate-coupons-form').on('submit', function(e) {
+                            e.preventDefault();
+                            $.post(ajaxurl, $(this).serialize(), function(res) {
+                                if(res.success) alert(res.data);
+                            });
+                        });
+                    });
+                    </script>
+                </div>
 
                 <div id="tab-payouts" class="tab-content">
                     <h3>Pending & Recent Payouts</h3>
