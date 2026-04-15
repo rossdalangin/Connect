@@ -1125,6 +1125,83 @@ function saas_ajax_ai_assist() {
                 "Helping you reclaim 20+ hours a week while doubling your revenue. Certified high-performance coach for busy CEOs."
             ]
         ],
+        'servant' => [
+            'headline' => [
+                "Dedicated to Progress & Community Service 🏛️",
+                "Building a Brighter Future for Our District",
+                "Transparency. Integrity. Public Service."
+            ],
+            'bio' => [
+                "Serving as your advocate in public office. I am dedicated to sustainable growth, educational excellence, and fiscal responsibility for our community.",
+                "Advancing policies that empower local families and small businesses. Together, we are building a more resilient and inclusive city."
+            ]
+        ],
+        'speaker' => [
+            'headline' => [
+                "Inspiring Transformation through High-Impact Keynotes 🎙️",
+                "Empowering Teams to Lead with Purpose",
+                "Global Keynote Speaker & Thought Leader"
+            ],
+            'bio' => [
+                "Helping organizations navigate change and build resilient cultures. I share actionable insights on leadership, innovation, and peak performance.",
+                "Captivating audiences worldwide with stories of grit and growth. I help leaders bridge the gap between vision and execution."
+            ]
+        ],
+        'author' => [
+            'headline' => [
+                "Exploring the Intersection of Tech & Humanity ✍️",
+                "Bestselling Author of 'The Elite mindset'",
+                "Storyteller. Researcher. Writer."
+            ],
+            'bio' => [
+                "Writing at the frontiers of personal growth and digital culture. My work helps modern professionals build meaningful lives in an era of distraction.",
+                "Crafting narratives that challenge the status quo. Join me as I explore the deep questions that define our shared future."
+            ]
+        ],
+        'lawyer' => [
+            'headline' => [
+                "Strategic Legal Advocacy for Elite Clients ⚖️",
+                "Protecting Your Interests. Defending Your Future.",
+                "High-Stakes Litigation & Advisory"
+            ],
+            'bio' => [
+                "Providing expert legal counsel with a focus on results. I help businesses and individuals navigate complex legal landscapes with confidence and precision.",
+                "Dedicated to excellence in legal practice. My mission is to provide sophisticated representation that honors your unique goals."
+            ]
+        ],
+        'doctor' => [
+            'headline' => [
+                "Compassionate Care, Precision Medicine 🩺",
+                "Your Partner in Health & Longevity",
+                "Evidence-Based Wellness for Modern Lives"
+            ],
+            'bio' => [
+                "Leading with science and heart. I specialize in personalized healthcare strategies that empower you to thrive at every stage of life.",
+                "Advancing the future of medicine through innovation and patient-centered care. Dedicated to your well-being and peak vitality."
+            ]
+        ],
+        'artist' => [
+            'headline' => [
+                "Visual Storytelling through Digital Art 🎨",
+                "Capturing the Essence of Modern Brands",
+                "Design that Inspires. Art that Connects."
+            ],
+            'bio' => [
+                "Independent designer creating immersive visual experiences. I help forward-thinking brands stand out through artistic excellence and strategic design.",
+                "Exploring the boundaries of digital creativity. My work focuses on the intersection of aesthetic beauty and functional impact."
+            ]
+        ],
+        'agency' => [
+            'headline' => [
+                "Scaling Brands through Performance Marketing 🏢",
+                "Your Growth Partner for the Digital Era",
+                "Bespoke Agency Solutions for Global Leaders"
+            ],
+            'bio' => [
+                "We build high-performance funnels that drive revenue. Our agency specializes in turning cold traffic into loyal brand advocates for elite founders.",
+                "Mastering the art of digital acquisition. We provide the strategy and execution your brand needs to dominate its niche."
+            ]
+        ],
         'creator' => [
             'headline' => [
                 "Exclusive Insights & Behind-the-Scenes 🎥",

@@ -282,6 +282,7 @@ class Saas_Dashboard {
                                     data-hour-to="<?php echo esc_attr(get_post_meta($link->ID, '_saas_hour_to', true)); ?>"
                                     data-custom-bg="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_bg', true)); ?>"
                                     data-custom-text="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_text', true)); ?>"
+                                    data-link-image-id="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_image_id', true)); ?>"
                                     data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>">
                                     <span class="handle">⠿</span>
                                     <div class="link-info">
@@ -373,7 +374,20 @@ class Saas_Dashboard {
                                 <select name="niche" id="profile-niche">
                                     <?php
                                     $niche = get_post_meta($profile_id, '_saas_niche', true);
-                                    $niches = ['coach' => 'Coach', 'creator' => 'Creator', 'realtor' => 'Real Estate', 'business' => 'Business'];
+                                    $niches = [
+                                        'servant' => 'Public Servant / Official',
+                                        'coach' => 'Business Coach',
+                                        'creator' => 'Digital Creator',
+                                        'realtor' => 'Real Estate Pro',
+                                        'business' => 'Corporate Entity',
+                                        'speaker' => 'Public Speaker',
+                                        'author' => 'Author / Writer',
+                                        'consultant' => 'Strategy Consultant',
+                                        'lawyer' => 'Lawyer / Legal',
+                                        'doctor' => 'Doctor / Healthcare',
+                                        'artist' => 'Artist / Designer',
+                                        'agency' => 'Agency Owner'
+                                    ];
                                     foreach($niches as $k => $v) : ?>
                                         <option value="<?php echo $k; ?>" <?php selected($niche, $k); ?>><?php echo $v; ?></option>
                                     <?php endforeach; ?>
@@ -1337,12 +1351,18 @@ class Saas_Dashboard {
                     <h3>Welcome! Let's build your profile 🚀</h3>
                     <p>What is your primary niche?</p>
                     <select id="wizard-niche" class="field">
+                        <option value="servant">🏛️ Public Servant / Official</option>
                         <option value="coach">🚀 Business Coach</option>
-                        <option value="freelancer">🎨 Creative Freelancer</option>
+                        <option value="creator">🎬 Digital Creator</option>
                         <option value="realtor">🏡 Real Estate Pro</option>
                         <option value="business">🏢 Corporate Entity</option>
-                        <option value="tiktok">📱 Social Influencer</option>
-                        <option value="luxury">⚜️ Luxury Private Advisory</option>
+                        <option value="speaker">🎙️ Public Speaker</option>
+                        <option value="author">✍️ Author / Writer</option>
+                        <option value="consultant">🧠 Strategy Consultant</option>
+                        <option value="lawyer">⚖️ Lawyer / Legal</option>
+                        <option value="doctor">🩺 Doctor / Healthcare</option>
+                        <option value="artist">🎨 Artist / Designer</option>
+                        <option value="agency">🏢 Agency Owner</option>
                     </select>
                     <button class="btn-primary next-step" style="width:100%;">Next Step</button>
                 </div>

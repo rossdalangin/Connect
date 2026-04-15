@@ -313,12 +313,34 @@ if ($comparison_json) : ?>
 </section>
 
 <!-- Final CTA Section -->
-<section style="padding: 120px 20px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; text-align: center;">
-    <div style="max-width: 800px; margin: 0 auto;">
-        <h2 style="font-size: 4rem; font-weight: 900; margin-bottom: 20px;">Ready to scale your digital presence?</h2>
-        <p style="font-size: 1.5rem; opacity: 0.9; margin-bottom: 40px;">Join thousands of elite creators who are building their future on our platform.</p>
-        <a href="<?php echo home_url('/register'); ?>" style="display: inline-block; padding: 25px 60px; background: #39e09b; color: #1e2329; text-decoration: none; border-radius: 100px; font-weight: 900; font-size: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">Get Started for Free</a>
-        <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">No credit card required. Cancel anytime.</p>
+<section style="padding: 160px 20px; background: #000; color: #fff; text-align: center; position: relative; overflow: hidden; border-top: 1px solid rgba(212,175,55,0.2);">
+    <!-- Animated Glows -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3; pointer-events: none;">
+        <div style="position: absolute; top: -20%; left: -20%; width: 60%; height: 60%; background: radial-gradient(circle, #d4af37 0%, transparent 70%); filter: blur(80px); animation: drift 20s infinite alternate;"></div>
+        <div style="position: absolute; bottom: -20%; right: -20%; width: 60%; height: 60%; background: radial-gradient(circle, #10b981 0%, transparent 70%); filter: blur(80px); animation: drift 25s infinite alternate-reverse;"></div>
+    </div>
+    <style> @keyframes drift { from { transform: translate(0,0); } to { transform: translate(10%, 10%); } } </style>
+
+    <div style="max-width: 1000px; margin: 0 auto; position: relative; z-index: 1;">
+        <h2 style="font-size: 5rem; font-weight: 900; margin-bottom: 25px; line-height: 1; letter-spacing: -3px; color: #fff;">
+            Scale your <span style="background: linear-gradient(135deg, #d4af37, #f6e05e); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Authority</span>.<br>
+            Own your <span style="background: linear-gradient(135deg, #10b981, #39e09b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Future</span>.
+        </h2>
+        <p style="font-size: 1.8rem; color: #94a3b8; margin-bottom: 60px; max-width: 800px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+            The world's most elite creators are switching to our funnel-first bio engine. Are you ready to convert more traffic?
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
+            <a href="<?php echo home_url('/register'); ?>" style="display: inline-block; padding: 28px 80px; background: linear-gradient(135deg, #d4af37 0%, #b5892d 100%); color: #000; text-decoration: none; border-radius: 100px; font-weight: 900; font-size: 1.75rem; box-shadow: 0 30px 60px -12px rgba(212, 175, 55, 0.4); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onmouseover="this.style.transform='scale(1.05) translateY(-5px)'; this.style.boxShadow='0 40px 80px -12px rgba(212, 175, 55, 0.6)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 30px 60px -12px rgba(212, 175, 55, 0.4)';">
+                Get Your Elite Link Now
+            </a>
+
+            <div style="display: flex; gap: 40px; color: #64748b; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">
+                <span>✓ No Coding</span>
+                <span>✓ No Credit Card</span>
+                <span>✓ Instant Setup</span>
+            </div>
+        </div>
     </div>
 </section>
 
