@@ -67,11 +67,13 @@ class Saas_Dashboard {
         $meta = saas_get_profile_meta( $profile_id );
         $is_pro = saas_is_profile_licensed($profile_id);
 
-        // Nudge for intended Pro users
-        if ( ! $is_pro && get_user_meta($user_id, '_saas_registration_target_plan', true) === 'pro' ) {
+        // Nudge for intended Pro/Agency users
+        $target_plan = get_user_meta($user_id, '_saas_registration_target_plan', true);
+        if ( ! $is_pro && in_array($target_plan, ['pro', 'agency']) ) {
+            $plan_label = ($target_plan === 'agency') ? 'Agency Unlimited' : 'Elite Pro';
             echo '<div class="saas-onboarding-card dashboard-card" style="background:var(--accent); margin-bottom:20px; border:none;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <p style="margin:0; font-weight:700; color:#fff;">🌟 Ready to complete your Elite Pro upgrade? Unlock all features now.</p>
+                    <p style="margin:0; font-weight:700; color:#fff;">🌟 Ready to complete your '. $plan_label .' upgrade? Unlock all features now.</p>
                     <button class="button" onclick="window.location.search=\'?tab=billing\'">Complete Upgrade</button>
                 </div>
             </div>';
@@ -906,6 +908,25 @@ class Saas_Dashboard {
                             <input type="text" id="saas-ref-link" value="<?php echo home_url('/?ref=' . wp_get_current_user()->user_login); ?>" readonly style="width:100%; border:none; font-weight:bold; background:transparent;">
                         </div>
                         <button id="saas-copy-ref-btn" class="btn-primary" style="background:var(--secondary); width:100%;">Copy Referral Link</button>
+
+                        <div style="margin-top:30px; padding-top:20px; border-top:1px solid rgba(16, 185, 129, 0.2);">
+                            <h4 style="color:var(--secondary); margin-bottom:15px;">Your Assigned Discount Codes</h4>
+                            <?php
+                            $all_coupons = get_option('saas_affiliate_coupons') ?: [];
+                            $my_coupons = array_filter($all_coupons, function($c) use ($user_id) { return $c['user_id'] == $user_id; });
+                            if ($my_coupons) : ?>
+                                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:10px;">
+                                    <?php foreach($my_coupons as $mc) : ?>
+                                        <div style="background:#fff; padding:12px; border-radius:12px; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                                            <code style="display:block; font-size:1.1rem; color:var(--secondary); font-weight:900; margin-bottom:5px;"><?php echo esc_html($mc['code']); ?></code>
+                                            <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted);"><?php echo $mc['discount']; ?>% Discount</span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else : ?>
+                                <p style="font-size:0.85rem; color:var(--text-muted);">Ask the admin to assign you a custom coupon code to share with your audience!</p>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <div class="dashboard-card">
@@ -1049,7 +1070,7 @@ class Saas_Dashboard {
                             </div>
 
                             <div class="plan-card" style="background:var(--primary-soft); padding:32px; border-radius:24px; border:2px solid var(--primary); position:relative; overflow:hidden;">
-                                <div style="position:absolute; top:20px; right:-35px; background:var(--primary); color:#fff; padding:5px 40px; transform:rotate(45deg); font-size:0.7rem; font-weight:bold;">POPULAR</div>
+                                <div style="position:absolute; top:20px; right:-35px; background:var(--primary); color:#fff; padding:5px 40px; transform:rotate(45deg); font-size:0.75rem; font-weight:bold;">POPULAR</div>
                                 <h4 style="font-size:1.5rem; margin:0; color:var(--primary);">Elite Pro</h4>
                                 <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$19<small style="font-size:1rem;">/mo</small></div>
                                 <ul style="list-style:none; padding:0; margin-bottom: 24px; line-height:2.2; font-size: 0.9rem; text-align:left;">
@@ -1058,47 +1079,77 @@ class Saas_Dashboard {
                                     <li>✓ Real-time Deep Analytics</li>
                                     <li>✓ Custom Domain Mapping</li>
                                     <li>✓ Remove All Branding</li>
-                                    <li>✓ Priority 24/7 Support</li>
                                 </ul>
-                            <?php if ($is_pro) :
+                            <?php if ($is_pro && get_user_meta($user_id, '_saas_subscription_plan', true) === 'pro') :
                                 $expiry = get_user_meta($user_id, '_saas_subscription_expiry', true);
                                 ?>
                                 <div style="color:var(--secondary); font-weight:bold; margin-bottom:15px;">✓ Your elite subscription is active</div>
-                                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;">
-                                    Plan: Elite Pro<br>
-                                    Next Billing: <?php echo $expiry ? date('M j, Y', $expiry) : 'Never'; ?>
-                                </p>
                                 <button id="saas-cancel-sub" class="button" style="width:100%; color:var(--danger);">Cancel Subscription</button>
-                            <?php else : ?>
+                            <?php elseif (!$is_pro) : ?>
                                 <div class="payment-options" style="display:flex; flex-direction:column; gap:10px;">
                                     <?php
                                     $gateway_mode = $payments->get_active_gateway();
                                     if ($gateway_mode === 'stripe' || $gateway_mode === 'user_select') : ?>
                                         <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="pro" style="width:100%;">Upgrade with Stripe</button>
                                     <?php endif; ?>
-
                                     <?php if ($gateway_mode === 'paypal' || $gateway_mode === 'user_select') : ?>
                                         <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="pro" style="width:100%; background:#0070ba;">Upgrade with PayPal</button>
-                                    <?php endif; ?>
-
-                                <div class="field" style="margin-top:20px;">
-                                    <label>Have an affiliate coupon?</label>
-                                    <div style="display:flex; gap:10px;">
-                                        <input type="text" id="saas-checkout-coupon" placeholder="Enter coupon code" style="flex:1;">
-                                        <button type="button" class="button" id="saas-apply-checkout-coupon">Apply</button>
-                                    </div>
-                                    <div id="coupon-status" style="font-size:0.75rem; margin-top:5px; font-weight:bold;"></div>
-                                </div>
-
-                                <button id="saas-demo-upgrade-btn" class="button" style="width:100%; margin-top:10px; background:var(--accent-soft); border-color:var(--accent); color:var(--accent);">⚡ Instant Demo Upgrade (UID: <?php echo $user_id; ?>)</button>
-                                <button id="saas-simulate-payment-btn" class="button" style="width:100%; margin-top:10px; background:var(--secondary-soft); border-color:var(--secondary); color:var(--secondary);">💸 Simulate Stripe Success ($19)</button>
-
-                                    <?php if ($gateway_mode === 'none') : ?>
-                                        <p style="color:var(--text-muted); font-size:0.8rem;">Online payments are currently disabled. Please contact support to upgrade.</p>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
+
+                        <div class="plan-card" style="background:#0f172a; padding:32px; border-radius:24px; border:2px solid #1e293b; position:relative; overflow:hidden; color:#fff;">
+                                <div style="position:absolute; top:20px; right:-35px; background:var(--accent); color:#000; padding:5px 40px; transform:rotate(45deg); font-size:0.75rem; font-weight:bold;">MAX SCALE</div>
+                                <h4 style="font-size:1.5rem; margin:0; color:var(--accent);">Agency Unlimited</h4>
+                                <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$49<small style="font-size:1rem;">/mo</small></div>
+                                <ul style="list-style:none; padding:0; margin-bottom: 24px; line-height:2.2; font-size: 0.9rem; text-align:left; color:rgba(255,255,255,0.7);">
+                                    <li>✓ Everything in Pro</li>
+                                    <li>✓ Unlimited Sub-accounts</li>
+                                    <li>✓ API & Webhook Access</li>
+                                    <li>✓ White-label Client Funnels</li>
+                                    <li>✓ Dedicated Account Manager</li>
+                                </ul>
+                            <?php if ($is_pro && get_user_meta($user_id, '_saas_subscription_plan', true) === 'agency') : ?>
+                                <div style="color:var(--secondary); font-weight:bold; margin-bottom:15px;">✓ Your agency subscription is active</div>
+                                <button id="saas-cancel-sub" class="button" style="width:100%; color:var(--danger); background:transparent;">Cancel Subscription</button>
+                            <?php elseif (!$is_pro || get_user_meta($user_id, '_saas_subscription_plan', true) === 'pro') : ?>
+                                <div class="payment-options" style="display:flex; flex-direction:column; gap:10px;">
+                                    <?php
+                                    $gateway_mode = $payments->get_active_gateway();
+                                    if ($gateway_mode === 'stripe' || $gateway_mode === 'user_select') : ?>
+                                        <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="agency" style="width:100%; background:var(--accent); color:#000;">Upgrade to Agency</button>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div style="max-width:600px; margin:40px auto 0;" class="dashboard-card">
+                        <div class="field">
+                            <label>Have an affiliate coupon?</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="saas-checkout-coupon" placeholder="Enter coupon code" style="flex:1;">
+                                <button type="button" class="button" id="saas-apply-checkout-coupon">Apply</button>
+                            </div>
+                            <div id="coupon-status" style="font-size:0.75rem; margin-top:5px; font-weight:bold;"></div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
+                            <button id="saas-demo-upgrade-btn" class="button" style="background:var(--accent-soft); border-color:var(--accent); color:var(--accent);">⚡ Instant Demo Upgrade</button>
+                            <button id="saas-simulate-payment-btn" class="button" style="background:var(--secondary-soft); border-color:var(--secondary); color:var(--secondary);">💸 Simulate Stripe Success</button>
+                        </div>
+
+                        <?php if ($is_pro) :
+                            $expiry = get_user_meta($user_id, '_saas_subscription_expiry', true);
+                            $u_plan = get_user_meta($user_id, '_saas_subscription_plan', true);
+                            ?>
+                            <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; font-size:0.85rem; color:var(--text-muted);">
+                                <strong>Plan:</strong> <?php echo strtoupper($u_plan); ?><br>
+                                <strong>Next Billing:</strong> <?php echo $expiry ? date('M j, Y', $expiry) : 'Never'; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     </div>
 
                     <div class="dashboard-card">

@@ -147,7 +147,7 @@ class Saas_Payments {
         $order_id = isset($data['order_id']) ? intval($data['order_id']) : 0;
 
         if ( $status === 'succeeded' ) {
-            $amount = 19.00;
+            $amount = ($plan === 'agency') ? 49.00 : 19.00;
             if ($order_id) {
                 update_post_meta($order_id, '_saas_order_status', 'completed');
                 $amount = get_post_meta($order_id, '_saas_order_amount', true) ?: 19.00;

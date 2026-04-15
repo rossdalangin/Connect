@@ -39,7 +39,8 @@ class Saas_Auth {
                 <input type="hidden" name="target_plan" value="<?php echo esc_attr($plan); ?>">
                 <div class="field" style="margin-bottom:15px;"><input type="text" name="user_login" placeholder="Pick a Username" value="<?php echo esc_attr($requested_username); ?>" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
                 <div class="field" style="margin-bottom:15px;"><input type="email" name="user_email" placeholder="Email Address" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
-                <div class="field" style="margin-bottom:20px;"><input type="password" name="user_pass" placeholder="Create Password" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
+                <div class="field" style="margin-bottom:15px;"><input type="password" name="user_pass" placeholder="Create Password" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
+                <div class="field" style="margin-bottom:20px;"><input type="text" name="coupon_code" placeholder="Coupon Code (Optional)" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;"></div>
                 <p><button type="submit" class="btn-primary" style="width:100%;">Create Account & Continue</button></p>
                 <p style="text-align:center; margin-top:20px; font-size:0.9rem;">Already have an account? <a href="<?php echo home_url('/login'); ?>" style="color:var(--primary); font-weight:700;">Login</a></p>
             </form>
@@ -80,12 +81,27 @@ class Saas_Auth {
                 update_user_meta($user_id, '_saas_registration_target_plan', sanitize_text_field($_POST['target_plan']));
             }
 
-            // Handle Referral attribution
-            if ( isset($_COOKIE['saas_ref']) ) {
-                $referrer = get_user_by('login', $_COOKIE['saas_ref']);
-                if ($referrer) {
-                    update_user_meta($user_id, '_saas_referred_by', $referrer->ID);
+            // Handle Coupon/Referral attribution
+            $coupon = isset($_POST['coupon_code']) ? strtoupper(sanitize_text_field($_POST['coupon_code'])) : '';
+            $referrer_id = 0;
+
+            if ($coupon) {
+                $coupons = get_option('saas_affiliate_coupons') ?: [];
+                foreach ($coupons as $c) {
+                    if (strtoupper($c['code']) === $coupon) {
+                        $referrer_id = intval($c['user_id']);
+                        break;
+                    }
                 }
+            }
+
+            if (!$referrer_id && isset($_COOKIE['saas_ref'])) {
+                $referrer = get_user_by('login', $_COOKIE['saas_ref']);
+                if ($referrer) $referrer_id = $referrer->ID;
+            }
+
+            if ($referrer_id) {
+                update_user_meta($user_id, '_saas_referred_by', $referrer_id);
             }
 
             wp_set_current_user( $user_id );
