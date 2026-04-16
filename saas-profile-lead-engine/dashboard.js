@@ -129,7 +129,7 @@
             $('#edit-link-image-preview').html(imgUrl ? '<img src="' + imgUrl + '" style="width:100%; height:100%; object-fit:cover;">' : '');
 
             $('#saas-edit-modal').css('display', 'flex');
-            $('body').css('overflow', 'hidden');
+
         });
 
         $(document).on('click', '.delete-link', function() {
@@ -341,7 +341,7 @@
                 $form.find('textarea, input[type="text"]').val('');
                 if($form.closest('.saas-modal').length) {
                     $form.closest('.saas-modal').hide();
-                    $('body').css('overflow', 'auto');
+
                 }
             });
         });
@@ -370,7 +370,7 @@
         $(document).on('click', '.close-modal, .saas-modal', function(e) {
             if (e.target !== this && !$(this).hasClass('close-modal')) return;
             $('.saas-modal').hide();
-            $('body').css('overflow', 'auto');
+
         });
 
         // 8. Advanced Toggle
@@ -446,12 +446,12 @@
         // 10. Preview Controls
         $('#saas-preview-trigger').on('click', function() {
             $('.saas-preview-pane').addClass('show').fadeIn();
-            $('body').css('overflow', 'hidden');
+
         });
 
         $('#saas-close-preview').on('click', function() {
             $('.saas-preview-pane').removeClass('show').fadeOut();
-            $('body').css('overflow', 'auto');
+
         });
 
         // Media Library Integration

@@ -193,6 +193,7 @@ class Saas_Admin_Settings {
         $clicks = array_column($activity, 'clicks');
 
         echo '<div class="saas-widget-content">';
+        echo '<p style="margin-top:0; color:#666;">Performance stats for <strong>' . date('F') . '</strong>:</p>';
         echo '<div style="display:flex; gap:20px; margin-bottom:20px;">';
         echo '<div><strong>Views:</strong><br>' . number_format($summary['views']) . '</div>';
         echo '<div><strong>Clicks:</strong><br>' . number_format($summary['clicks']) . '</div>';

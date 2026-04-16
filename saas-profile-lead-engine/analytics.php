@@ -147,18 +147,18 @@ class Saas_Analytics {
     }
 
     /**
-     * Get Global Analytics Summary (for Admin Dashboard)
+     * Get Global Analytics Summary (for Admin Dashboard - Current Month)
      */
     public function get_global_summary() {
         global $wpdb;
-        $total_views  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'view'" );
-        $total_clicks = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'click'" );
-        $total_leads  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'lead_conversion'" );
+        $views  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'view' AND created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')" );
+        $clicks = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'click' AND created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')" );
+        $leads  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'lead_conversion' AND created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')" );
 
         return [
-            'views'  => $total_views ?: 0,
-            'clicks' => $total_clicks ?: 0,
-            'leads'  => $total_leads ?: 0,
+            'views'  => $views ?: 0,
+            'clicks' => $clicks ?: 0,
+            'leads'  => $leads ?: 0,
         ];
     }
 

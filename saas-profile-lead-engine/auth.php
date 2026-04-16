@@ -9,6 +9,18 @@ class Saas_Auth {
     public function __construct() {
         add_shortcode( 'saas_login_form', [ $this, 'login_form' ] );
         add_shortcode( 'saas_register_form', [ $this, 'register_form' ] );
+        add_filter( 'login_redirect', [ $this, 'handle_login_redirect' ], 10, 3 );
+    }
+
+    public function handle_login_redirect( $redirect_to, $request, $user ) {
+        if ( isset( $user->roles ) && is_array( $user->roles ) ) {
+            if ( in_array( 'administrator', $user->roles ) ) {
+                return $redirect_to;
+            } else {
+                return home_url( '/dashboard' );
+            }
+        }
+        return $redirect_to;
     }
 
     public function login_form() {
