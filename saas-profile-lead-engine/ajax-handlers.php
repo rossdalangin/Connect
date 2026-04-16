@@ -515,6 +515,8 @@ function saas_ajax_apply_template() {
                 ['title' => 'Book an Audit', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
                 ['title' => 'Case Studies', 'url' => '#', 'type' => 'button'],
                 ['title' => 'Contact Details', 'url' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:consult@site.com\nlinkedin:https://linkedin.com"],
+                ['title' => 'Save to Contacts', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
+                ['title' => 'Q4 Availability', 'url' => '#', 'type' => 'milestone', 'extra' => 'Booked:85']
             ]
         ],
         'lawyer' => [
@@ -640,19 +642,6 @@ function saas_ajax_apply_template() {
                 ['title' => 'Flash Sale Ending Soon! ⏳', 'url' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+12 hours'))],
                 ['title' => 'Join My Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
                 ['title' => 'Latest Setup Tour', 'url' => '#', 'type' => 'video']
-            ]
-        ],
-        'consultant' => [
-            'headline' => 'Operational Efficiency for Modern SaaS.',
-            'bio' => 'I help seed-stage startups optimize their unit economics and reduce churn.',
-            'color' => '#2c3e50',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['title' => 'Book an Audit', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Contact Details', 'url' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:consult@site.com\nlinkedin:https://linkedin.com"],
-                ['title' => 'Save to Contacts', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
-                ['title' => 'Q4 Availability', 'url' => '#', 'type' => 'milestone', 'extra' => 'Booked:85']
             ]
         ],
         'luxury' => [
@@ -1403,6 +1392,50 @@ function saas_ajax_ai_assist() {
             'bio' => [
                 "Streamlining operations for modern enterprises. We provide the infrastructure you need to scale globally with confidence.",
                 "Innovation-first consultancy helping legacy brands transition to the digital-first economy. We build the future of commerce."
+            ]
+        ],
+        'consultant' => [
+            'headline' => [
+                "Strategic Advisory for High-Growth Startups 🧠",
+                "Operational Efficiency for Modern SaaS",
+                "Unlocking Growth through Data-Driven Strategy"
+            ],
+            'bio' => [
+                "Ex-SaaS Founder helping seed-stage startups optimize their unit economics and reduce churn through proven operational frameworks.",
+                "Helping leadership teams bridge the gap between vision and execution. I specialize in scaling impact for digital-first organizations."
+            ]
+        ],
+        'freelancer' => [
+            'headline' => [
+                "Visual Identity & Web Experience Design 🎨",
+                "Helping Brands Stand Out in the Digital Noise",
+                "Design that Converts. Code that Scales."
+            ],
+            'bio' => [
+                "Independent creative helping startups and DTC brands launch beautiful, high-converting products. I focus on minimalist design and intuitive user journeys.",
+                "Your partner for world-class design and development. I build the digital experiences that define modern industry leaders."
+            ]
+        ],
+        'tiktok' => [
+            'headline' => [
+                "Shop My Top Tech & Setup Finds 🛍️",
+                "Daily Tech Inspo & Productivity Hacks",
+                "Exclusive Deals on the Best Gear"
+            ],
+            'bio' => [
+                "Sharing the best tech deals and home office aesthetic finds. I hunt for the gear that makes your work life better (and cooler). Check my links for exclusive discounts!",
+                "Building the ultimate productivity setup. Follow along for setup tours, reviews, and the best deals in tech."
+            ]
+        ],
+        'luxury' => [
+            'headline' => [
+                "Bespoke Private Advisory ⚜️",
+                "Curating Excellence for the Discerning Individual",
+                "Access to the World's Most Exclusive Opportunities"
+            ],
+            'bio' => [
+                "Specializing in off-market acquisitions and private advisory for high-net-worth individuals. My mission is to protect and grow your legacy with absolute discretion.",
+                "Providing sophisticated solutions for complex global needs. I offer a bespoke approach to private interests, ensuring excellence at every touchpoint."
             ]
         ]
     ];

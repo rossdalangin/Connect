@@ -750,7 +750,8 @@ class Saas_Admin_Settings {
                                 <td><?php echo get_the_date('', $p->ID); ?></td>
                                 <td>
                                     <?php if($status === 'pending'): ?>
-                                        <a href="<?php echo get_edit_post_link($p->ID); ?>" class="button button-small">Process Payout</a>
+                                        <button class="button button-small mark-payout-paid" data-id="<?php echo $p->ID; ?>">Mark as Paid</button>
+                                        <a href="<?php echo get_edit_post_link($p->ID); ?>" class="button button-small">Edit</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -795,6 +796,27 @@ class Saas_Admin_Settings {
             jQuery(this).addClass('nav-tab-active');
             jQuery('.tab-content').hide();
             jQuery(jQuery(this).attr('href')).show();
+        });
+
+        jQuery('.mark-payout-paid').on('click', function() {
+            var $btn = jQuery(this);
+            var payoutId = $btn.data('id');
+            if(!confirm('Have you manually sent the funds?')) return;
+
+            $btn.prop('disabled', true).text('Processing...');
+            jQuery.post(ajaxurl, {
+                action: 'saas_process_payout',
+                payout_id: payoutId,
+                security: '<?php echo wp_create_nonce("saas_dashboard_nonce"); ?>'
+            }, function(res) {
+                if(res.success) {
+                    alert(res.data);
+                    location.reload();
+                } else {
+                    alert('Error: ' + res.data);
+                    $btn.prop('disabled', false).text('Mark as Paid');
+                }
+            });
         });
         </script>
         <?php

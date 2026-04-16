@@ -122,7 +122,7 @@ class Saas_Payments {
             wp_send_json_success([ 'redirect_url' => $session['url'] . '?order_id=' . $order_id ]);
         } elseif ( $gateway === 'paypal' ) {
             $paypal_email = get_option('saas_paypal_email');
-            $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id);
+            $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id) . "&amount=" . urlencode($amount) . "&currency_code=USD";
             wp_send_json_success([ 'redirect_url' => $paypal_url ]);
         }
 

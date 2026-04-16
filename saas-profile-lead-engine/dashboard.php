@@ -126,7 +126,7 @@ class Saas_Dashboard {
 
                     <div class="dashboard-card" style="margin-bottom:0; padding:15px; border-left: 4px solid var(--secondary);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-muted);">Pulse: Recent Activity</h4>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-muted);">Pulse: <?php echo date('F'); ?> Activity</h4>
                             <span class="pulse-dot"></span>
                         </div>
                         <div class="recent-activity-list" style="font-size:0.75rem;">
@@ -501,7 +501,10 @@ class Saas_Dashboard {
                                         'lawyer' => 'Lawyer / Legal',
                                         'doctor' => 'Doctor / Healthcare',
                                         'artist' => 'Artist / Designer',
-                                        'agency' => 'Agency Owner'
+                                        'agency' => 'Agency Owner',
+                                        'freelancer' => 'Creative Freelancer',
+                                        'tiktok' => 'Influencer / TikTok',
+                                        'luxury' => 'Luxury Advisory'
                                     ];
                                     foreach($niches as $k => $v) : ?>
                                         <option value="<?php echo $k; ?>" <?php selected($niche, $k); ?>><?php echo $v; ?></option>
@@ -1468,6 +1471,9 @@ class Saas_Dashboard {
                         <option value="doctor">🩺 Doctor / Healthcare</option>
                         <option value="artist">🎨 Artist / Designer</option>
                         <option value="agency">🏢 Agency Owner</option>
+                        <option value="freelancer">🎨 Creative Freelancer</option>
+                        <option value="tiktok">📱 Influencer / TikTok</option>
+                        <option value="luxury">⚜️ Luxury Advisory</option>
                     </select>
                     <button class="btn-primary next-step" style="width:100%;">Next Step</button>
                 </div>

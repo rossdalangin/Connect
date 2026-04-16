@@ -114,20 +114,24 @@ $h_img   = get_option('saas_home_image');
 </section>
 
 <!-- Tech Preview Section -->
-<section class="features-section" style="padding: 120px 20px; background: #fff; border-top: 1px solid #eee;">
+<section class="features-section" style="padding: 120px 20px; background: #fff; border-top: 1px solid #eee; position: relative;">
     <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
-        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 80px;">The only link hub with an IQ.</h2>
+        <h2 style="font-size: 4rem; font-weight: 900; margin-bottom: 80px; letter-spacing: -2px;">The only link hub with an <span style="color:#6c5ce7;">IQ</span>.</h2>
 
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; margin-bottom: 80px; text-align: left; align-items: center;">
-            <div style="background:#f8fafc; padding:50px; border-radius:40px; border: 1px solid #e2e8f0;">
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <span style="background:rgba(108, 92, 231, 0.1); color:#6c5ce7; padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem;">Smart Routing</span>
-                    <span style="background:rgba(57, 224, 155, 0.1); color:#39e09b; padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem;">A/B Testing</span>
+            <div style="background:#f8fafc; padding:60px; border-radius:40px; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px rgba(0,0,0,0.02); transition: transform 0.4s;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='none'">
+                <div style="display:flex; gap:10px; margin-bottom:25px;">
+                    <span style="background:rgba(108, 92, 231, 0.1); color:#6c5ce7; padding:8px 18px; border-radius:50px; font-weight:800; font-size:0.75rem; text-transform: uppercase; letter-spacing: 1px;">Smart Routing</span>
+                    <span style="background:rgba(57, 224, 155, 0.1); color:#10b981; padding:8px 18px; border-radius:50px; font-weight:800; font-size:0.75rem; text-transform: uppercase; letter-spacing: 1px;">A/B Testing</span>
                 </div>
-                <h3 style="font-size:2.5rem; margin-bottom:20px; line-height:1.2;">Automate your conversion.</h3>
-                <p style="color:#64748b; font-size:1.15rem; line-height:1.7;">Our system automatically detects your visitor's location and device. Send iPhone users to the App Store and Android users to Play Store—automatically. Run split tests on your CTAs to see which version converts better, just like the world's top marketers.</p>
+                <h3 style="font-size:2.75rem; margin-bottom:25px; line-height:1.1; font-weight: 900;">Automate your growth.</h3>
+                <p style="color:#64748b; font-size:1.25rem; line-height:1.7; font-weight: 500;">Our engine detects visitor intent, device, and location in real-time. Serve optimized content to every user automatically. Run split tests on your CTAs to identify your highest-converting offers with mathematical precision.</p>
+                <div style="margin-top: 30px; display: flex; align-items: center; gap: 15px; color: #1e293b; font-weight: 700;">
+                    <div style="width: 40px; height: 40px; background: #6c5ce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff;">📊</div>
+                    <span>Real-time optimization engine active.</span>
+                </div>
             </div>
-            <div style="background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding:50px; border-radius:40px; color:#fff; position:relative; overflow:hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.2);">
+            <div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding:60px; border-radius:40px; color:#fff; position:relative; overflow:hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05);">
                 <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:25px; border-radius:20px; margin-bottom:20px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
                         <strong>Variant A: "Book Now"</strong>
