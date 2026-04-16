@@ -444,220 +444,36 @@ function saas_ajax_apply_template() {
         foreach ($old_blocks as $ob) wp_delete_post($ob->ID, true);
     }
 
-    // 2. Define Template Sets
-    $sets = [
-        'coach' => [
-            'headline' => 'Helping you double your revenue in 90 days.',
-            'bio' => 'Certified high-performance coach. I work with CEOs and founders to scale their impact.',
-            'color' => '#6c5ce7',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => '👉 Free Strategy Session', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Watch Case Study', 'url' => 'https://youtube.com', 'type' => 'video'],
-                ['title' => 'Client Success', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Alex helped me double my revenue!'],
+    // 2. Fetch Templates from DB
+    $sets = get_option('saas_templates');
+    if (!$sets) {
+        $sets = [
+            'coach' => [
+                'headline' => 'Helping you double your revenue in 90 days.',
+                'bio' => 'Certified high-performance coach. I work with CEOs and founders to scale their impact.',
+                'color' => '#6c5ce7',
+                'theme' => 'light',
+                'shadow' => 'soft',
+                'links' => [
+                    ['title' => '👉 Free Strategy Session', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Watch Case Study', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Client Success', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Alex helped me double my revenue!'],
+                ]
+            ],
+            'business' => [
+                'headline' => 'Innovative Solutions for Global Enterprise.',
+                'bio' => 'Streamlining operations and driving growth through technology.',
+                'color' => '#0073aa',
+                'theme' => 'light',
+                'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => "$99/hr\nFeature 1\nFeature 2"],
+                    ['title' => 'Book a Consultation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'We operate 24/7 across the globe.']
+                ]
             ]
-        ],
-        'servant' => [
-            'headline' => 'Dedicated to Progress & Community Service 🏛️',
-            'bio' => 'Serving as your advocate in public office. I am dedicated to sustainable growth and fiscal responsibility.',
-            'color' => '#1e293b',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Latest Community Update', 'url' => '#', 'type' => 'video'],
-                ['title' => 'Join the Volunteer Team', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'My Vision for 2024', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
-            ]
-        ],
-        'creator' => [
-            'headline' => 'Building the Next Generation of Digital Brands 🎬',
-            'bio' => 'Daily tips on content strategy and community building. Join 50k+ others on the journey.',
-            'color' => '#ff0050',
-            'theme' => 'vibrant',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'Latest Masterclass', 'url' => '#', 'type' => 'video'],
-                ['title' => 'Join Private Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
-                ['title' => 'My Setup Gear', 'url' => '#', 'type' => 'button'],
-            ]
-        ],
-        'speaker' => [
-            'headline' => 'Inspiring Transformation through Keynotes 🎙️',
-            'bio' => 'Helping organizations navigate change and build resilient cultures. Global Keynote Speaker.',
-            'color' => '#d4af37',
-            'theme' => 'luxury',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Watch Highlight Reel', 'url' => '#', 'type' => 'video'],
-                ['title' => 'Inquire for Speaking', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Speaker One-Sheet', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-            ]
-        ],
-        'author' => [
-            'headline' => 'Exploring the Intersection of Tech & Humanity ✍️',
-            'bio' => 'Bestselling Author. My work helps modern professionals build meaningful lives in an era of distraction.',
-            'color' => '#4338ca',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Order New Book', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Read Chapter Preview', 'url' => '#', 'type' => 'button'],
-                ['title' => 'Join my Newsletter', 'url' => '#', 'type' => 'newsletter'],
-            ]
-        ],
-        'consultant' => [
-            'headline' => 'Operational Efficiency for Modern SaaS 🧠',
-            'bio' => 'I help seed-stage startups optimize their unit economics and reduce churn.',
-            'color' => '#2c3e50',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['title' => 'Book an Audit', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Case Studies', 'url' => '#', 'type' => 'button'],
-                ['title' => 'Contact Details', 'url' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:consult@site.com\nlinkedin:https://linkedin.com"],
-                ['title' => 'Save to Contacts', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
-                ['title' => 'Q4 Availability', 'url' => '#', 'type' => 'milestone', 'extra' => 'Booked:85']
-            ]
-        ],
-        'lawyer' => [
-            'headline' => 'Strategic Legal Advocacy for Elite Clients ⚖️',
-            'bio' => 'Providing expert legal counsel with a focus on results. High-stakes litigation and advisory.',
-            'color' => '#1a1a1a',
-            'theme' => 'luxury',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'Request Consultation', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Areas of Practice', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
-                ['title' => 'Client Testimonials', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Unparalleled expertise and results.'],
-            ]
-        ],
-        'doctor' => [
-            'headline' => 'Compassionate Care, Precision Medicine 🩺',
-            'bio' => 'Your Partner in Health and Longevity. Evidence-based wellness for modern lives.',
-            'color' => '#0d9488',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Book Appointment', 'url' => '#', 'type' => 'calendar'],
-                ['title' => 'Patient Portal', 'url' => '#', 'type' => 'button'],
-                ['title' => 'Health Resources', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
-            ]
-        ],
-        'artist' => [
-            'headline' => 'Visual Storytelling through Digital Art 🎨',
-            'bio' => 'Independent designer creating immersive visual experiences for forward-thinking brands.',
-            'color' => '#f472b6',
-            'theme' => 'vibrant',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'Portfolio Gallery', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400\nhttps://via.placeholder.com/401"],
-                ['title' => 'Project Inquiry', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Follow my Process', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
-            ]
-        ],
-        'agency' => [
-            'headline' => 'Scaling Brands through Performance Marketing 🏢',
-            'bio' => 'We build high-performance funnels that drive revenue for elite founders.',
-            'color' => '#111827',
-            'theme' => 'dark',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Get a Free Quote', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Our Pricing Models', 'url' => '#', 'type' => 'pricing', 'extra' => "$2,500+\nFull CRM Sync\nScale Strategy"],
-                ['title' => 'Latest Campaign Results', 'url' => '#', 'type' => 'video'],
-            ]
-        ],
-        'freelancer' => [
-            'headline' => 'Design & Development for Modern Brands.',
-            'bio' => 'Independent creative helping startups launch beautiful products.',
-            'color' => '#00d1b2',
-            'theme' => 'light',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'My Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/300\nhttps://via.placeholder.com/301"],
-                ['title' => 'Hire Me', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
-            ]
-        ],
-        'realtor' => [
-            'headline' => 'Modern Homes for Modern Families.',
-            'bio' => 'Helping buyers find their dream home in the luxury market. Top 1% agent.',
-            'color' => '#2d3436',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['title' => 'Available Listings', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/300\nhttps://via.placeholder.com/301"],
-                ['title' => 'Book a Viewing', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Happy Homeowners', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Found our dream home in record time!'],
-                ['title' => 'Sales Target', 'url' => '#', 'type' => 'milestone', 'extra' => 'Closed:92']
-            ]
-        ],
-        'business' => [
-            'headline' => 'Innovative Solutions for Global Enterprise.',
-            'bio' => 'Streamlining operations and driving growth through technology.',
-            'color' => '#0073aa',
-            'theme' => 'light',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => "$99/hr\nFeature 1\nFeature 2"],
-                ['title' => 'Book a Consultation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Customer Feedback', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Professional and reliable service.'],
-                ['title' => 'Office Location', 'url' => 'https://maps.google.com', 'type' => 'button'],
-                ['title' => 'FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'We operate 24/7 across the globe.']
-            ]
-        ],
-        'politician' => [
-            'headline' => 'A Stronger Community for a Brighter Future.',
-            'bio' => 'Dedicated to transparency, progress, and public service.',
-            'color' => '#e84118',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Our Vision for 2024', 'url' => '#', 'type' => 'video'],
-                ['title' => 'Donate to the Campaign', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Join the Volunteer Team', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Endorsements', 'url' => '#', 'type' => 'testimonial', 'extra' => 'A true leader for our community.'],
-                ['title' => 'Fundraising Goal', 'url' => '#', 'type' => 'milestone', 'extra' => 'Goal:75']
-            ]
-        ],
-        'elite_card' => [
-            'headline' => 'John Doe | Executive Director',
-            'bio' => 'Strategic visionary with 15+ years experience in digital transformation.',
-            'color' => '#2c3e50',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['title' => 'Contact Info', 'url' => '#', 'type' => 'social_icons', 'extra' => "phone:tel:123456\nemail:mailto:me@site.com\nlinkedin:https://linkedin.com"],
-                ['title' => 'Save VCard', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
-                ['title' => 'My Website', 'url' => 'https://yoursite.com', 'type' => 'button']
-            ]
-        ],
-        'tiktok' => [
-            'headline' => 'Daily Tech & Setup Inspo ⚡️',
-            'bio' => 'Building the ultimate home office. Shop my setup below!',
-            'color' => '#ff0050',
-            'theme' => 'vibrant',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'My Amazon Storefront', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
-                ['title' => 'Flash Sale Ending Soon! ⏳', 'url' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+12 hours'))],
-                ['title' => 'Join My Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
-                ['title' => 'Latest Setup Tour', 'url' => '#', 'type' => 'video']
-            ]
-        ],
-        'luxury' => [
-            'headline' => 'Bespoke Private Advisory.',
-            'bio' => 'Curating exclusive opportunities for the discerning individual.',
-            'color' => '#d4af37',
-            'theme' => 'dark',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Inquire Privately', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Exclusive Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Asset+1\nhttps://via.placeholder.com/800x600?text=Asset+2"],
-                ['title' => 'Secure Documentation', 'url' => '#', 'type' => 'button', 'style' => 'outline', 'extra' => 'Password Protected']
-            ]
-        ]
-    ];
+        ];
+    }
 
     // Ensure template exists, fallback to business or coach if not
     if (!isset($sets[$template])) {
@@ -974,91 +790,51 @@ function saas_ajax_generate_samples() {
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error('Unauthorized');
 
     $user_id = get_current_user_id();
-    $samples = [
-        [
-            'title' => 'Elite Business Coach',
-            'headline' => 'Scaling Founders from 6 to 7 Figures 🚀',
-            'bio' => 'Ex-Google Exec turned Strategic Coach. I help high-ticket service providers automate their acquisition and double their profit margins.',
-            'color' => '#6c5ce7',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['t' => '👉 Free Strategy Session', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['t' => 'Masterclass: Scaling Systems', 'u' => 'https://youtube.com', 'type' => 'video'],
-                ['t' => 'Client Success Stories', 'u' => '#', 'type' => 'testimonial', 'extra' => 'Working with Alex was the best decision for my agency. We hit $100k months in record time.'],
-                ['t' => 'Consulting Packages', 'u' => '#', 'type' => 'pricing', 'extra' => "$2,500/mo\nBi-weekly Calls\nSlack Support\nResource Library"],
+    // Fetch richer templates from DB first
+    $all_templates = get_option('saas_templates');
+    $samples = [];
+
+    if ($all_templates) {
+        foreach($all_templates as $id => $tpl) {
+            $samples[] = [
+                'title' => 'Elite ' . ucfirst($id),
+                'headline' => $tpl['headline'],
+                'bio' => $tpl['bio'],
+                'color' => $tpl['color'],
+                'theme' => $tpl['theme'],
+                'shadow' => $tpl['shadow'],
+                'links' => array_map(function($l) {
+                    return ['t' => $l['title'], 'u' => $l['url'], 'type' => $l['type'], 'style' => $l['style'] ?? 'regular', 'extra' => $l['extra'] ?? ''];
+                }, $tpl['links'])
+            ];
+        }
+    } else {
+        // High-quality fallback defaults
+        $samples = [
+            [
+                'title' => 'Executive Performance Coach',
+                'headline' => 'Helping Founders Scale from 6 to 7 Figures 🚀',
+                'bio' => 'Ex-Google Exec turned Strategic Coach. I help high-ticket service providers automate their acquisition and double their profit margins.',
+                'color' => '#6c5ce7', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['t' => '👉 Free Strategy Session', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['t' => 'Masterclass: Scaling Systems', 'u' => 'https://youtube.com', 'type' => 'video'],
+                    ['t' => 'Consulting Packages', 'u' => '#', 'type' => 'pricing', 'extra' => "$2,500/mo\nBi-weekly Calls\nSlack Support\nResource Library"],
+                ]
+            ],
+            [
+                'title' => 'Bespoke Private Advisory',
+                'headline' => 'Own Your Future. Protect Your Legacy. ⚜️',
+                'bio' => 'Specializing in off-market acquisitions and private advisory for high-net-worth individuals. Excellence at every touchpoint.',
+                'color' => '#d4af37', 'theme' => 'luxury', 'shadow' => 'soft',
+                'links' => [
+                    ['t' => 'New Asset Portfolio', 'u' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Penthouse+A\nhttps://via.placeholder.com/800x600?text=Coastal+Villa"],
+                    ['t' => 'Inquire Privately', 'u' => '#', 'type' => 'lead_form'],
+                    ['t' => 'Save VCard to Phone', 'u' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
+                ]
             ]
-        ],
-        [
-            'title' => 'TikTok Affiliate Pro',
-            'headline' => 'Shop My Top Tech & Setup Finds 🛍️',
-            'bio' => 'Sharing the best tech deals and home office aesthetic finds. Check the links below for exclusive discounts!',
-            'color' => '#E1306C',
-            'theme' => 'vibrant',
-            'shadow' => 'hard',
-            'links' => [
-                ['t' => 'My Amazon Storefront', 'u' => 'https://amazon.com', 'type' => 'button', 'style' => 'rainbow'],
-                ['t' => 'Flash Sale Ending Soon! ⏳', 'u' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+12 hours'))],
-                ['t' => 'Join Private Deals Telegram', 'u' => '#', 'type' => 'button', 'style' => 'glow'],
-                ['t' => 'Setup Tour', 'u' => 'https://tiktok.com', 'type' => 'video'],
-            ]
-        ],
-        [
-            'title' => 'Luxury Real Estate',
-            'headline' => 'Bespoke Advisory for Elite Homeowners.',
-            'bio' => 'Specializing in off-market luxury listings in the Tri-State area. Member of the Top 0.1% Global Network.',
-            'color' => '#2d3436',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['t' => 'New Off-Market Listings', 'u' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Penthouse+A\nhttps://via.placeholder.com/800x600?text=Coastal+Villa"],
-                ['t' => 'Request Private Showing', 'u' => '#', 'type' => 'lead_form'],
-                ['t' => 'Quarterly Market Report', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['t' => 'Q2 Sales Achievement', 'u' => '#', 'type' => 'milestone', 'extra' => 'Volume:$42M']
-            ]
-        ],
-        [
-            'title' => 'Creative Freelancer',
-            'headline' => 'Visual Identity & Web Experience Design.',
-            'bio' => 'Helping DTC brands stand out through minimalist design and high-converting interfaces.',
-            'color' => '#00d1b2',
-            'theme' => 'light',
-            'shadow' => 'hard',
-            'links' => [
-                ['t' => 'Recent Branding Work', 'u' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400\nhttps://via.placeholder.com/401\nhttps://via.placeholder.com/402"],
-                ['t' => 'Project Inquiry Form', 'u' => '#', 'type' => 'lead_form'],
-                ['t' => 'View Pricing Guide', 'u' => '#', 'type' => 'pricing', 'extra' => "$1,500+\nCustom Branding\nUI/UX Design\nWebflow Dev"],
-            ]
-        ],
-        [
-            'title' => 'Campaign HQ 2024',
-            'headline' => 'A New Vision for Our Community.',
-            'bio' => 'Join the movement for transparency, sustainable growth, and better schools. Every voice matters.',
-            'color' => '#e84118',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['t' => 'Watch the Keynote Speech', 'u' => 'https://youtube.com', 'type' => 'video'],
-                ['t' => 'Donate to the Campaign', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['t' => 'Volunteer Signup', 'u' => '#', 'type' => 'lead_form'],
-                ['t' => 'Endorsements', 'u' => '#', 'type' => 'testimonial', 'extra' => 'The only candidate with a clear plan for our future.'],
-                ['t' => 'Grassroots Funding Progress', 'u' => '#', 'type' => 'milestone', 'extra' => 'Goal:82']
-            ]
-        ],
-        [
-            'title' => 'John Doe Consulting',
-            'headline' => 'Operational Efficiency for Modern SaaS.',
-            'bio' => 'Ex-SaaS Founder helping seed-stage startups optimize their unit economics and reduce churn.',
-            'color' => '#2c3e50',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['t' => 'Contact Details', 'u' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:john@doe.com\nlinkedin:https://linkedin.com/in/johndoe\ntwitter:https://twitter.com/johndoe"],
-                ['t' => 'Save to Contacts', 'u' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
-                ['t' => 'Schedule Audit Call', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-            ]
-        ]
-    ];
+        ];
+    }
 
     foreach ($samples as $s) {
         $p_id = wp_insert_post(['post_type' => 'saas_profile', 'post_title' => $s['title'], 'post_status' => 'publish', 'post_author' => $user_id]);
@@ -1086,15 +862,68 @@ function saas_ajax_generate_samples() {
                 if ($l['type'] === 'image_gallery') update_post_meta($l_id, '_saas_gallery_images', explode("\n", $l['extra']));
                 if ($l['type'] === 'countdown') update_post_meta($l_id, '_saas_expiry', $l['extra']);
                 if ($l['type'] === 'milestone') {
-                    list($lbl, $per) = explode(':', $l['extra']);
-                    update_post_meta($l_id, '_saas_ms_label', $lbl);
-                    update_post_meta($l_id, '_saas_ms_percent', intval($per));
+                    if (strpos($l['extra'], ':') !== false) {
+                        list($lbl, $per) = explode(':', $l['extra']);
+                        update_post_meta($l_id, '_saas_ms_label', $lbl);
+                        update_post_meta($l_id, '_saas_ms_percent', intval($per));
+                    }
                 }
             }
         }
     }
 
-    wp_send_json_success('Sample profiles created successfully!');
+    // 1. Generate Sample Leads
+    $lead_names = ['James Wilson', 'Sarah Parker', 'Michael Chen', 'Emma Davis', 'Chris Evans'];
+    foreach($lead_names as $name) {
+        $lead_id = wp_insert_post(['post_type' => 'saas_lead', 'post_title' => "Lead: $name", 'post_status' => 'publish', 'post_author' => $user_id]);
+        update_post_meta($lead_id, '_saas_lead_name', $name);
+        update_post_meta($lead_id, '_saas_lead_email', strtolower(str_replace(' ', '.', $name)) . '@example.com');
+        update_post_meta($lead_id, '_saas_lead_status', (rand(0,1) ? 'New' : 'Contacted'));
+    }
+
+    // 2. Generate Sample Orders
+    for($i=0; $i<5; $i++) {
+        $order_id = wp_insert_post(['post_type' => 'saas_order', 'post_title' => 'Sample Order #' . rand(1000, 9999), 'post_status' => 'publish', 'post_author' => $user_id]);
+        update_post_meta($order_id, '_saas_order_amount', rand(19, 99));
+        update_post_meta($order_id, '_saas_order_status', 'completed');
+    }
+
+    // 3. Generate Sample Licenses
+    for($i=0; $i<3; $i++) {
+        $key = 'ELITE-' . wp_generate_password(4, false) . '-' . wp_generate_password(4, false);
+        wp_insert_post(['post_type' => 'saas_license', 'post_title' => strtoupper($key), 'post_status' => 'publish', 'post_author' => $user_id, 'meta_input' => ['_saas_license_status' => 'active', '_saas_license_plan' => 'pro']]);
+    }
+
+    // 4. Generate Sample Payouts
+    for($i=0; $i<2; $i++) {
+        $payout_id = wp_insert_post(['post_type' => 'saas_payout', 'post_title' => 'Payout Request', 'post_status' => 'publish', 'post_author' => $user_id]);
+        update_post_meta($payout_id, '_amount', rand(50, 200));
+        update_post_meta($payout_id, '_status', (rand(0,1) ? 'pending' : 'paid'));
+        update_post_meta($payout_id, '_method', 'paypal');
+        update_post_meta($payout_id, '_method_email', 'affiliate@example.com');
+    }
+
+    // 5. Generate Sample Messages
+    for($i=0; $i<3; $i++) {
+        wp_insert_post(['post_type' => 'saas_message', 'post_title' => 'System Update ' . ($i+1), 'post_content' => 'This is a sample system notification for testing.', 'post_status' => 'publish', 'post_author' => 1, 'meta_input' => ['_saas_msg_recipient' => $user_id, '_saas_msg_status' => 'unread']]);
+    }
+
+    // 6. Populate Analytics Table
+    global $wpdb;
+    $table = $wpdb->prefix . 'saas_analytics';
+    $types = ['view', 'click', 'lead_conversion'];
+    for($i=0; $i<50; $i++) {
+        $wpdb->insert($table, [
+            'user_id' => $user_id,
+            'event_type' => $types[array_rand($types)],
+            'target_id' => 0,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'Mozilla/5.0',
+            'created_at' => date('Y-m-d H:i:s', strtotime('-' . rand(0, 30) . ' days'))
+        ]);
+    }
+
+    wp_send_json_success('Comprehensive sample data generated across all modules! 🚀');
 }
 
 // 11. AJAX: Verify Link Password (Secure)

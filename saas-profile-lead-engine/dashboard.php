@@ -1029,6 +1029,10 @@ class Saas_Dashboard {
                         <?php
                         $earned = get_user_meta($user_id, '_saas_affiliate_earned', true) ?: 0;
                         $refs_count = count(get_users(['meta_key' => '_saas_referred_by', 'meta_value' => $user_id, 'fields' => 'ID']));
+                        $marketing_materials = get_option('saas_marketing_materials') ?: [
+                            ['name' => 'Standard Banner', 'img' => 'https://via.placeholder.com/300x100?text=Claim+Your+Elite+Bio', 'size' => '300x100'],
+                            ['name' => 'Sidebar Ad', 'img' => 'https://via.placeholder.com/150x150?text=Stop+Losing+Leads', 'size' => '150x150']
+                        ];
                         ?>
                         <div class="stats-grid" style="margin:20px 0;">
                             <div class="stat-card" style="background:#fff;"><small>TOTAL EARNED</small><div class="value" style="color:var(--secondary);">$<?php echo number_format($earned, 2); ?></div></div>
@@ -1120,17 +1124,33 @@ class Saas_Dashboard {
                     <div class="dashboard-card">
                         <h4>Marketing Materials</h4>
                         <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Use these elite assets to boost your referrals.</p>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                            <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
-                                <small style="font-weight:bold; display:block; margin-bottom:5px;">Standard Banner</small>
-                                <img src="https://via.placeholder.com/300x100?text=Claim+Your+Elite+Bio" style="width:100%; border-radius:5px;">
-                                <button class="button copy-html-btn" style="width:100%; margin-top:10px;">Copy HTML</button>
-                            </div>
-                            <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
-                                <small style="font-weight:bold; display:block; margin-bottom:5px;">Sidebar Ad</small>
-                                <img src="https://via.placeholder.com/150x150?text=Stop+Losing+Leads" style="width:100%; border-radius:5px;">
-                                <button class="button copy-html-btn" style="width:100%; margin-top:10px;">Copy HTML</button>
-                            </div>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px;">
+                            <?php foreach($marketing_materials as $mm) : ?>
+                                <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
+                                    <small style="font-weight:bold; display:block; margin-bottom:5px;"><?php echo esc_html($mm['name']); ?> (<?php echo esc_html($mm['size']); ?>)</small>
+                                    <img src="<?php echo esc_url($mm['img']); ?>" style="width:100%; border-radius:5px; margin-bottom:10px;">
+                                    <button class="button copy-html-btn" style="width:100%;">Copy HTML</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h4>Elite Sales Scripts</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Copy and paste these high-converting scripts to your favorite platforms.</p>
+                        <?php
+                        $scripts = get_option('saas_sales_scripts') ?: [
+                            ['title' => 'Sample Outreach', 'content' => 'Hey [Name], I noticed your bio...']
+                        ];
+                        ?>
+                        <div style="display:grid; gap:15px;">
+                            <?php foreach($scripts as $script) : ?>
+                                <div style="padding:20px; background:var(--bg-main); border-radius:12px; border:1px solid var(--border);">
+                                    <h5 style="margin:0 0 10px; font-weight:800;"><?php echo esc_html($script['title']); ?></h5>
+                                    <pre style="white-space: pre-wrap; font-size: 0.85rem; color: var(--text-dark); background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd;"><?php echo esc_html($script['content']); ?></pre>
+                                    <button class="button" onclick="const p = this.previousElementSibling; const t = document.createElement('textarea'); t.value = p.innerText; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); this.innerText='Copied! ✅'; setTimeout(() => this.innerText='Copy Script', 2000);">Copy Script</button>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
 
@@ -1314,21 +1334,17 @@ class Saas_Dashboard {
 
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
                             <?php
-                            $tpls = [
-                                'coach' => ['name' => 'Executive Coach', 'icon' => '🚀'],
-                                'freelancer' => ['name' => 'Creative Freelancer', 'icon' => '🎨'],
-                                'realtor' => ['name' => 'Luxury Realtor', 'icon' => '🏡'],
-                                'business' => ['name' => 'Corporate Entity', 'icon' => '🏢'],
-                                'politician' => ['name' => 'Public Official', 'icon' => '🏛️'],
-                                'elite_card' => ['name' => 'Digital Card Pro', 'icon' => '💳'],
-                                'tiktok' => ['name' => 'Viral Influencer', 'icon' => '📱'],
-                                'consultant' => ['name' => 'Strategy Expert', 'icon' => '🧠'],
-                                'luxury' => ['name' => 'Luxury Private', 'icon' => '⚜️']
+                            $all_tpls = get_option('saas_templates') ?: [];
+                            $tpl_icons = [
+                                'coach' => '🚀', 'business' => '🏢', 'luxury' => '⚜️', 'freelancer' => '🎨',
+                                'realtor' => '🏡', 'politician' => '🏛️', 'elite_card' => '💳', 'tiktok' => '📱', 'consultant' => '🧠'
                             ];
-                            foreach($tpls as $id => $t) : ?>
+                            foreach($all_tpls as $id => $t) :
+                                $icon = $tpl_icons[$id] ?? '✨';
+                            ?>
                                 <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s;">
-                                    <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $t['icon']; ?></div>
-                                    <h4 style="margin:0 0 15px;"><?php echo $t['name']; ?></h4>
+                                    <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $icon; ?></div>
+                                    <h4 style="margin:0 0 15px;"><?php echo esc_html(ucfirst($id)); ?></h4>
                                     <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none;">Apply Template</button>
                                 </div>
                             <?php endforeach; ?>
@@ -1341,33 +1357,34 @@ class Saas_Dashboard {
                         <h3>Elite Training Academy 🎓</h3>
                         <p>I want you to succeed. That's why I've put together these short, high-impact tutorials to help you master your new digital salesman.</p>
 
+                        <?php
+                        $training_vids = get_option('saas_training_academy') ?: [
+                            ['title' => 'The 60-Second Setup', 'desc' => 'Go from zero to a live funnel in under a minute.', 'video_id' => 'setup'],
+                            ['title' => 'Lead Magnet Magic', 'desc' => 'Capture contact info and build your email list.', 'video_id' => 'leads']
+                        ];
+                        $kb_articles = get_option('saas_knowledge_base') ?: [
+                            ['title' => 'How to connect my own domain?', 'url' => '#'],
+                            ['title' => 'Setting up Stripe for product sales', 'url' => '#']
+                        ];
+                        ?>
+
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-top:30px;">
-                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
-                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
-                                <h4>The 60-Second Setup</h4>
-                                <p class="field-hint">I'll show you how to go from zero to a live, high-converting funnel in under a minute.</p>
-                                <button class="button" style="width:100%;">Watch Now</button>
-                            </div>
-                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
-                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
-                                <h4>Lead Magnet Magic</h4>
-                                <p class="field-hint">Learn how to use Lead Forms to capture contact info and build your email list on autopilot.</p>
-                                <button class="button" style="width:100%;">Watch Now</button>
-                            </div>
-                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
-                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
-                                <h4>NFC & Real-World Sales</h4>
-                                <p class="field-hint">How to use your digital business card at networking events to close more deals.</p>
-                                <button class="button" style="width:100%;">Watch Now</button>
-                            </div>
+                            <?php foreach($training_vids as $v) : ?>
+                                <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
+                                    <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial [<?php echo esc_js($v['video_id']); ?>] loading...')">▶️</div>
+                                    <h4><?php echo esc_html($v['title']); ?></h4>
+                                    <p class="field-hint"><?php echo esc_html($v['desc']); ?></p>
+                                    <button class="button" style="width:100%;">Watch Now</button>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
 
                         <hr style="margin:40px 0;">
                         <h4>Knowledge Base</h4>
                         <ul style="list-style:none; padding:0;">
-                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">How to connect my own domain?</a></li>
-                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">Setting up Stripe for product sales</a></li>
-                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">A/B Testing: How many variants should I use?</a></li>
+                            <?php foreach($kb_articles as $art) : ?>
+                                <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="<?php echo esc_url($art['url']); ?>" style="text-decoration:none; color:var(--primary); font-weight:700;"><?php echo esc_html($art['title']); ?></a></li>
+                            <?php endforeach; ?>
                         </ul>
                     </div>
                 </div>

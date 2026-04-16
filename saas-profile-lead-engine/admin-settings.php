@@ -258,6 +258,15 @@ class Saas_Admin_Settings {
             'saas_license_factory',
             [ $this, 'license_factory_html' ]
         );
+
+        add_submenu_page(
+            'saas_settings',
+            'Content Hub',
+            'Content Hub',
+            'manage_options',
+            'saas_content_hub',
+            [ $this, 'content_hub_page_html' ]
+        );
     }
 
     public function settings_init() {
@@ -616,6 +625,221 @@ class Saas_Admin_Settings {
         wp_send_json_success('Affiliate coupons saved successfully!');
     }
 
+    public function content_hub_page_html() {
+        if ( ! current_user_can( 'manage_options' ) ) return;
+
+        if (isset($_POST['saas_save_content_hub'])) {
+            check_admin_referer('saas_content_hub_nonce');
+
+            if (isset($_POST['templates_json'])) {
+                $templates = json_decode(stripslashes($_POST['templates_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_templates', $templates);
+                }
+            }
+
+            if (isset($_POST['training_json'])) {
+                $training = json_decode(stripslashes($_POST['training_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_training_academy', $training);
+                }
+            }
+
+            if (isset($_POST['kb_json'])) {
+                $kb = json_decode(stripslashes($_POST['kb_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_knowledge_base', $kb);
+                }
+            }
+
+            if (isset($_POST['marketing_json'])) {
+                $marketing = json_decode(stripslashes($_POST['marketing_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_marketing_materials', $marketing);
+                }
+            }
+
+            if (isset($_POST['scripts_json'])) {
+                $scripts = json_decode(stripslashes($_POST['scripts_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_sales_scripts', $scripts);
+                }
+            }
+
+            echo '<div class="updated"><p>Content Hub updated successfully!</p></div>';
+        }
+
+        $templates = get_option('saas_templates') ?: $this->get_default_templates();
+        $training  = get_option('saas_training_academy') ?: $this->get_default_training();
+        $kb        = get_option('saas_knowledge_base') ?: $this->get_default_kb();
+        $marketing = get_option('saas_marketing_materials') ?: $this->get_default_marketing();
+        $scripts   = get_option('saas_sales_scripts') ?: $this->get_default_scripts();
+        ?>
+        <div class="wrap saas-admin-wrapper">
+            <h1>SaaS Content Hub</h1>
+            <p>Manage templates, training videos, knowledge base, and affiliate marketing materials.</p>
+
+            <div class="saas-tabs-container">
+                <h2 class="nav-tab-wrapper">
+                    <a href="#tab-templates" class="nav-tab nav-tab-active">Templates</a>
+                    <a href="#tab-training" class="nav-tab">Training Academy</a>
+                    <a href="#tab-kb" class="nav-tab">Knowledge Base</a>
+                    <a href="#tab-marketing" class="nav-tab">Marketing Materials</a>
+                    <a href="#tab-scripts" class="nav-tab">Sales Scripts</a>
+                </h2>
+
+                <form method="post" action="">
+                    <?php wp_nonce_field('saas_content_hub_nonce'); ?>
+
+                    <div id="tab-templates" class="tab-content" style="padding:20px; background:#fff;">
+                        <h3>Manage Profile Templates (JSON)</h3>
+                        <p class="description">Define the headline, bio, colors, and default blocks for each niche template.</p>
+                        <textarea name="templates_json" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($templates, JSON_PRETTY_PRINT)); ?></textarea>
+                    </div>
+
+                    <div id="tab-training" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>Training Academy Videos (JSON)</h3>
+                        <p class="description">Add/Edit tutorial videos for the user dashboard Training tab.</p>
+                        <textarea name="training_json" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($training, JSON_PRETTY_PRINT)); ?></textarea>
+                    </div>
+
+                    <div id="tab-kb" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>Knowledge Base Articles (JSON)</h3>
+                        <p class="description">Manage the links and titles shown in the Knowledge Base section.</p>
+                        <textarea name="kb_json" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($kb, JSON_PRETTY_PRINT)); ?></textarea>
+                    </div>
+
+                    <div id="tab-marketing" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>Affiliate Marketing Materials (JSON)</h3>
+                        <p class="description">Define the banners and assets available for affiliates in the Earn tab.</p>
+                        <textarea name="marketing_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($marketing, JSON_PRETTY_PRINT)); ?></textarea>
+                    </div>
+
+                    <div id="tab-scripts" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>Sales Scripts & Templates (JSON)</h3>
+                        <p class="description">Add copy-paste scripts for affiliates to use on social media and email.</p>
+                        <textarea name="scripts_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($scripts, JSON_PRETTY_PRINT)); ?></textarea>
+                    </div>
+
+                    <p class="submit">
+                        <input type="submit" name="saas_save_content_hub" class="button button-primary" value="Save All Hub Content">
+                    </p>
+                </form>
+            </div>
+        </div>
+        <script>
+        jQuery('.nav-tab').on('click', function(e) {
+            e.preventDefault();
+            jQuery('.nav-tab').removeClass('nav-tab-active');
+            jQuery(this).addClass('nav-tab-active');
+            jQuery('.tab-content').hide();
+            jQuery(jQuery(this).attr('href')).show();
+        });
+        </script>
+        <?php
+    }
+
+    private function get_default_templates() {
+        return [
+            'coach' => [
+                'headline' => 'Helping you double your revenue in 90 days. 🚀',
+                'bio' => 'Certified high-performance coach. I work with CEOs and founders to scale their impact.',
+                'color' => '#6c5ce7', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => '👉 Free Strategy Session', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Watch Case Study', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Client Success Stories', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Working with Alex was the best decision for my agency.'],
+                    ['title' => 'Consulting Packages', 'url' => '#', 'type' => 'pricing', 'extra' => "$2,500/mo\nBi-weekly Calls\nSlack Support\nResource Library"],
+                ]
+            ],
+            'tiktok' => [
+                'headline' => 'Shop My Top Tech & Setup Finds 🛍️',
+                'bio' => 'Sharing the best tech deals and office aesthetic finds. Check my links for exclusive discounts!',
+                'color' => '#ff0050', 'theme' => 'vibrant', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'My Amazon Storefront', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                    ['title' => 'Flash Sale Ending Soon! ⏳', 'url' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+12 hours'))],
+                    ['title' => 'Join My Private Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                    ['title' => 'Latest Setup Tour', 'url' => 'https://tiktok.com', 'type' => 'video'],
+                ]
+            ],
+            'realtor' => [
+                'headline' => 'Bespoke Advisory for Elite Homeowners. 🏡',
+                'bio' => 'Specializing in off-market luxury listings. Member of the Top 0.1% Global Network.',
+                'color' => '#2d3436', 'theme' => 'dark', 'shadow' => 'none',
+                'links' => [
+                    ['title' => 'New Off-Market Listings', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Penthouse+A\nhttps://via.placeholder.com/800x600?text=Coastal+Villa"],
+                    ['title' => 'Request Private Showing', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Quarterly Market Report', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Sales Target Progress', 'url' => '#', 'type' => 'milestone', 'extra' => 'Volume:$42M'],
+                ]
+            ],
+            'freelancer' => [
+                'headline' => 'Visual Identity & Web Design for Modern Brands. 🎨',
+                'bio' => 'Helping DTC brands stand out through minimalist design and high-converting interfaces.',
+                'color' => '#00d1b2', 'theme' => 'light', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Recent Branding Work', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400\nhttps://via.placeholder.com/401"],
+                    ['title' => 'View Pricing Guide', 'url' => '#', 'type' => 'pricing', 'extra' => "$1,500+\nCustom Branding\nUI/UX Design\nWebflow Dev"],
+                    ['title' => 'Project Inquiry', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Hire Me on Upwork', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                ]
+            ],
+            'business' => [
+                'headline' => 'Innovative Solutions for Global Enterprise. 🏢',
+                'bio' => 'Streamlining operations and driving growth through technology.',
+                'color' => '#0073aa', 'theme' => 'light', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Book a Consultation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Our Core Services', 'url' => '#', 'type' => 'pricing', 'extra' => "$199/hr\nStrategy Audit\nProcess Automation\nCustom Dev"],
+                    ['title' => 'FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'We operate 24/7 across the globe.'],
+                    ['title' => 'Office Location', 'url' => 'https://maps.google.com', 'type' => 'button'],
+                ]
+            ],
+            'luxury' => [
+                'headline' => 'Bespoke Private Advisory. ⚜️',
+                'bio' => 'Curating exclusive opportunities for the discerning individual.',
+                'color' => '#d4af37', 'theme' => 'luxury', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Inquire Privately', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Exclusive Asset Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Asset+1\nhttps://via.placeholder.com/800x600?text=Asset+2"],
+                    ['title' => 'Secure Documentation', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
+                    ['title' => 'Save VCard to Phone', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
+                ]
+            ]
+        ];
+    }
+
+    private function get_default_training() {
+        return [
+            ['title' => 'The 60-Second Setup', 'desc' => 'Go from zero to a live, high-converting funnel in under a minute.', 'video_id' => 'setup'],
+            ['title' => 'Lead Magnet Magic', 'desc' => 'Learn how to use Lead Forms to capture contact info and build your email list.', 'video_id' => 'leads'],
+            ['title' => 'NFC & Real-World Sales', 'desc' => 'How to use your digital business card at networking events to close more deals.', 'video_id' => 'nfc']
+        ];
+    }
+
+    private function get_default_kb() {
+        return [
+            ['title' => 'How to connect my own domain?', 'url' => '#'],
+            ['title' => 'Setting up Stripe for product sales', 'url' => '#'],
+            ['title' => 'A/B Testing: How many variants should I use?', 'url' => '#']
+        ];
+    }
+
+    private function get_default_marketing() {
+        return [
+            ['name' => 'Standard Banner', 'img' => 'https://via.placeholder.com/300x100?text=Claim+Your+Elite+Bio', 'size' => '300x100'],
+            ['name' => 'Sidebar Ad', 'img' => 'https://via.placeholder.com/150x150?text=Stop+Losing+Leads', 'size' => '150x150']
+        ];
+    }
+
+    private function get_default_scripts() {
+        return [
+            ['title' => 'Instagram/TikTok Hook', 'content' => "Hey [Name], noticed your bio link is just a standard list. I built a system for [Niche] that captures 3x more leads directly in the bio. Want a 5-min video showing how it works? No cost."],
+            ['title' => 'Cold Email Outreach', 'content' => "Subject: Quick question about your bio link\n\nHi [Name],\n\nI love your content, but I noticed you are losing 90% of your traffic to a standard link list. I created an 'Elite Funnel' system specifically for consultants that converts visitors into leads automatically.\n\nYou can claim your link here: [Link]\n\nBest,\n[My Name]"]
+        ];
+    }
+
     public function ajax_send_broadcast() {
         if (!current_user_can('manage_options')) wp_send_json_error('Unauthorized');
         check_ajax_referer('saas_dashboard_nonce', 'security');
@@ -922,30 +1146,94 @@ class Saas_Admin_Settings {
         $growth_counts = array_column($growth, 'count');
         ?>
         <div class="wrap saas-admin-wrapper">
-            <div class="saas-admin-sidebar">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_profile'); ?>">Profiles</a></li>
-                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_lead'); ?>">Captured Leads</a></li>
-                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_license'); ?>">System Licenses</a></li>
-                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_order'); ?>">Sales/Orders</a></li>
-                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_payout'); ?>">Affiliate Payouts</a></li>
-                    <li><a href="<?php echo admin_url('edit.php?post_type=saas_message'); ?>">System Messages</a></li>
-                </ul>
-            </div>
-            <div class="saas-admin-main">
-            <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+            <h1>Elite SaaS: System Control Center</h1>
 
-            <!-- Global Analytics Dashboard Card -->
-            <div class="saas-admin-card" style="background:#fff; padding:20px; border-radius:8px; display:flex; gap:40px; margin:20px 0;">
-                <div><strong>Total Views:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['views']); ?></span></div>
-                <div><strong>Total Clicks:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['clicks']); ?></span></div>
-                <div><strong>Total Leads:</strong> <br> <span style="font-size:2rem;"><?php echo number_format($summary['leads']); ?></span></div>
-            </div>
+            <div class="saas-tabs-container" style="margin-top:20px;">
+                <h2 class="nav-tab-wrapper">
+                    <a href="#tab-system-status" class="nav-tab nav-tab-active">📊 System Status</a>
+                    <a href="#tab-general-settings" class="nav-tab">⚙️ General & Payments</a>
+                    <a href="#tab-home-editor" class="nav-tab">🏠 Homepage Content</a>
+                    <a href="#tab-tools" class="nav-tab">🛠️ Advanced Tools</a>
+                    <a href="#tab-broadcast" class="nav-tab">📣 System Broadcast</a>
+                </h2>
 
-            <div style="background:#fff; padding:30px; border-radius:12px; margin-bottom:40px; box-shadow:0 10px 30px rgba(0,0,0,0.05);">
-                <h3>System Growth Trends</h3>
-                <canvas id="saas-admin-chart" height="100"></canvas>
+                <div id="tab-system-status" class="tab-content">
+                    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:30px; margin-top:20px;">
+                        <div class="saas-admin-sidebar" style="margin:0;">
+                            <h3>Quick Stats</h3>
+                            <div class="saas-admin-card" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px;">
+                                <strong>Views:</strong> <span style="font-size:1.5rem; display:block;"><?php echo number_format($summary['views']); ?></span>
+                            </div>
+                            <div class="saas-admin-card" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px;">
+                                <strong>Clicks:</strong> <span style="font-size:1.5rem; display:block;"><?php echo number_format($summary['clicks']); ?></span>
+                            </div>
+                            <div class="saas-admin-card" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd;">
+                                <strong>Leads:</strong> <span style="font-size:1.5rem; display:block;"><?php echo number_format($summary['leads']); ?></span>
+                            </div>
+                            <hr>
+                            <h3>CPT Links</h3>
+                            <ul style="list-style:none; padding:0;">
+                                <li><a href="<?php echo admin_url('edit.php?post_type=saas_profile'); ?>">Profiles</a></li>
+                                <li><a href="<?php echo admin_url('edit.php?post_type=saas_lead'); ?>">Captured Leads</a></li>
+                                <li><a href="<?php echo admin_url('edit.php?post_type=saas_license'); ?>">System Licenses</a></li>
+                                <li><a href="<?php echo admin_url('edit.php?post_type=saas_order'); ?>">Sales/Orders</a></li>
+                            </ul>
+                        </div>
+                        <div class="saas-admin-main" style="margin:0;">
+                            <div style="background:#fff; padding:30px; border-radius:12px; border:1px solid #ddd;">
+                                <h3>System Growth Trends (6 Months)</h3>
+                                <canvas id="saas-admin-chart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-general-settings" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
+                    <form action="options.php" method="post">
+                        <?php
+                        settings_fields( 'saas_settings_group' );
+                        do_settings_sections( 'saas_settings' ); // We will split these sections in init
+                        submit_button( 'Save All Settings' );
+                        ?>
+                    </form>
+                </div>
+
+                <div id="tab-home-editor" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
+                    <h3>Elite Sales Copy Setup</h3>
+                    <p>Populate your homepage with professional copy designed by elite marketers.</p>
+                    <a href="<?php echo admin_url('admin-post.php?action=saas_populate_pro_content'); ?>" class="button button-primary" style="background:#39e09b; border-color:#39e09b; color:#1e2329;">🔥 Apply Pro Sales Copy Now</a>
+                    <hr>
+                    <p>Use the General Settings tab to manually edit homepage titles, descriptions, and JSON content.</p>
+                </div>
+
+                <div id="tab-tools" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                        <div>
+                            <h3>Environment Management</h3>
+                            <p>Automatically create Login, Register, and Dashboard pages with correct shortcodes.</p>
+                            <a href="<?php echo admin_url('admin-post.php?action=saas_generate_pages'); ?>" class="button button-secondary">Generate System Pages</a>
+                            <hr>
+                            <h3>Health Check</h3>
+                            <?php $this->render_health_check(); ?>
+                        </div>
+                        <div>
+                            <h3>Sample Data Engine</h3>
+                            <p>Generate a comprehensive environment with profiles, leads, orders, and stats for testing.</p>
+                            <button id="saas-generate-samples-btn" class="button button-secondary">🚀 Generate Full Sample Data</button>
+                            <button id="saas-test-payment-btn" class="button button-secondary" style="background:#f59e0b; color:#fff; border:none; margin-top:10px;">Simulate Success Payment (UID: 1)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-broadcast" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
+                    <h3>System Broadcast</h3>
+                    <p>Send a message to every user's internal dashboard inbox.</p>
+                    <form id="saas-broadcast-form">
+                        <p><input type="text" name="subject" placeholder="Message Subject" style="width:100%; font-size:1.1rem; padding:10px;" required></p>
+                        <p><textarea name="message" placeholder="Type your system announcement here..." style="width:100%;" rows="8" required></textarea></p>
+                        <p><button type="submit" class="button button-primary" style="padding:10px 30px;">Broadcast to All Users</button></p>
+                    </form>
+                </div>
             </div>
 
             <script>
@@ -962,104 +1250,55 @@ class Saas_Admin_Settings {
                                 backgroundColor: '#6c5ce7'
                             }]
                         },
-                        options: { responsive: true }
+                        options: { responsive: true, maintainAspectRatio: false }
                     });
                 }
-            });
-            </script>
 
-            <form action="options.php" method="post">
-                <?php
-                settings_fields( 'saas_settings_group' );
-                do_settings_sections( 'saas_settings' );
-                submit_button( 'Save Global Settings' );
-                ?>
-            </form>
-
-            <hr>
-            <h2>High-Conversion Copy Setup</h2>
-            <p>Populate your homepage with professional, world-class sales copy designed by elite marketers.</p>
-            <a href="<?php echo admin_url('admin-post.php?action=saas_populate_pro_content'); ?>" class="button button-primary" style="background:#39e09b; border-color:#39e09b; color:#1e2329;">Apply Pro Sales Copy</a>
-
-            <hr>
-            <h2>System Page Generator</h2>
-            <p>Automatically create Login, Register, and Dashboard pages with correct shortcodes.</p>
-            <a href="<?php echo admin_url('admin-post.php?action=saas_generate_pages'); ?>" class="button button-secondary">Generate System Pages</a>
-
-            <hr>
-            <h2>Sample Data Generator</h2>
-            <p>Generate 5+ sample profiles (Coach, Realtor, Influencer) to test the system and demo to clients.</p>
-            <button id="saas-generate-samples-btn" class="button button-secondary">Generate Sample Profiles</button>
-            <button id="saas-test-payment-btn" class="button button-secondary" style="background:#f59e0b; color:#fff; border:none;">Simulate Success Payment (UID: 1)</button>
-
-            <script>
-            document.getElementById('saas-test-payment-btn')?.addEventListener('click', function() {
-                if(!confirm('This will simulate a successful $19 payment for user ID 1. Continue?')) return;
-                fetch('<?php echo get_rest_url(null, "/saas/v1/webhook"); ?>', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: 1, status: 'succeeded', plan: 'pro' })
-                }).then(r => r.json()).then(d => {
-                    alert('Webhook processed: ' + JSON.stringify(d));
-                    location.reload();
+                jQuery('.nav-tab').on('click', function(e) {
+                    e.preventDefault();
+                    jQuery('.nav-tab').removeClass('nav-tab-active');
+                    jQuery(this).addClass('nav-tab-active');
+                    jQuery('.tab-content').hide();
+                    jQuery(jQuery(this).attr('href')).show();
                 });
-            });
 
-            document.getElementById('saas-generate-samples-btn')?.addEventListener('click', function() {
-                if (!confirm('This will create new sample profiles and links. Continue?')) return;
-                const btn = this;
-                btn.disabled = true;
-                btn.innerText = 'Generating...';
+                document.getElementById('saas-test-payment-btn')?.addEventListener('click', function() {
+                    if(!confirm('Simulate successful payment for User ID 1?')) return;
+                    fetch('<?php echo get_rest_url(null, "/saas/v1/webhook"); ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: 1, status: 'succeeded', plan: 'pro' })
+                    }).then(r => r.json()).then(d => {
+                        alert('Webhook Success!');
+                        location.reload();
+                    });
+                });
 
-                fetch(ajaxurl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        action: 'saas_generate_samples'
+                document.getElementById('saas-generate-samples-btn')?.addEventListener('click', function() {
+                    if (!confirm('Generate comprehensive sample data?')) return;
+                    const btn = this;
+                    btn.disabled = true; btn.innerText = 'Generating...';
+                    fetch(ajaxurl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({ action: 'saas_generate_samples' })
                     })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    alert(data.data);
-                    location.reload();
+                    .then(r => r.json()).then(data => { alert(data.data); location.reload(); });
+                });
+
+                jQuery('#saas-broadcast-form').on('submit', function(e) {
+                    e.preventDefault();
+                    if(!confirm('Send to ALL users?')) return;
+                    var $btn = jQuery(this).find('button');
+                    $btn.prop('disabled', true).text('Sending...');
+                    jQuery.post(ajaxurl, jQuery(this).serialize() + '&action=saas_send_broadcast&security=<?php echo wp_create_nonce("saas_dashboard_nonce"); ?>', function(res) {
+                        alert(res.data);
+                        $btn.prop('disabled', false).text('Broadcast to All Users');
+                        if(res.success) jQuery('#saas-broadcast-form').find('input, textarea').val('');
+                    });
                 });
             });
             </script>
-
-            <hr>
-            <h2>User Level Setup Guide</h2>
-            <div style="background:#f9f9f9; padding:20px; border-radius:8px; border-left:4px solid #0073aa;">
-                <ol>
-                    <li><strong>Admin:</strong> Generate system pages using the button above.</li>
-                    <li><strong>User:</strong> Register an account on the /register page.</li>
-                    <li><strong>User:</strong> Login and navigate to /dashboard.</li>
-                    <li><strong>User:</strong> Set up your profile (username, bio, links).</li>
-                    <li><strong>User:</strong> Share your unique link (domain.com/username).</li>
-                </ol>
-            </div>
-
-            <hr>
-            <h2>System Broadcast</h2>
-            <p>Send a message to every user's inbox in the system.</p>
-            <form id="saas-broadcast-form">
-                <p><input type="text" name="subject" placeholder="Broadcast Subject" style="width:100%;" required></p>
-                <p><textarea name="message" placeholder="System update, promotion, or announcement..." style="width:100%;" rows="5" required></textarea></p>
-                <p><button type="submit" class="button button-primary">Send to All Users</button></p>
-            </form>
-            <script>
-            jQuery('#saas-broadcast-form').on('submit', function(e) {
-                e.preventDefault();
-                if(!confirm('This will send a message to EVERY user. Continue?')) return;
-                var $btn = jQuery(this).find('button');
-                $btn.prop('disabled', true).text('Sending...');
-                jQuery.post(ajaxurl, jQuery(this).serialize() + '&action=saas_send_broadcast&security=<?php echo wp_create_nonce("saas_dashboard_nonce"); ?>', function(res) {
-                    alert(res.data);
-                    $btn.prop('disabled', false).text('Send to All Users');
-                    if(res.success) jQuery('#saas-broadcast-form').find('input, textarea').val('');
-                });
-            });
-            </script>
-            </div>
         </div>
         <?php
     }
