@@ -20,6 +20,8 @@ $h_img   = get_option('saas_home_image');
     </div>
 
     <div class="landing-content" style="max-width: 1200px; text-align: center; z-index: 1; padding: 120px 20px;">
+        <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); the_content(); endwhile; endif; ?>
+
         <h1 style="font-size: 5.5rem; font-weight: 900; line-height: 1; margin-bottom:30px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -3px; transform: scale(1);">
             <?php echo esc_html($h_title); ?>
         </h1>

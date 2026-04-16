@@ -128,7 +128,12 @@
             var imgUrl = $li.find('.btn-thumb').attr('src');
             $('#edit-link-image-preview').html(imgUrl ? '<img src="' + imgUrl + '" style="width:100%; height:100%; object-fit:cover;">' : '');
 
-            $('#saas-edit-modal').css('display', 'flex');
+            // Show Inline instead of Modal
+            $('#saas-edit-inline').slideDown(400, function() {
+                $('html, body').animate({
+                    scrollTop: $(this).offset().top - 120
+                }, 500);
+            });
 
         });
 
@@ -445,13 +450,16 @@
 
         // 10. Preview Controls
         $('#saas-preview-trigger').on('click', function() {
-            $('.saas-preview-pane').addClass('show').fadeIn();
-
+            $('#saas-preview-inline').slideDown(400, function() {
+                $('html, body').animate({
+                    scrollTop: $(this).offset().top - 120
+                }, 500);
+            });
         });
 
-        $('#saas-close-preview').on('click', function() {
-            $('.saas-preview-pane').removeClass('show').fadeOut();
-
+        $(document).on('click', '.close-inline', function() {
+            var target = $(this).data('target');
+            $('#' + target).slideUp();
         });
 
         // Media Library Integration

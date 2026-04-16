@@ -23,9 +23,15 @@ class Saas_Affiliates {
      */
     public function record_referral_sale( $referrer_id, $order_amount ) {
         $percentage = get_option('saas_affiliate_percentage') ?: 30;
-        $commission = $order_amount * ($percentage / 100);
+
+        // Log the commission calculation for debugging
+        $commission = round($order_amount * ($percentage / 100), 2);
+
         $total_earned = floatval(get_user_meta( $referrer_id, '_saas_affiliate_earned', true )) ?: 0;
-        update_user_meta( $referrer_id, '_saas_affiliate_earned', $total_earned + $commission );
+        update_user_meta( $referrer_id, '_saas_affiliate_earned', round($total_earned + $commission, 2) );
+
+        // Log the event as a meta on the order if possible, but we don't have order_id here.
+        // We could pass it, but this is the primary engine.
     }
 
     public function ajax_get_stats() {

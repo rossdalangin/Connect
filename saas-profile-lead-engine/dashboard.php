@@ -297,6 +297,121 @@ class Saas_Dashboard {
                                 </li>
                             <?php endforeach; ?>
                             </ul>
+
+                            <!-- Inline Edit Block Content -->
+                            <div id="saas-edit-inline" class="dashboard-card saas-inline-container" style="display:none; margin-top:20px; border: 2px solid var(--primary);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                                    <h3 style="margin:0;">✏️ Edit Block Content</h3>
+                                    <button type="button" class="close-inline button" data-target="saas-edit-inline">&times;</button>
+                                </div>
+                                <p class="field-hint" style="margin-bottom:20px;">Optimize this block for maximum conversion. Use the advanced options to add A/B testing or device-specific routing.</p>
+                                <form id="saas-edit-link-form">
+                                    <input type="hidden" name="link_id" id="edit-link-id">
+
+                                    <div class="field"><label>Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
+                                    <div class="field"><label>URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
+                                    <div class="field"><label>Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
+
+                                    <button type="button" class="button toggle-advanced" style="width:100%; margin-bottom:20px; background:#f1f5f9; color:#475569; font-weight:bold;">⚙️ Advanced Options</button>
+
+                                    <div id="edit-advanced-fields" style="display:none; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                                        <div class="field">
+                                            <label>Style & Animation</label>
+                                            <div style="display:flex; gap:10px;">
+                                                <select name="block_style" id="edit-link-style" style="flex:1;">
+                                                    <option value="regular">Regular</option>
+                                                    <option value="featured">Featured (Pulse)</option>
+                                                    <option value="outline">Outline</option>
+                                                    <option value="glow">Glow</option>
+                                                </select>
+                                                <select name="block_animation" id="edit-link-animation" style="flex:1;">
+                                                    <option value="none">No Animation</option>
+                                                    <option value="fadeinup">Fade In Up</option>
+                                                    <option value="bouncein">Bounce In</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                            <label>A/B Testing (Pro)</label>
+                                            <div style="display:flex; gap:10px;">
+                                                <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Variant B Title" style="flex:1;">
+                                                <input type="url" name="ab_url_b" id="edit-link-ab-url" placeholder="Variant B URL" style="flex:1;">
+                                            </div>
+                                        </div>
+
+                                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                                            <label>Conditional Routing (Pro)</label>
+                                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                                <input type="url" name="url_mobile" id="edit-link-url-mobile" placeholder="Mobile-only URL">
+                                                <div style="display:flex; gap:10px;">
+                                                    <input type="text" name="url_geo_country" id="edit-link-geo-country" placeholder="Country Code (e.g. US)" style="flex:1;">
+                                                    <input type="url" name="url_geo" id="edit-link-url-geo" placeholder="Geo-specific URL" style="flex:1;">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="field">
+                                            <label>Custom Design</label>
+                                            <div style="display:flex; gap:10px;">
+                                                <div style="flex:1;">
+                                                    <small>Background</small>
+                                                    <input type="color" name="custom_bg" id="edit-link-custom-bg" style="height:40px; padding:2px;">
+                                                </div>
+                                                <div style="flex:1;">
+                                                    <small>Text</small>
+                                                    <input type="color" name="custom_text" id="edit-link-custom-text" style="height:40px; padding:2px;">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="field">
+                                            <label>Visibility Scheduling</label>
+                                            <div style="display:flex; gap:10px;">
+                                                <input type="date" name="start_date" id="edit-link-start" style="flex:1;" title="Start Date">
+                                                <input type="date" name="end_date" id="edit-link-end" style="flex:1;" title="End Date">
+                                            </div>
+                                            <p class="field-hint">Automate your promotions. This block will only be visible between these dates.</p>
+                                        </div>
+
+                                        <div class="field">
+                                            <label>Hour Range (0-23)</label>
+                                            <div style="display:flex; gap:10px;">
+                                                <input type="number" name="hour_from" id="edit-link-hour-from" placeholder="From" min="0" max="23" style="flex:1;">
+                                                <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To" min="0" max="23" style="flex:1;">
+                                            </div>
+                                        </div>
+
+                                            <div class="field">
+                                                <label>Icon/Thumb Image</label>
+                                                <div id="edit-link-image-preview" style="width:60px; height:60px; border-radius:10px; background:#eee; margin-bottom:10px; overflow:hidden; border:1px solid #ddd;"></div>
+                                                <input type="hidden" name="link_image_id" id="edit-link-image-id">
+                                                <button type="button" class="button select-media" data-target="link-image">Select Icon</button>
+                                            </div>
+
+                                        <div class="field">
+                                            <label>Password Unlock</label>
+                                            <input type="text" name="link_password" id="edit-link-pass" placeholder="Block password">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn-primary" style="width:100%;">Save All Changes</button>
+                                </form>
+                            </div>
+
+                            <!-- Inline Real-Time Preview -->
+                            <div id="saas-preview-inline" class="dashboard-card saas-inline-container" style="display:none; margin-top:20px; border: 2px solid var(--secondary);">
+                                <div class="preview-header" style="width:100%; color:var(--text-dark); margin-bottom:20px;">
+                                    <h3 style="margin:0;">📱 Real-Time Preview</h3>
+                                    <div style="display:flex; gap:10px;">
+                                        <button onclick="document.getElementById('saas-preview-frame').contentWindow.location.reload();" class="button">🔄 Refresh</button>
+                                        <button type="button" class="close-inline button" data-target="saas-preview-inline">&times;</button>
+                                    </div>
+                                </div>
+                                <div class="preview-frame-container" style="margin: 0 auto;">
+                                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name); ?>"></iframe>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -841,9 +956,9 @@ class Saas_Dashboard {
 
                             <hr>
                             <h4>Advanced Triggers</h4>
-                            <div class="field">
-                                <label>Webhook URL (Zapier/Make)</label>
-                                <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>">
+                            <div class="field <?php echo $payments->is_agency_user($user_id) ? '' : 'pro-gated-inline'; ?>" data-tier="agency">
+                                <label>Webhook URL (Zapier/Make) <span class="pro-badge" style="background:var(--accent);">Agency</span></label>
+                                <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" <?php echo $payments->is_agency_user($user_id) ? '' : 'readonly'; ?>>
                             </div>
                             <div class="field">
                                 <label>Redirect after Submission</label>
@@ -1313,16 +1428,6 @@ class Saas_Dashboard {
 
             </div> <!-- End Main Area -->
 
-            <div class="saas-preview-pane">
-                <div class="preview-header">
-                    <button id="saas-close-preview" class="close-preview-btn">&times;</button>
-                    <strong>Real-Time Preview</strong>
-                    <button onclick="document.getElementById('saas-preview-frame').contentWindow.location.reload();" class="button">🔄</button>
-                </div>
-                <div class="preview-frame-container">
-                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name); ?>"></iframe>
-                </div>
-            </div>
         </div>
 
         <!-- Modals -->
@@ -1420,105 +1525,6 @@ class Saas_Dashboard {
             </div>
         </div>
 
-        <div id="saas-edit-modal" class="saas-modal">
-            <div class="saas-modal-content">
-                <span class="close-modal">&times;</span>
-                <h3>Edit Block Content</h3>
-                <p class="field-hint" style="margin-bottom:20px;">Optimize this block for maximum conversion. Use the advanced options to add A/B testing or device-specific routing.</p>
-                <form id="saas-edit-link-form">
-                    <input type="hidden" name="link_id" id="edit-link-id">
-
-                    <div class="field"><label>Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
-                    <div class="field"><label>URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
-                    <div class="field"><label>Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
-
-                    <button type="button" class="button toggle-advanced" style="width:100%; margin-bottom:20px; background:#f1f5f9; color:#475569; font-weight:bold;">⚙️ Advanced Options</button>
-
-                    <div id="edit-advanced-fields" style="display:none; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
-                        <div class="field">
-                            <label>Style & Animation</label>
-                            <div style="display:flex; gap:10px;">
-                                <select name="block_style" id="edit-link-style" style="flex:1;">
-                                    <option value="regular">Regular</option>
-                                    <option value="featured">Featured (Pulse)</option>
-                                    <option value="outline">Outline</option>
-                                    <option value="glow">Glow</option>
-                                </select>
-                                <select name="block_animation" id="edit-link-animation" style="flex:1;">
-                                    <option value="none">No Animation</option>
-                                    <option value="fadeinup">Fade In Up</option>
-                                    <option value="bouncein">Bounce In</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
-                            <label>A/B Testing (Pro)</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Variant B Title" style="flex:1;">
-                                <input type="url" name="ab_url_b" id="edit-link-ab-url" placeholder="Variant B URL" style="flex:1;">
-                            </div>
-                        </div>
-
-                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
-                            <label>Conditional Routing (Pro)</label>
-                            <div style="display:flex; flex-direction:column; gap:10px;">
-                                <input type="url" name="url_mobile" id="edit-link-url-mobile" placeholder="Mobile-only URL">
-                                <div style="display:flex; gap:10px;">
-                                    <input type="text" name="url_geo_country" id="edit-link-geo-country" placeholder="Country Code (e.g. US)" style="flex:1;">
-                                    <input type="url" name="url_geo" id="edit-link-url-geo" placeholder="Geo-specific URL" style="flex:1;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <label>Custom Design</label>
-                            <div style="display:flex; gap:10px;">
-                                <div style="flex:1;">
-                                    <small>Background</small>
-                                    <input type="color" name="custom_bg" id="edit-link-custom-bg" style="height:40px; padding:2px;">
-                                </div>
-                                <div style="flex:1;">
-                                    <small>Text</small>
-                                    <input type="color" name="custom_text" id="edit-link-custom-text" style="height:40px; padding:2px;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <label>Visibility Scheduling</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="date" name="start_date" id="edit-link-start" style="flex:1;" title="Start Date">
-                                <input type="date" name="end_date" id="edit-link-end" style="flex:1;" title="End Date">
-                            </div>
-                            <p class="field-hint">Automate your promotions. This block will only be visible between these dates.</p>
-                        </div>
-
-                        <div class="field">
-                            <label>Hour Range (0-23)</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="number" name="hour_from" id="edit-link-hour-from" placeholder="From" min="0" max="23" style="flex:1;">
-                                <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To" min="0" max="23" style="flex:1;">
-                            </div>
-                        </div>
-
-                            <div class="field">
-                                <label>Icon/Thumb Image</label>
-                                <div id="edit-link-image-preview" style="width:60px; height:60px; border-radius:10px; background:#eee; margin-bottom:10px; overflow:hidden; border:1px solid #ddd;"></div>
-                                <input type="hidden" name="link_image_id" id="edit-link-image-id">
-                                <button type="button" class="button select-media" data-target="link-image">Select Icon</button>
-                            </div>
-
-                        <div class="field">
-                            <label>Password Unlock</label>
-                            <input type="text" name="link_password" id="edit-link-pass" placeholder="Block password">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width:100%;">Save All Changes</button>
-                </form>
-            </div>
-        </div>
         <?php
         return ob_get_clean();
     }

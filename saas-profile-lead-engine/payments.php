@@ -42,6 +42,19 @@ class Saas_Payments {
     }
 
     /**
+     * Check if user is on Agency tier
+     */
+    public function is_agency_user( $user_id ) {
+        $plan = get_user_meta( $user_id, '_saas_subscription_plan', true );
+        $expiry = get_user_meta( $user_id, '_saas_subscription_expiry', true );
+
+        if ( $plan === 'agency' && ( ! $expiry || $expiry > time() ) ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * AJAX: Process Checkout Session
      */
     public function handle_checkout() {

@@ -208,9 +208,16 @@ function saas_ajax_save_profile() {
 
     // AUTOMATION CONTEXT
     if ($context === 'automation') {
+        $payments = new Saas_Payments();
         if (isset($_POST['lead_magnet_url'])) update_post_meta($profile_id, '_saas_lead_magnet_url', esc_url_raw($_POST['lead_magnet_url']));
         if (isset($_POST['lead_redirect'])) update_post_meta($profile_id, '_saas_lead_redirect', esc_url_raw($_POST['lead_redirect']));
-        if (isset($_POST['lead_webhook'])) update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
+
+        if ($payments->is_agency_user($user_id)) {
+            if (isset($_POST['lead_webhook'])) update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
+        } else {
+            delete_post_meta($profile_id, '_saas_lead_webhook');
+        }
+
         if (isset($_POST['lead_success_msg'])) update_post_meta($profile_id, '_saas_lead_success_msg', sanitize_text_field($_POST['lead_success_msg']));
 
         update_post_meta($profile_id, '_saas_form_phone', isset($_POST['form_field_phone']) ? '1' : '0');
@@ -341,15 +348,29 @@ function saas_ajax_save_link() {
     if (isset($_POST['custom_bg'])) update_post_meta($link_id, '_saas_custom_bg', sanitize_hex_color($_POST['custom_bg']));
     if (isset($_POST['custom_text'])) update_post_meta($link_id, '_saas_custom_text', sanitize_hex_color($_POST['custom_text']));
 
-    if (isset($_POST['url_mobile'])) update_post_meta($link_id, '_saas_url_mobile', esc_url_raw($_POST['url_mobile']));
-    if (isset($_POST['url_geo'])) update_post_meta($link_id, '_saas_url_geo', esc_url_raw($_POST['url_geo']));
-    if (isset($_POST['url_geo_country'])) update_post_meta($link_id, '_saas_url_geo_country', sanitize_text_field($_POST['url_geo_country']));
-    if (isset($_POST['link_password'])) update_post_meta($link_id, '_saas_link_password', sanitize_text_field($_POST['link_password']));
+    $payments = new Saas_Payments();
+    $is_pro = $payments->is_pro_user(get_current_user_id());
+
+    if ($is_pro) {
+        if (isset($_POST['url_mobile'])) update_post_meta($link_id, '_saas_url_mobile', esc_url_raw($_POST['url_mobile']));
+        if (isset($_POST['url_geo'])) update_post_meta($link_id, '_saas_url_geo', esc_url_raw($_POST['url_geo']));
+        if (isset($_POST['url_geo_country'])) update_post_meta($link_id, '_saas_url_geo_country', sanitize_text_field($_POST['url_geo_country']));
+        if (isset($_POST['link_password'])) update_post_meta($link_id, '_saas_link_password', sanitize_text_field($_POST['link_password']));
+        if (isset($_POST['ab_title_b'])) update_post_meta($link_id, '_saas_ab_title_b', sanitize_text_field($_POST['ab_title_b']));
+        if (isset($_POST['ab_url_b'])) update_post_meta($link_id, '_saas_ab_url_b', esc_url_raw($_POST['ab_url_b']));
+    } else {
+        // Clear pro meta if not pro
+        delete_post_meta($link_id, '_saas_url_mobile');
+        delete_post_meta($link_id, '_saas_url_geo');
+        delete_post_meta($link_id, '_saas_url_geo_country');
+        delete_post_meta($link_id, '_saas_link_password');
+        delete_post_meta($link_id, '_saas_ab_title_b');
+        delete_post_meta($link_id, '_saas_ab_url_b');
+    }
+
     if (isset($_POST['block_style'])) update_post_meta($link_id, '_saas_block_style', sanitize_text_field($_POST['block_style']));
     if (isset($_POST['block_animation'])) update_post_meta($link_id, '_saas_block_animation', sanitize_text_field($_POST['block_animation']));
     if (isset($_POST['link_image_id'])) update_post_meta($link_id, '_saas_link_image_id', intval($_POST['link_image_id']));
-    if (isset($_POST['ab_title_b'])) update_post_meta($link_id, '_saas_ab_title_b', sanitize_text_field($_POST['ab_title_b']));
-    if (isset($_POST['ab_url_b'])) update_post_meta($link_id, '_saas_ab_url_b', esc_url_raw($_POST['ab_url_b']));
     if (isset($_POST['hour_from'])) update_post_meta($link_id, '_saas_hour_from', sanitize_text_field($_POST['hour_from']));
     if (isset($_POST['hour_to'])) update_post_meta($link_id, '_saas_hour_to', sanitize_text_field($_POST['hour_to']));
 

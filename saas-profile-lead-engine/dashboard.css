@@ -405,6 +405,17 @@ body {
     justify-content: center;
 }
 
+/* Inline Containers */
+.saas-inline-container {
+    animation: fadeIn 0.4s ease;
+    scroll-margin-top: 100px;
+}
+
+.saas-inline-container .preview-frame-container {
+    box-shadow: none;
+    border-width: 4px;
+}
+
 .saas-modal-content {
     background: var(--white);
     padding: 32px;
