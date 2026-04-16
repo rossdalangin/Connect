@@ -401,6 +401,114 @@ function saas_ajax_apply_template() {
                 ['title' => 'Client Success', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Alex helped me double my revenue!'],
             ]
         ],
+        'servant' => [
+            'headline' => 'Dedicated to Progress & Community Service 🏛️',
+            'bio' => 'Serving as your advocate in public office. I am dedicated to sustainable growth and fiscal responsibility.',
+            'color' => '#1e293b',
+            'theme' => 'light',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Latest Community Update', 'url' => '#', 'type' => 'video'],
+                ['title' => 'Join the Volunteer Team', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'My Vision for 2024', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
+            ]
+        ],
+        'creator' => [
+            'headline' => 'Building the Next Generation of Digital Brands 🎬',
+            'bio' => 'Daily tips on content strategy and community building. Join 50k+ others on the journey.',
+            'color' => '#ff0050',
+            'theme' => 'vibrant',
+            'shadow' => 'hard',
+            'links' => [
+                ['title' => 'Latest Masterclass', 'url' => '#', 'type' => 'video'],
+                ['title' => 'Join Private Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                ['title' => 'My Setup Gear', 'url' => '#', 'type' => 'button'],
+            ]
+        ],
+        'speaker' => [
+            'headline' => 'Inspiring Transformation through Keynotes 🎙️',
+            'bio' => 'Helping organizations navigate change and build resilient cultures. Global Keynote Speaker.',
+            'color' => '#d4af37',
+            'theme' => 'luxury',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Watch Highlight Reel', 'url' => '#', 'type' => 'video'],
+                ['title' => 'Inquire for Speaking', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'Speaker One-Sheet', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+            ]
+        ],
+        'author' => [
+            'headline' => 'Exploring the Intersection of Tech & Humanity ✍️',
+            'bio' => 'Bestselling Author. My work helps modern professionals build meaningful lives in an era of distraction.',
+            'color' => '#4338ca',
+            'theme' => 'light',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Order New Book', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['title' => 'Read Chapter Preview', 'url' => '#', 'type' => 'button'],
+                ['title' => 'Join my Newsletter', 'url' => '#', 'type' => 'newsletter'],
+            ]
+        ],
+        'consultant' => [
+            'headline' => 'Operational Efficiency for Modern SaaS 🧠',
+            'bio' => 'I help seed-stage startups optimize their unit economics and reduce churn.',
+            'color' => '#2c3e50',
+            'theme' => 'dark',
+            'shadow' => 'none',
+            'links' => [
+                ['title' => 'Book an Audit', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['title' => 'Case Studies', 'url' => '#', 'type' => 'button'],
+                ['title' => 'Contact Details', 'url' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:consult@site.com\nlinkedin:https://linkedin.com"],
+            ]
+        ],
+        'lawyer' => [
+            'headline' => 'Strategic Legal Advocacy for Elite Clients ⚖️',
+            'bio' => 'Providing expert legal counsel with a focus on results. High-stakes litigation and advisory.',
+            'color' => '#1a1a1a',
+            'theme' => 'luxury',
+            'shadow' => 'hard',
+            'links' => [
+                ['title' => 'Request Consultation', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'Areas of Practice', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
+                ['title' => 'Client Testimonials', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Unparalleled expertise and results.'],
+            ]
+        ],
+        'doctor' => [
+            'headline' => 'Compassionate Care, Precision Medicine 🩺',
+            'bio' => 'Your Partner in Health and Longevity. Evidence-based wellness for modern lives.',
+            'color' => '#0d9488',
+            'theme' => 'light',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Book Appointment', 'url' => '#', 'type' => 'calendar'],
+                ['title' => 'Patient Portal', 'url' => '#', 'type' => 'button'],
+                ['title' => 'Health Resources', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
+            ]
+        ],
+        'artist' => [
+            'headline' => 'Visual Storytelling through Digital Art 🎨',
+            'bio' => 'Independent designer creating immersive visual experiences for forward-thinking brands.',
+            'color' => '#f472b6',
+            'theme' => 'vibrant',
+            'shadow' => 'hard',
+            'links' => [
+                ['title' => 'Portfolio Gallery', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400\nhttps://via.placeholder.com/401"],
+                ['title' => 'Project Inquiry', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'Follow my Process', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+            ]
+        ],
+        'agency' => [
+            'headline' => 'Scaling Brands through Performance Marketing 🏢',
+            'bio' => 'We build high-performance funnels that drive revenue for elite founders.',
+            'color' => '#111827',
+            'theme' => 'dark',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Get a Free Quote', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'Our Pricing Models', 'url' => '#', 'type' => 'pricing', 'extra' => "$2,500+\nFull CRM Sync\nScale Strategy"],
+                ['title' => 'Latest Campaign Results', 'url' => '#', 'type' => 'video'],
+            ]
+        ],
         'freelancer' => [
             'headline' => 'Design & Development for Modern Brands.',
             'bio' => 'Independent creative helping startups launch beautiful products.',
