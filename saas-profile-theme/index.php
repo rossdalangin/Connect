@@ -46,6 +46,7 @@ $meta = saas_get_profile_meta( $profile_id );
 
 // Check Pro Status (Unified License Check)
 $is_pro = saas_is_profile_licensed($profile_id);
+$is_preview = isset($_GET['preview']) && $_GET['preview'] == '1';
 $bg_type = get_post_meta( $profile_id, '_saas_bg_type', true ) ?: 'flat';
 $bg_color = get_post_meta( $profile_id, '_saas_bg_color', true ) ?: '#f3f3f1';
 $gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
@@ -143,9 +144,9 @@ include __DIR__ . '/header.php';
         <?php foreach ( $blocks as $index => $block ) :
             $type = get_post_meta( $block->ID, '_saas_block_type', true ) ?: 'button';
 
-            // Pro Gating Check
+            // Pro Gating Check - Relaxed for display to ensure consistency
+            // Gating is handled at the creation level
             $pro_blocks = ['image_gallery', 'newsletter', 'product', 'calendar'];
-            if (in_array($type, $pro_blocks) && !$is_pro) continue;
 
             $style = get_post_meta( $block->ID, '_saas_block_style', true ) ?: 'regular';
             $animation = get_post_meta($block->ID, '_saas_block_animation', true) ?: 'fadeinup';
@@ -157,20 +158,22 @@ include __DIR__ . '/header.php';
             if ($custom_bg) $block_style_attr .= "background-color: $custom_bg; ";
             if ($custom_text) $block_style_attr .= "color: $custom_text; ";
 
-            // Scheduling Check
-            $start_date = get_post_meta($block->ID, '_saas_start_date', true);
-            $end_date = get_post_meta($block->ID, '_saas_end_date', true);
-            $now = time();
-            if ($start_date && strtotime($start_date) > $now) continue;
-            if ($end_date && strtotime($end_date) < $now) continue;
+            if (!$is_preview) {
+                // Scheduling Check
+                $start_date = get_post_meta($block->ID, '_saas_start_date', true);
+                $end_date = get_post_meta($block->ID, '_saas_end_date', true);
+                $now = time();
+                if ($start_date && strtotime($start_date) > $now) continue;
+                if ($end_date && strtotime($end_date) < $now) continue;
 
-            // Hour-based scheduling
-            $hour_from = get_post_meta($block->ID, '_saas_hour_from', true);
-            $hour_to   = get_post_meta($block->ID, '_saas_hour_to', true);
-            if ($is_pro && ($hour_from !== '' || $hour_to !== '')) {
-                $current_hour = (int) current_time('G');
-                if ($hour_from !== '' && $current_hour < (int)$hour_from) continue;
-                if ($hour_to !== '' && $current_hour > (int)$hour_to) continue;
+                // Hour-based scheduling
+                $hour_from = get_post_meta($block->ID, '_saas_hour_from', true);
+                $hour_to   = get_post_meta($block->ID, '_saas_hour_to', true);
+                if ($is_pro && ($hour_from !== '' || $hour_to !== '')) {
+                    $current_hour = (int) current_time('G');
+                    if ($hour_from !== '' && $current_hour < (int)$hour_from) continue;
+                    if ($hour_to !== '' && $current_hour > (int)$hour_to) continue;
+                }
             }
             ?>
             <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" data-block-id="<?php echo $block->ID; ?>" style="animation-delay: <?php echo $index * 0.1; ?>s; <?php echo $block_style_attr; ?>">

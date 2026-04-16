@@ -409,7 +409,7 @@ class Saas_Dashboard {
                                     </div>
                                 </div>
                                 <div class="preview-frame-container" style="margin: 0 auto;">
-                                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name); ?>"></iframe>
+                                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name . '?preview=1'); ?>"></iframe>
                                 </div>
                             </div>
                         </div>

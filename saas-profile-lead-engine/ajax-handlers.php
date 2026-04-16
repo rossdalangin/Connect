@@ -379,10 +379,12 @@ function saas_ajax_save_link() {
     if ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
     elseif ($type === 'pricing' || $type === 'product') {
-        update_post_meta($link_id, '_saas_price', $extra);
-        if ($type === 'pricing') {
-            $features = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
-            update_post_meta($link_id, '_saas_features', $features);
+        $lines = array_filter(array_map('trim', explode("\n", $extra)));
+        if (!empty($lines)) {
+            update_post_meta($link_id, '_saas_price', $lines[0]);
+            if ($type === 'pricing') {
+                update_post_meta($link_id, '_saas_features', array_slice($lines, 1));
+            }
         }
     }
     elseif ($type === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
@@ -403,6 +405,10 @@ function saas_ajax_save_link() {
             }
         }
         update_post_meta($link_id, '_saas_social_data', $data);
+    }
+    elseif ($type === 'image_gallery') {
+        $urls = array_filter(array_map('trim', explode("\n", $extra)));
+        update_post_meta($link_id, '_saas_gallery_images', $urls);
     }
 
     wp_send_json_success( 'Link updated' );
