@@ -28,10 +28,15 @@ $h_img   = get_option('saas_home_image');
         </p>
 
         <div class="cta-actions">
-            <a href="<?php echo home_url('/register'); ?>" class="saas-cta-btn-vibrant">
-                <?php echo esc_html($h_cta); ?>
-            </a>
-            <p style="margin-top: 20px; color: #a0a0a0; font-size: 0.9rem;">No credit card required. Setup in minutes.</p>
+            <div class="hero-claim-wrapper" style="margin-top: 40px;">
+                <form action="<?php echo home_url('/register'); ?>" method="GET" style="display:inline-flex; background:#fff; padding:10px; border-radius:100px; box-shadow:0 15px 35px rgba(0,0,0,0.1); border:1px solid #eee; width:100%; max-width:600px; text-align:left;">
+                    <span style="padding:0 20px; color:#999; display:flex; align-items:center; font-weight:700;"><?php echo parse_url(home_url(), PHP_URL_HOST); ?>/</span>
+                    <input type="text" name="username" id="saas-home-username" placeholder="yourname" style="flex:1; border:none; outline:none; font-size:1.1rem; font-weight:700; padding:10px 0;">
+                    <button type="submit" style="background:linear-gradient(135deg, #6c5ce7, #a29bfe); color:#fff; border:none; padding:15px 40px; border-radius:50px; font-weight:800; cursor:pointer; margin-left:10px;"><?php echo esc_html($h_cta); ?></button>
+                </form>
+                <div id="username-status" style="margin-top:10px; font-size:0.9rem; font-weight:700; height:20px; color:#6c5ce7;"></div>
+                <p style="margin-top: 20px; color: #a0a0a0; font-size: 0.9rem;">No credit card required. Setup in minutes.</p>
+            </div>
         </div>
 
         <!-- Social Proof Logos -->
@@ -414,5 +419,36 @@ if ($comparison_json) : ?>
         to { transform: rotate(360deg); }
     }
 </style>
+
+<script>
+jQuery(document).ready(function($) {
+    var timer;
+    $('#saas-home-username').on('keyup', function() {
+        var user = $(this).val();
+        var $status = $('#username-status');
+        clearTimeout(timer);
+
+        if (user.length < 3) {
+            $status.text('').css('color', 'inherit');
+            return;
+        }
+
+        $status.text('Checking availability...').css('color', '#666');
+
+        timer = setTimeout(function() {
+            $.post('<?php echo admin_url("admin-ajax.php"); ?>', {
+                action: 'saas_check_username',
+                username: user
+            }, function(res) {
+                if (res.success) {
+                    $status.text('✓ ' + user + ' is available!').css('color', '#10b981');
+                } else {
+                    $status.text('✗ ' + user + ' is already taken.').css('color', '#ef4444');
+                }
+            });
+        }, 500);
+    });
+});
+</script>
 
 <?php get_footer(); ?>

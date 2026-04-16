@@ -187,6 +187,12 @@ function saas_ajax_save_profile() {
         if (isset($_POST['bg_type'])) {
             $bg_type = sanitize_text_field( $_POST['bg_type'] );
             $bg_val  = sanitize_text_field( $_POST['bg_value'] );
+
+            // Premium background gating
+            if (!$is_pro && in_array($bg_type, ['mesh', 'particles'])) {
+                $bg_type = 'flat';
+            }
+
             update_post_meta($profile_id, '_saas_bg_type', $bg_type );
             if ($bg_type === 'gradient') update_post_meta($profile_id, '_saas_bg_gradient', $bg_val );
             else update_post_meta($profile_id, '_saas_bg_color', $bg_val );
@@ -228,9 +234,17 @@ function saas_ajax_save_profile() {
 
     // SEO CONTEXT
     if ($context === 'seo' || $context === 'all') {
+        $payments = new Saas_Payments();
+        $is_pro = $payments->is_pro_user($user_id);
+
         if (isset($_POST['meta_title'])) update_post_meta($profile_id, '_saas_seo_title', sanitize_text_field($_POST['meta_title']));
         if (isset($_POST['meta_desc'])) update_post_meta($profile_id, '_saas_seo_desc', sanitize_textarea_field($_POST['meta_desc']));
-        if (isset($_POST['favicon'])) update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
+
+        if ($is_pro) {
+            if (isset($_POST['favicon'])) update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
+        } else {
+            delete_post_meta($profile_id, '_saas_favicon');
+        }
     }
 
     // INTEGRATIONS CONTEXT
@@ -242,8 +256,14 @@ function saas_ajax_save_profile() {
 
     // TRACKING CONTEXT
     if ($context === 'tracking' || $context === 'all') {
-        if (isset($_POST['header_scripts'])) update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
-        if (isset($_POST['footer_scripts'])) update_post_meta($profile_id, '_saas_footer_scripts', $_POST['footer_scripts']);
+        $payments = new Saas_Payments();
+        if ($payments->is_pro_user($user_id)) {
+            if (isset($_POST['header_scripts'])) update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
+            if (isset($_POST['footer_scripts'])) update_post_meta($profile_id, '_saas_footer_scripts', $_POST['footer_scripts']);
+        } else {
+            delete_post_meta($profile_id, '_saas_header_scripts');
+            delete_post_meta($profile_id, '_saas_footer_scripts');
+        }
     }
 
     wp_send_json_success( 'Data saved successfully!' );

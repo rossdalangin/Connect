@@ -294,7 +294,10 @@ body {
     }
     .saas-modal-content {
         padding: 20px;
-        margin: 20px auto;
+        margin: 10px auto; /* Tighter margins on mobile */
+    }
+    .saas-modal {
+        padding: 20px 10px; /* Reduced mobile padding */
     }
 }
 
