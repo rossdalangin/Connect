@@ -616,8 +616,8 @@
             };
 
             saasFetch('saas_save_profile', data, $btn).done(function() {
-                // After saving info, apply the template for the selected niche
-                saasFetch('saas_apply_template', { template: niche, profile_id: profileId }, $btn)
+                // After saving info, apply the template for the selected niche, but skip headline/bio overwrite
+                saasFetch('saas_apply_template', { template: niche, profile_id: profileId, skip_meta: 1 }, $btn)
                     .done(function() { location.reload(); });
             });
         });

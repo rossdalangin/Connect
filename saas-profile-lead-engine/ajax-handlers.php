@@ -422,6 +422,7 @@ function saas_ajax_apply_template() {
     $template = sanitize_text_field( $_POST['template'] );
     $user_id = get_current_user_id();
     $profile_id = isset($_POST['profile_id']) ? intval($_POST['profile_id']) : 0;
+    $skip_meta = isset($_POST['skip_meta']) && $_POST['skip_meta'] == '1';
 
     // Verify profile ownership
     if ($profile_id) {
@@ -669,8 +670,10 @@ function saas_ajax_apply_template() {
 
         // Update profile meta too
         if ($profile_id) {
-            update_post_meta($profile_id, '_saas_headline', $set['headline']);
-            update_post_meta($profile_id, '_saas_bio', $set['bio']);
+            if (!$skip_meta) {
+                update_post_meta($profile_id, '_saas_headline', $set['headline']);
+                update_post_meta($profile_id, '_saas_bio', $set['bio']);
+            }
             update_post_meta($profile_id, '_saas_theme_color', $set['color']);
             update_post_meta($profile_id, '_saas_profile_theme', $set['theme']);
             update_post_meta($profile_id, '_saas_container_shadow', $set['shadow']);
