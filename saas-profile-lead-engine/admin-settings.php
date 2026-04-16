@@ -9,6 +9,7 @@ class Saas_Admin_Settings {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
         add_action( 'wp_ajax_saas_save_affiliate_coupons', [$this, 'ajax_save_affiliate_coupons'] );
+        add_action( 'wp_ajax_saas_send_broadcast', [$this, 'ajax_send_broadcast'] );
         add_filter( 'manage_users_columns', [ $this, 'add_user_columns' ] );
         add_filter( 'manage_users_custom_column', [ $this, 'render_user_columns' ], 10, 3 );
         add_action( 'admin_init', [ $this, 'settings_init' ] );
@@ -613,6 +614,31 @@ class Saas_Admin_Settings {
         $coupons = $_POST['coupons'] ?? [];
         update_option('saas_affiliate_coupons', $coupons);
         wp_send_json_success('Affiliate coupons saved successfully!');
+    }
+
+    public function ajax_send_broadcast() {
+        if (!current_user_can('manage_options')) wp_send_json_error('Unauthorized');
+        check_ajax_referer('saas_dashboard_nonce', 'security');
+
+        $subject = sanitize_text_field($_POST['subject']);
+        $message = sanitize_textarea_field($_POST['message']);
+        $users = get_users(['fields' => 'ID']);
+
+        foreach ($users as $user_id) {
+            wp_insert_post([
+                'post_type'    => 'saas_message',
+                'post_title'   => $subject,
+                'post_content' => $message,
+                'post_status'  => 'publish',
+                'post_author'  => get_current_user_id(),
+                'meta_input'   => [
+                    '_saas_msg_recipient' => $user_id,
+                    '_saas_msg_status'    => 'unread'
+                ]
+            ]);
+        }
+
+        wp_send_json_success('Broadcast sent to ' . count($users) . ' users!');
     }
 
     public function finances_page_html() {

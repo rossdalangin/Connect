@@ -313,6 +313,7 @@ body {
     justify-content: flex-start;
     padding: 60px 20px;
     overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .saas-preview-pane.show {
@@ -397,6 +398,8 @@ body {
     padding: 60px 20px;
     overflow-y: auto;
     box-sizing: border-box;
+    align-items: flex-start; /* Ensure top alignment for long forms */
+    justify-content: center;
 }
 
 .saas-modal-content {

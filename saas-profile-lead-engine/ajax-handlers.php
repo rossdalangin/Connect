@@ -43,10 +43,10 @@ function saas_ajax_add_link() {
     $animation = isset($_POST['block_animation']) ? sanitize_text_field( $_POST['block_animation'] ) : 'fadeinup';
 
     // Pro-tier Block Enforcement
-    $pro_only_blocks = ['image_gallery', 'newsletter', 'calendar', 'countdown'];
+    $pro_only_blocks = ['image_gallery', 'newsletter', 'calendar', 'countdown', 'product'];
     $payments = new Saas_Payments();
     if (in_array($type, $pro_only_blocks) && !$payments->is_pro_user(get_current_user_id())) {
-        wp_send_json_error('This block type is reserved for Elite Pro users.');
+        wp_send_json_error('This block type is reserved for Elite Pro or Agency users.');
     }
 
     // Verify ownership of the target profile
@@ -143,6 +143,11 @@ function saas_ajax_save_profile() {
             if (isset($_POST['custom_domain'])) update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
             if (isset($_POST['profile_password'])) update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
             update_post_meta($profile_id, '_saas_verified_badge', isset($_POST['verified_badge']) ? '1' : '0');
+        } else {
+            // Force disable pro-only fields for free users
+            update_post_meta($profile_id, '_saas_verified_badge', '0');
+            delete_post_meta($profile_id, '_saas_custom_domain');
+            delete_post_meta($profile_id, '_saas_profile_password');
         }
 
         update_post_meta($profile_id, '_saas_show_in_directory', isset($_POST['show_in_directory']) ? '1' : '0');
@@ -173,6 +178,10 @@ function saas_ajax_save_profile() {
         if ($is_pro) {
             if (isset($_POST['custom_css'])) update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
             update_post_meta($profile_id, '_saas_hide_branding', isset($_POST['hide_branding']) ? '1' : '0');
+        } else {
+            // Force disable pro-only styles for free users
+            delete_post_meta($profile_id, '_saas_custom_css');
+            update_post_meta($profile_id, '_saas_hide_branding', '0');
         }
 
         if (isset($_POST['bg_type'])) {

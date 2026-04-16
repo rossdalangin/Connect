@@ -106,6 +106,41 @@ $h_img   = get_option('saas_home_image');
     </div>
 </section>
 
+<!-- Tech Preview Section -->
+<section class="features-section" style="padding: 120px 20px; background: #fff; border-top: 1px solid #eee;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 80px;">The only link hub with an IQ.</h2>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; margin-bottom: 80px; text-align: left; align-items: center;">
+            <div style="background:#f8fafc; padding:50px; border-radius:40px; border: 1px solid #e2e8f0;">
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <span style="background:rgba(108, 92, 231, 0.1); color:#6c5ce7; padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem;">Smart Routing</span>
+                    <span style="background:rgba(57, 224, 155, 0.1); color:#39e09b; padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem;">A/B Testing</span>
+                </div>
+                <h3 style="font-size:2.5rem; margin-bottom:20px; line-height:1.2;">Automate your conversion.</h3>
+                <p style="color:#64748b; font-size:1.15rem; line-height:1.7;">Our system automatically detects your visitor's location and device. Send iPhone users to the App Store and Android users to Play Store—automatically. Run split tests on your CTAs to see which version converts better, just like the world's top marketers.</p>
+            </div>
+            <div style="background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding:50px; border-radius:40px; color:#fff; position:relative; overflow:hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.2);">
+                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:25px; border-radius:20px; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <strong>Variant A: "Book Now"</strong>
+                        <span style="color:#ef4444; font-weight:900;">14.2%</span>
+                    </div>
+                    <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:10px;"><div style="width:14.2%; height:100%; background:#ef4444; border-radius:10px;"></div></div>
+                </div>
+                <div style="background:rgba(255,255,255,0.08); border:2px solid #39e09b; padding:25px; border-radius:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <strong>Variant B: "Claim My Session"</strong>
+                        <span style="color:#39e09b; font-weight:900;">32.5% (Winner)</span>
+                    </div>
+                    <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:10px;"><div style="width:32.5%; height:100%; background:#39e09b; border-radius:10px;"></div></div>
+                </div>
+                <p style="margin-top:20px; font-size:0.85rem; color:rgba(255,255,255,0.5); text-align:center;">Real-time A/B Testing Results</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- How It Works Section -->
 <section style="padding: 120px 20px; background: #fff;">
     <div style="max-width: 1100px; margin: 0 auto; text-align: center;">
@@ -265,7 +300,20 @@ if ($comparison_json) : ?>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; align-items: stretch;">
             <?php
             $pricing_json = get_option('saas_home_pricing_json');
-            $plans = json_decode($pricing_json, true) ?: [];
+            $plans = json_decode($pricing_json, true) ?: [
+                [
+                    'name' => 'Free', 'price' => '$0', 'period' => 'forever', 'cta' => 'Join for Free', 'link' => '/register', 'style' => 'light',
+                    'features' => ['1 Profile', 'Standard Blocks', 'Basic Analytics', 'Community Support']
+                ],
+                [
+                    'name' => 'Elite Pro', 'price' => '$19', 'period' => '/mo', 'cta' => 'Upgrade to Pro', 'link' => '/register?plan=pro', 'style' => 'featured', 'badge' => 'FOR THE ELITE 1%',
+                    'features' => ['Everything in Free', 'Unlimited Premium Blocks', 'Lead Generation CRM', 'Custom Domain Mapping', 'Priority Support']
+                ],
+                [
+                    'name' => 'Agency Unlimited', 'price' => '$49', 'period' => '/mo', 'cta' => 'Go Unlimited', 'link' => '/register?plan=agency', 'style' => 'light',
+                    'features' => ['Everything in Pro', 'Unlimited Sub-accounts', 'API Access', 'White-label Client Funnels', 'Dedicated Manager']
+                ]
+            ];
             foreach ($plans as $p) :
                 $is_featured = ($p['style'] === 'featured');
             ?>
