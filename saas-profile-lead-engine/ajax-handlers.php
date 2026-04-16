@@ -613,6 +613,12 @@ function saas_ajax_apply_template() {
         ]
     ];
 
+    // Ensure template exists, fallback to business or coach if not
+    if (!isset($sets[$template])) {
+        if (isset($sets['business'])) $template = 'business';
+        elseif (isset($sets['coach'])) $template = 'coach';
+    }
+
     if ( isset($sets[$template]) ) {
         $set = $sets[$template];
 
