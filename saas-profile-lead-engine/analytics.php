@@ -165,11 +165,13 @@ class Saas_Analytics {
     public function get_growth_data() {
         global $wpdb;
         $results = $wpdb->get_results( "
-            SELECT DATE_FORMAT(post_date, '%b') as month, COUNT(*) as count
+            SELECT DATE_FORMAT(post_date, '%b %Y') as month, COUNT(*) as count
             FROM {$wpdb->posts}
-            WHERE post_type = 'saas_profile' AND post_status = 'publish'
+            WHERE post_type = 'saas_profile'
+              AND post_status = 'publish'
+              AND post_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
             GROUP BY month
-            ORDER BY post_date ASC LIMIT 6
+            ORDER BY MIN(post_date) ASC
         " );
         return $results ?: [];
     }

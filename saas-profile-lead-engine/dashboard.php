@@ -1285,7 +1285,10 @@ class Saas_Dashboard {
                                     <?php
                                     $gateway_mode = $payments->get_active_gateway();
                                     if ($gateway_mode === 'stripe' || $gateway_mode === 'user_select') : ?>
-                                        <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="agency" style="width:100%; background:var(--accent); color:#000;">Upgrade to Agency</button>
+                                        <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="agency" style="width:100%; background:var(--accent); color:#000;">Upgrade to Agency (Stripe)</button>
+                                    <?php endif; ?>
+                                    <?php if ($gateway_mode === 'paypal' || $gateway_mode === 'user_select') : ?>
+                                        <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="agency" style="width:100%; background:#0070ba;">Upgrade to Agency (PayPal)</button>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>

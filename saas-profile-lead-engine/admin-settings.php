@@ -335,6 +335,24 @@ class Saas_Admin_Settings {
             [ 'id' => 'saas_stripe_secret_key', 'desc' => 'Found in your Stripe Dashboard (Developers > API Keys).' ]
         );
 
+        add_settings_field(
+            'paypal_enabled',
+            'Enable PayPal Payments',
+            [ $this, 'checkbox_render' ],
+            'saas_settings',
+            'saas_payment_section',
+            [ 'id' => 'saas_paypal_enabled' ]
+        );
+
+        add_settings_field(
+            'paypal_email',
+            'PayPal Business Email',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_payment_section',
+            [ 'id' => 'saas_paypal_email', 'desc' => 'Email address associated with your PayPal merchant account.' ]
+        );
+
         add_settings_section(
             'saas_branding_section',
             'Global Platform Branding',
@@ -1236,6 +1254,7 @@ class Saas_Admin_Settings {
                     <a href="#tab-general-settings" class="nav-tab">⚙️ General & Payments</a>
                     <a href="#tab-home-editor" class="nav-tab">🏠 Homepage Content</a>
                     <a href="#tab-tools" class="nav-tab">🛠️ Advanced Tools</a>
+                    <a href="#tab-shortcodes" class="nav-tab">📜 Shortcode Guide</a>
                     <a href="#tab-broadcast" class="nav-tab">📣 System Broadcast</a>
                 </h2>
 
@@ -1321,6 +1340,29 @@ class Saas_Admin_Settings {
                             <button id="saas-generate-samples-btn" class="button button-secondary">🚀 Generate Full Sample Data</button>
                             <button id="saas-test-payment-btn" class="button button-secondary" style="background:#f59e0b; color:#fff; border:none; margin-top:10px;">Simulate Success Payment (UID: 1)</button>
                         </div>
+                    </div>
+                </div>
+
+                <div id="tab-shortcodes" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
+                    <h3>Available System Shortcodes</h3>
+                    <p>Use these shortcodes to place SaaS functionality on any page or post.</p>
+
+                    <div style="background:#f8fafc; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #eee;">
+                        <code style="font-size:1.1rem; color:var(--primary);">[saas_dashboard]</code>
+                        <p><strong>Description:</strong> Renders the complete user dashboard. Users must be logged in to see their content.</p>
+                        <p><strong>Example:</strong> Create a page titled "My Dashboard" and paste this shortcode in the editor.</p>
+                    </div>
+
+                    <div style="background:#f8fafc; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #eee;">
+                        <code style="font-size:1.1rem; color:var(--primary);">[saas_login_form]</code>
+                        <p><strong>Description:</strong> Displays a professional login form optimized for the SaaS platform.</p>
+                        <p><strong>Example:</strong> <code>[saas_login_form redirect="/custom-path"]</code> (Redirect is optional).</p>
+                    </div>
+
+                    <div style="background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #eee;">
+                        <code style="font-size:1.1rem; color:var(--primary);">[saas_register_form]</code>
+                        <p><strong>Description:</strong> Renders the multi-step user registration form.</p>
+                        <p><strong>Example:</strong> Use this on your "Sign Up" page to allow new consultants to join.</p>
                     </div>
                 </div>
 
