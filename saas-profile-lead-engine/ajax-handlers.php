@@ -75,7 +75,9 @@ function saas_ajax_add_link() {
 
         // Extended meta for complex blocks
         $extra = isset($_POST['extra']) ? $_POST['extra'] : '';
-        if ($type === 'testimonial') {
+        if ($type === 'button') {
+            update_post_meta($link_id, '_saas_link_desc', sanitize_textarea_field($extra));
+        } elseif ($type === 'testimonial') {
             update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($extra));
         } elseif ($type === 'faq') {
             update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($extra));
@@ -379,7 +381,8 @@ function saas_ajax_save_link() {
 
     // Determine meta key based on type
     $type = get_post_meta( $link_id, '_saas_block_type', true );
-    if ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
+    if ($type === 'button') update_post_meta($link_id, '_saas_link_desc', $extra);
+    elseif ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
     elseif ($type === 'pricing' || $type === 'product') {
         $lines = array_filter(array_map('trim', explode("\n", $extra)));

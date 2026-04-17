@@ -88,6 +88,9 @@ include __DIR__ . '/header.php';
             else echo 'none';
         ?>;
     }
+    .btn-text-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .btn-desc { font-size: 0.8rem; opacity: 0.8; margin-top: 4px; display: block; }
+    .testimonial-block { padding: 25px; background: #fff; border-radius: var(--btn-radius); box-shadow: var(--shadow-style); text-align: center; }
     <?php
     $custom_css = get_post_meta($profile_id, '_saas_custom_css', true);
     if ($is_pro && $custom_css) echo $custom_css;
@@ -211,17 +214,24 @@ include __DIR__ . '/header.php';
                         if ($thumb_id) : ?>
                             <img src="<?php echo esc_url(wp_get_attachment_thumb_url($thumb_id)); ?>" class="btn-thumb">
                         <?php endif; ?>
-                        <span class="btn-label"><?php echo esc_html( $block->post_title ); ?> <?php if($has_pass) echo '🔒'; ?></span>
+                        <div class="btn-text-wrapper">
+                            <span class="btn-label"><?php echo esc_html( $block->post_title ); ?> <?php if($has_pass) echo '🔒'; ?></span>
+                            <?php
+                            $btn_desc = get_post_meta($block->ID, '_saas_link_desc', true);
+                            if ($btn_desc) : ?>
+                                <small class="btn-desc"><?php echo esc_html($btn_desc); ?></small>
+                            <?php endif; ?>
+                        </div>
                     </a>
                 <?php elseif ($type === 'video') : ?>
                     <div class="video-embed">
                         <?php echo wp_oembed_get( $url ); ?>
                     </div>
                 <?php elseif ($type === 'testimonial') : ?>
-                    <div class="testimonial-block">
+                    <a href="<?php echo esc_url($url); ?>" class="testimonial-block" style="text-decoration:none; color:inherit;">
                         <p class="quote">"<?php echo esc_html( get_post_meta($block->ID, '_saas_testimonial_text', true) ); ?>"</p>
                         <cite>- <?php echo esc_html( $block->post_title ); ?></cite>
-                    </div>
+                    </a>
                 <?php elseif ($type === 'faq') : ?>
                     <details class="faq-block">
                         <summary><?php echo esc_html( $block->post_title ); ?></summary>
@@ -641,7 +651,23 @@ window.addEventListener('message', function(event) {
     if (event.data.type === 'live_update') {
         const { key, value } = event.data;
         if (key === 'cover_update') {
-            location.reload(); // Hard refresh for new images in preview
+            const coverCont = document.querySelector('.profile-cover');
+            if (coverCont) {
+                const img = coverCont.querySelector('img');
+                if (img) img.src = value;
+                else coverCont.innerHTML = `<img src="${value}" style="width:100%; height:100%; object-fit:cover;">`;
+            } else {
+                const header = document.querySelector('.profile-header');
+                const newCover = document.createElement('div');
+                newCover.className = 'profile-cover';
+                newCover.innerHTML = `<img src="${value}" style="width:100%; height:100%; object-fit:cover;">`;
+                header.parentNode.insertBefore(newCover, header);
+                header.classList.add('has-cover');
+            }
+        }
+        if (key === 'profile_image_update') {
+            const img = document.querySelector('.profile-header img');
+            if (img) img.src = value;
         }
         if (key === 'headline') document.querySelector('.profile-header h1').innerText = value;
         if (key === 'bio') document.querySelector('.profile-header .bio').innerText = value;

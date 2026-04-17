@@ -1174,7 +1174,12 @@ class Saas_Admin_Settings {
                                 <td><strong><?php echo $user->display_name; ?></strong></td>
                                 <td><?php echo $o->post_title; ?></td>
                                 <td>$<?php echo number_format(get_post_meta($o->ID, '_saas_order_amount', true), 2); ?></td>
-                                <td><?php echo strtoupper(get_post_meta($o->ID, '_saas_order_status', true)); ?></td>
+                                    <td>
+                                        <span class="status-badge status-<?php echo get_post_meta($o->ID, '_saas_order_status', true); ?>">
+                                            <?php echo strtoupper(get_post_meta($o->ID, '_saas_order_status', true)); ?>
+                                        </span>
+                                        <br><small><?php echo strtoupper(get_post_meta($o->ID, '_saas_gateway', true)); ?></small>
+                                    </td>
                                 <td><?php echo get_the_date('', $o->ID); ?></td>
                             </tr>
                             <?php endforeach; ?>

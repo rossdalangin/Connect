@@ -259,7 +259,7 @@ class Saas_Dashboard {
                             <ul id="saas-links-list" class="sortable">
                             <?php foreach ( $links as $link ) :
                                 $type = get_post_meta($link->ID, '_saas_block_type', true);
-                                $extra = get_post_meta($link->ID, '_saas_testimonial_text', true) ?: get_post_meta($link->ID, '_saas_faq_answer', true);
+                                $extra = get_post_meta($link->ID, '_saas_link_desc', true) ?: (get_post_meta($link->ID, '_saas_testimonial_text', true) ?: get_post_meta($link->ID, '_saas_faq_answer', true));
                                 if (!$extra) {
                                     if ($type === 'pricing' || $type === 'product') {
                                         $price = get_post_meta($link->ID, '_saas_price', true);

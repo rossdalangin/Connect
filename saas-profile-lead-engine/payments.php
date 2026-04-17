@@ -113,6 +113,8 @@ class Saas_Payments {
             ]);
             update_post_meta($order_id, '_saas_order_amount', $amount);
             update_post_meta($order_id, '_saas_order_status', 'pending');
+            update_post_meta($order_id, '_saas_order_plan', $plan_id);
+            update_post_meta($order_id, '_saas_gateway', 'stripe');
             if ($is_product) {
                 update_post_meta($order_id, '_saas_product_id', $block_id);
                 update_post_meta($order_id, '_saas_customer_id', $user_id);
@@ -122,7 +124,19 @@ class Saas_Payments {
             wp_send_json_success([ 'redirect_url' => $session['url'] . '?order_id=' . $order_id ]);
         } elseif ( $gateway === 'paypal' ) {
             $paypal_email = get_option('saas_paypal_email');
-            $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id) . "&amount=" . urlencode($amount) . "&currency_code=USD";
+
+            $order_id = wp_insert_post([
+                'post_type' => 'saas_order',
+                'post_title' => ($is_product ? 'Product Sale: ' : 'Plan Upgrade: ') . $plan_id,
+                'post_status' => 'publish',
+                'post_author' => $is_product ? get_post_field('post_author', $block_id) : $user_id
+            ]);
+            update_post_meta($order_id, '_saas_order_amount', $amount);
+            update_post_meta($order_id, '_saas_order_status', 'pending');
+            update_post_meta($order_id, '_saas_order_plan', $plan_id);
+            update_post_meta($order_id, '_saas_gateway', 'paypal');
+
+            $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id) . "&amount=" . urlencode($amount) . "&currency_code=USD&custom=" . $order_id . "&return=" . urlencode(home_url('/dashboard?payment=success')) . "&cancel_return=" . urlencode(home_url('/dashboard?payment=cancel'));
             wp_send_json_success([ 'redirect_url' => $paypal_url ]);
         }
 

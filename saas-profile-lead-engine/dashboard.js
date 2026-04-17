@@ -476,9 +476,11 @@
                 if (target === 'profile-image') {
                     $('#profile-image-id').val(attachment.id);
                     $('#profile-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                    updatePreview('profile_image_update', attachment.url);
                 } else if (target === 'cover-image') {
                     $('#cover-image-id').val(attachment.id);
                     $('#cover-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                    updatePreview('cover_update', attachment.url);
                 } else if (target === 'link-image') {
                     $('#edit-link-image-id').val(attachment.id);
                     $('#edit-link-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
