@@ -261,9 +261,27 @@ class Saas_Dashboard {
                                 $type = get_post_meta($link->ID, '_saas_block_type', true);
                                 $extra = get_post_meta($link->ID, '_saas_testimonial_text', true) ?: get_post_meta($link->ID, '_saas_faq_answer', true);
                                 if (!$extra) {
-                                    $price = get_post_meta($link->ID, '_saas_price', true);
-                                    $feats = get_post_meta($link->ID, '_saas_features', true);
-                                    if ($price) $extra = $price . ($feats ? "\n" . implode("\n", $feats) : "");
+                                    if ($type === 'pricing' || $type === 'product') {
+                                        $price = get_post_meta($link->ID, '_saas_price', true);
+                                        $feats = get_post_meta($link->ID, '_saas_features', true);
+                                        if ($price) $extra = $price . ($feats ? "\n" . (is_array($feats) ? implode("\n", $feats) : $feats) : "");
+                                    } elseif ($type === 'image_gallery') {
+                                        $imgs = get_post_meta($link->ID, '_saas_gallery_images', true);
+                                        if ($imgs) $extra = is_array($imgs) ? implode("\n", $imgs) : $imgs;
+                                    } elseif ($type === 'social_icons') {
+                                        $socials = get_post_meta($link->ID, '_saas_social_data', true);
+                                        if ($socials && is_array($socials)) {
+                                            $lines = [];
+                                            foreach($socials as $p => $u) $lines[] = "$p:$u";
+                                            $extra = implode("\n", $lines);
+                                        }
+                                    } elseif ($type === 'countdown') {
+                                        $extra = get_post_meta($link->ID, '_saas_expiry', true);
+                                    } elseif ($type === 'milestone') {
+                                        $lbl = get_post_meta($link->ID, '_saas_ms_label', true);
+                                        $per = get_post_meta($link->ID, '_saas_ms_percent', true);
+                                        if ($lbl) $extra = "$lbl:$per";
+                                    }
                                 }
                                 ?>
                                 <li data-id="<?php echo $link->ID; ?>"

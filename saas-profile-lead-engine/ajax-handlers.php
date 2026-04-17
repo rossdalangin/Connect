@@ -74,21 +74,24 @@ function saas_ajax_add_link() {
         update_post_meta( $link_id, '_saas_link_url', $url );
 
         // Extended meta for complex blocks
-        if ($type === 'testimonial' && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($_POST['extra']));
-        } elseif ($type === 'faq' && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($_POST['extra']));
-        } elseif (($type === 'pricing' || $type === 'product') && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_price', sanitize_text_field($_POST['extra']));
-            if ($type === 'pricing') {
-                update_post_meta($link_id, '_saas_features', ['Premium Support', 'Unlimited Links', 'No Branding']);
+        $extra = isset($_POST['extra']) ? $_POST['extra'] : '';
+        if ($type === 'testimonial') {
+            update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($extra));
+        } elseif ($type === 'faq') {
+            update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($extra));
+        } elseif ($type === 'pricing' || $type === 'product') {
+            $lines = array_filter(array_map('trim', explode("\n", $extra)));
+            if (!empty($lines)) {
+                update_post_meta($link_id, '_saas_price', $lines[0]);
+                if ($type === 'pricing') {
+                    update_post_meta($link_id, '_saas_features', array_slice($lines, 1));
+                }
             }
-        } elseif ($type === 'image_gallery' && isset($_POST['extra'])) {
-            $urls = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
+        } elseif ($type === 'image_gallery') {
+            $urls = array_filter(array_map('trim', explode("\n", $extra)));
             update_post_meta($link_id, '_saas_gallery_images', $urls);
-        } elseif ($type === 'social_icons' && isset($_POST['extra'])) {
-            // extra: platform:url newline separated
-            $lines = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
+        } elseif ($type === 'social_icons') {
+            $lines = array_filter(array_map('trim', explode("\n", $extra)));
             $data = [];
             foreach ($lines as $l) {
                 if (strpos($l, ':') !== false) {
@@ -97,11 +100,11 @@ function saas_ajax_add_link() {
                 }
             }
             update_post_meta($link_id, '_saas_social_data', $data);
-        } elseif ($type === 'countdown' && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_expiry', sanitize_text_field($_POST['extra']));
-        } elseif ($type === 'milestone' && isset($_POST['extra'])) {
-            if (strpos($_POST['extra'], ':') !== false) {
-                list($lbl, $per) = explode(':', $_POST['extra'], 2);
+        } elseif ($type === 'countdown') {
+            update_post_meta($link_id, '_saas_expiry', sanitize_text_field($extra));
+        } elseif ($type === 'milestone') {
+            if (strpos($extra, ':') !== false) {
+                list($lbl, $per) = explode(':', $extra, 2);
                 update_post_meta($link_id, '_saas_ms_label', sanitize_text_field($lbl));
                 update_post_meta($link_id, '_saas_ms_percent', intval($per));
             }
