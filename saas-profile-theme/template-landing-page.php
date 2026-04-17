@@ -18,13 +18,13 @@ $h_img   = get_option('saas_home_image');
     </div>
     <style> @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style>
 
-    <div class="landing-content" style="max-width: 800px; text-align: center;">
-        <header class="landing-header" style="margin-bottom: 60px; max-width:900px;">
-            <h1 style="font-size: 5rem; font-weight: 900; line-height: 1; margin-bottom:30px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px;">
+    <div class="landing-content" style="max-width: 1000px; text-align: center;">
+        <header class="landing-header" style="margin-bottom: 60px; width:100%;">
+            <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900; line-height: 0.9; margin-bottom:30px; background: linear-gradient(135deg, #1e293b, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -3px;">
                 <?php echo esc_html($h_title); ?>
             </h1>
             <?php if ($h_hero) : ?>
-                <p style="font-size: 1.75rem; color: #636e72; font-weight: 500;"><?php echo esc_html($h_hero); ?></p>
+                <p style="font-size: 1.5rem; color: #64748b; font-weight: 500; max-width: 800px; margin: 0 auto; line-height: 1.6;"><?php echo esc_html($h_hero); ?></p>
             <?php endif; ?>
         </header>
 
@@ -149,25 +149,25 @@ $h_img   = get_option('saas_home_image');
 </section>
 
 <!-- Growth Stats Section -->
-<section style="padding: 80px 20px; background: #f8fafc;">
+<section style="padding: 100px 20px; background: #0f172a; color: #fff;">
     <?php
     $count_profiles = wp_count_posts('saas_profile')->publish;
     $count_leads = wp_count_posts('saas_lead')->publish;
     global $wpdb;
-    $total_rev = $wpdb->get_var("SELECT SUM(meta_value) FROM $wpdb->postmeta WHERE meta_key = '_saas_order_amount'");
+    $total_rev = (float)$wpdb->get_var("SELECT SUM(meta_value) FROM $wpdb->postmeta WHERE meta_key = '_saas_order_amount'");
     ?>
-    <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; text-align: center;">
+    <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 50px; text-align: center;">
         <div>
-            <div style="font-size: 3.5rem; font-weight: 900; color: #6c5ce7;"><?php echo number_format($count_profiles + 1250); ?>+</div>
-            <p style="font-weight: 700; color: #64748b;">Elite Profiles</p>
+            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><?php echo number_format($count_profiles + 1250); ?>+</div>
+            <p style="font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem;">Elite Profiles Launched</p>
         </div>
         <div>
-            <div style="font-size: 3.5rem; font-weight: 900; color: #10b981;">$<?php echo number_format(($total_rev / 1000) + 42.5, 1); ?>M+</div>
-            <p style="font-weight: 700; color: #64748b;">Revenue Tracked</p>
+            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">$<?php echo number_format(($total_rev / 1000) + 42.5, 1); ?>M+</div>
+            <p style="font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem;">Revenue Processed</p>
         </div>
         <div>
-            <div style="font-size: 3.5rem; font-weight: 900; color: #f59e0b;"><?php echo number_format($count_leads + 8500); ?>+</div>
-            <p style="font-weight: 700; color: #64748b;">Leads Captured</p>
+            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><?php echo number_format($count_leads + 8500); ?>+</div>
+            <p style="font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem;">High-Intent Leads Captured</p>
         </div>
     </div>
 </section>

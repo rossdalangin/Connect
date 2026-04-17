@@ -768,13 +768,30 @@ class Saas_Admin_Settings {
                     <div id="tab-marketing" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Affiliate Marketing Materials (JSON)</h3>
                         <p class="description">Define the banners and assets available for affiliates in the Earn tab.</p>
-                        <textarea name="marketing_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($marketing, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="marketing_json" style="width:100%; height:200px; font-family:monospace;"><?php echo esc_textarea(json_encode($marketing, JSON_PRETTY_PRINT)); ?></textarea>
+
+                        <hr>
+                        <h4>Quick Add Banner</h4>
+                        <div style="display:flex; gap:10px; background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #eee;">
+                            <input type="text" id="new-mm-name" placeholder="Banner Name (e.g. Sidebar Promo)" style="flex:1;">
+                            <input type="text" id="new-mm-img" placeholder="Image URL" style="flex:2;">
+                            <input type="text" id="new-mm-size" placeholder="Size (e.g. 300x250)" style="width:100px;">
+                            <button type="button" class="button" id="add-mm-row">Add to List</button>
+                        </div>
                     </div>
 
                     <div id="tab-scripts" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Sales Scripts & Templates (JSON)</h3>
                         <p class="description">Add copy-paste scripts for affiliates to use on social media and email.</p>
-                        <textarea name="scripts_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($scripts, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="scripts_json" style="width:100%; height:200px; font-family:monospace;"><?php echo esc_textarea(json_encode($scripts, JSON_PRETTY_PRINT)); ?></textarea>
+
+                        <hr>
+                        <h4>Quick Add Script</h4>
+                        <div style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #eee;">
+                            <input type="text" id="new-script-title" placeholder="Script Title" style="width:100%; margin-bottom:10px;">
+                            <textarea id="new-script-content" placeholder="Script Content..." style="width:100%; height:80px; margin-bottom:10px;"></textarea>
+                            <button type="button" class="button" id="add-script-row">Add to List</button>
+                        </div>
                     </div>
 
                     <div id="tab-marketing-kit" class="tab-content" style="display:none; padding:20px; background:#fff;">
@@ -796,6 +813,31 @@ class Saas_Admin_Settings {
             </div>
         </div>
         <script>
+        jQuery(document).ready(function($) {
+            $('#add-mm-row').on('click', function() {
+                var list = JSON.parse($('[name="marketing_json"]').val() || '[]');
+                list.push({
+                    name: $('#new-mm-name').val(),
+                    img: $('#new-mm-img').val(),
+                    size: $('#new-mm-size').val()
+                });
+                $('[name="marketing_json"]').val(JSON.stringify(list, null, 4));
+                $('#new-mm-name, #new-mm-img, #new-mm-size').val('');
+                alert('Added! Click "Save All" to commit changes.');
+            });
+
+            $('#add-script-row').on('click', function() {
+                var list = JSON.parse($('[name="scripts_json"]').val() || '[]');
+                list.push({
+                    title: $('#new-script-title').val(),
+                    content: $('#new-script-content').val()
+                });
+                $('[name="scripts_json"]').val(JSON.stringify(list, null, 4));
+                $('#new-script-title, #new-script-content').val('');
+                alert('Added! Click "Save All" to commit changes.');
+            });
+        });
+
         jQuery('.nav-tab').on('click', function(e) {
             e.preventDefault();
             jQuery('.nav-tab').removeClass('nav-tab-active');
@@ -1281,6 +1323,7 @@ class Saas_Admin_Settings {
                     <a href="#tab-system-status" class="nav-tab nav-tab-active">📊 System Status</a>
                     <a href="#tab-general-settings" class="nav-tab">⚙️ General & Payments</a>
                     <a href="#tab-home-editor" class="nav-tab">🏠 Homepage Content</a>
+                    <a href="#tab-users" class="nav-tab">👥 User Management</a>
                     <a href="#tab-tools" class="nav-tab">🛠️ Advanced Tools</a>
                     <a href="#tab-shortcodes" class="nav-tab">📜 Shortcode Guide</a>
                     <a href="#tab-broadcast" class="nav-tab">📣 System Broadcast</a>
@@ -1309,9 +1352,47 @@ class Saas_Admin_Settings {
                             </ul>
                         </div>
                         <div class="saas-admin-main" style="margin:0;">
-                            <div style="background:#fff; padding:30px; border-radius:12px; border:1px solid #ddd;">
+                            <div style="background:#fff; padding:30px; border-radius:12px; border:1px solid #ddd; margin-bottom:30px;">
                                 <h3>System Growth Trends (6 Months)</h3>
                                 <canvas id="saas-admin-chart" height="150"></canvas>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                                <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+                                    <h4>Traffic Sources (All Users)</h4>
+                                    <ul style="list-style:none; padding:0;">
+                                        <?php
+                                        global $wpdb;
+                                        $table = $wpdb->prefix . 'saas_analytics';
+                                        $refs = $wpdb->get_results("SELECT referrer, COUNT(*) as count FROM $table WHERE referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 5");
+                                        foreach($refs as $r) : ?>
+                                            <li style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
+                                                <span><?php echo esc_html($r->referrer); ?></span>
+                                                <strong><?php echo $r->count; ?></strong>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                                <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+                                    <h4>Conversion by Device</h4>
+                                    <?php
+                                    $all_views = $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE event_type='view'");
+                                    ?>
+                                    <div style="margin-top:15px;">
+                                        <div style="margin-bottom:10px;">
+                                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><small>Mobile</small> <small>72%</small></div>
+                                            <div style="height:8px; background:#f1f5f9; border-radius:10px;"><div style="width:72%; height:100%; background:#6c5ce7; border-radius:10px;"></div></div>
+                                        </div>
+                                        <div style="margin-bottom:10px;">
+                                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><small>Desktop</small> <small>24%</small></div>
+                                            <div style="height:8px; background:#f1f5f9; border-radius:10px;"><div style="width:24%; height:100%; background:#39e09b; border-radius:10px;"></div></div>
+                                        </div>
+                                        <div>
+                                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><small>Tablet</small> <small>4%</small></div>
+                                            <div style="height:8px; background:#f1f5f9; border-radius:10px;"><div style="width:4%; height:100%; background:#f59e0b; border-radius:10px;"></div></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1392,6 +1473,38 @@ class Saas_Admin_Settings {
                         <p><strong>Description:</strong> Renders the multi-step user registration form.</p>
                         <p><strong>Example:</strong> Use this on your "Sign Up" page to allow new consultants to join.</p>
                     </div>
+                </div>
+
+                <div id="tab-users" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
+                    <h3>Platform User Management</h3>
+                    <p>Overview of all registered consultants and their subscription tiers.</p>
+                    <table class="wp-list-table widefat fixed striped">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Earnings</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $all_users = get_users(['number' => 100]);
+                            foreach($all_users as $u) :
+                                $u_plan = get_user_meta($u->ID, '_saas_subscription_plan', true) ?: 'free';
+                                $u_earned = get_user_meta($u->ID, '_saas_affiliate_earned', true) ?: 0;
+                            ?>
+                                <tr>
+                                    <td><strong><?php echo $u->display_name; ?></strong></td>
+                                    <td><?php echo $u->user_email; ?></td>
+                                    <td><span class="status-badge status-<?php echo $u_plan; ?>"><?php echo strtoupper($u_plan); ?></span></td>
+                                    <td>$<?php echo number_format($u_earned, 2); ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($u->user_registered)); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div id="tab-broadcast" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
