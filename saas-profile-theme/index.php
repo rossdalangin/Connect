@@ -90,7 +90,10 @@ include __DIR__ . '/header.php';
     }
     .btn-text-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; }
     .btn-desc { font-size: 0.8rem; opacity: 0.8; margin-top: 4px; display: block; }
-    .testimonial-block { padding: 25px; background: #fff; border-radius: var(--btn-radius); box-shadow: var(--shadow-style); text-align: center; }
+    .testimonial-block { padding: 30px; background: #fff; border-radius: var(--btn-radius); box-shadow: var(--shadow-style); text-align: center; position: relative; transition: transform 0.3s; border: 1px solid rgba(0,0,0,0.05); }
+    .testimonial-block:hover { transform: translateY(-5px); }
+    .testimonial-link { display: inline-block; margin-top: 15px; color: var(--primary-color); font-weight: 700; text-decoration: none; font-size: 0.9rem; border-bottom: 2px solid transparent; transition: border-color 0.2s; }
+    .testimonial-link:hover { border-color: var(--primary-color); }
     <?php
     $custom_css = get_post_meta($profile_id, '_saas_custom_css', true);
     if ($is_pro && $custom_css) echo $custom_css;
@@ -228,10 +231,13 @@ include __DIR__ . '/header.php';
                         <?php echo wp_oembed_get( $url ); ?>
                     </div>
                 <?php elseif ($type === 'testimonial') : ?>
-                    <a href="<?php echo esc_url($url); ?>" class="testimonial-block" style="text-decoration:none; color:inherit;">
-                        <p class="quote">"<?php echo esc_html( get_post_meta($block->ID, '_saas_testimonial_text', true) ); ?>"</p>
-                        <cite>- <?php echo esc_html( $block->post_title ); ?></cite>
-                    </a>
+                    <div class="testimonial-block">
+                        <p class="quote" style="font-size: 1.15rem; line-height: 1.7; font-style: italic; color: #334155;">"<?php echo esc_html( get_post_meta($block->ID, '_saas_testimonial_text', true) ); ?>"</p>
+                        <cite style="display: block; margin-top: 20px; font-weight: 900; color: #0f172a; font-style: normal; font-size: 1.1rem;">— <?php echo esc_html( $block->post_title ); ?></cite>
+                        <?php if ($url && $url !== '#') : ?>
+                            <a href="<?php echo esc_url($url); ?>" class="testimonial-link" target="_blank">View Case Study ↗</a>
+                        <?php endif; ?>
+                    </div>
                 <?php elseif ($type === 'faq') : ?>
                     <details class="faq-block">
                         <summary><?php echo esc_html( $block->post_title ); ?></summary>

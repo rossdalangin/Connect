@@ -104,9 +104,11 @@
             var $li = $(this).closest('li');
             var d = $li.data();
 
+            var type = $li.attr('data-type') || 'button';
             $('#edit-link-id').val($li.attr('data-id'));
             $('#edit-link-title').val($li.find('.link-title').text());
             $('#edit-link-url').val($li.find('.link-url').text());
+            $('#edit-block-type-badge').text(type.toUpperCase().replace('_', ' '));
 
             // Map data attributes to modal fields
             $('#edit-link-extra').val($li.attr('data-extra'));

@@ -1528,16 +1528,33 @@ class Saas_Admin_Settings {
                 const ctx = document.getElementById('saas-admin-chart');
                 if (ctx && typeof Chart !== 'undefined') {
                     new Chart(ctx, {
-                        type: 'bar',
+                        type: 'line',
                         data: {
                             labels: <?php echo json_encode($growth_labels ?: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']); ?>,
                             datasets: [{
-                                label: 'New Profiles',
+                                label: 'New Profiles Created',
                                 data: <?php echo json_encode($growth_counts ?: [0, 0, 0, 0, 0, 0]); ?>,
-                                backgroundColor: '#6c5ce7'
+                                borderColor: '#6c5ce7',
+                                backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#fff',
+                                pointBorderColor: '#6c5ce7',
+                                pointRadius: 5
                             }]
                         },
-                        options: { responsive: true, maintainAspectRatio: false }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                                x: { grid: { display: false } }
+                            }
+                        }
                     });
                 }
 

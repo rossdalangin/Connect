@@ -319,7 +319,10 @@ class Saas_Dashboard {
                             <!-- Inline Edit Block Content -->
                             <div id="saas-edit-inline" class="dashboard-card saas-inline-container" style="display:none; margin-top:20px; border: 2px solid var(--primary);">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                                    <h3 style="margin:0;">✏️ Edit Block Content</h3>
+                                    <div style="display:flex; align-items:center; gap:15px;">
+                                        <h3 style="margin:0;">✏️ Edit Block</h3>
+                                        <span id="edit-block-type-badge" class="pro-badge" style="background:#64748b; font-size:0.7rem; padding:4px 10px; border-radius:8px;">BUTTON</span>
+                                    </div>
                                     <button type="button" class="close-inline button" data-target="saas-edit-inline">&times;</button>
                                 </div>
                                 <p class="field-hint" style="margin-bottom:20px;">Optimize this block for maximum conversion. Use the advanced options to add A/B testing or device-specific routing.</p>
