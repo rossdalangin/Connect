@@ -276,6 +276,8 @@ class Saas_Admin_Settings {
         register_setting( 'saas_settings_group', 'saas_paypal_email' );
         register_setting( 'saas_settings_group', 'saas_affiliate_percentage' );
         register_setting( 'saas_settings_group', 'saas_global_logo' );
+        register_setting( 'saas_settings_group', 'saas_global_favicon' );
+        register_setting( 'saas_settings_group', 'saas_global_css' );
 
         // Homepage Content
         register_setting( 'saas_settings_group', 'saas_home_title' );
@@ -347,6 +349,24 @@ class Saas_Admin_Settings {
             'saas_settings',
             'saas_branding_section',
             [ 'id' => 'saas_global_logo', 'desc' => 'Recommended: PNG with transparent background, 200x50px.' ]
+        );
+
+        add_settings_field(
+            'global_favicon',
+            'Platform Favicon URL',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_branding_section',
+            [ 'id' => 'saas_global_favicon' ]
+        );
+
+        add_settings_field(
+            'global_css',
+            'Global Platform CSS',
+            [ $this, 'textarea_render' ],
+            'saas_settings',
+            'saas_branding_section',
+            [ 'id' => 'saas_global_css', 'desc' => 'Inject custom CSS into the dashboard and main platform pages.' ]
         );
 
         add_settings_field(
@@ -666,6 +686,13 @@ class Saas_Admin_Settings {
                 }
             }
 
+            if (isset($_POST['marketing_kit_json'])) {
+                $kit = json_decode(stripslashes($_POST['marketing_kit_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_affiliate_marketing_kit', $kit);
+                }
+            }
+
             echo '<div class="updated"><p>Content Hub updated successfully!</p></div>';
         }
 
@@ -674,6 +701,7 @@ class Saas_Admin_Settings {
         $kb        = get_option('saas_knowledge_base') ?: $this->get_default_kb();
         $marketing = get_option('saas_marketing_materials') ?: $this->get_default_marketing();
         $scripts   = get_option('saas_sales_scripts') ?: $this->get_default_scripts();
+        $affiliate_kit = get_option('saas_affiliate_marketing_kit') ?: $this->get_default_marketing_kit();
         ?>
         <div class="wrap saas-admin-wrapper">
             <h1>SaaS Content Hub</h1>
@@ -686,6 +714,7 @@ class Saas_Admin_Settings {
                     <a href="#tab-kb" class="nav-tab">Knowledge Base</a>
                     <a href="#tab-marketing" class="nav-tab">Marketing Materials</a>
                     <a href="#tab-scripts" class="nav-tab">Sales Scripts</a>
+                    <a href="#tab-marketing-kit" class="nav-tab">Marketing Kit</a>
                 </h2>
 
                 <form method="post" action="">
@@ -719,6 +748,12 @@ class Saas_Admin_Settings {
                         <h3>Sales Scripts & Templates (JSON)</h3>
                         <p class="description">Add copy-paste scripts for affiliates to use on social media and email.</p>
                         <textarea name="scripts_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($scripts, JSON_PRETTY_PRINT)); ?></textarea>
+                    </div>
+
+                    <div id="tab-marketing-kit" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>Affiliate Marketing Kit Content (HTML/JSON)</h3>
+                        <p class="description">Define custom HTML and detailed assets for the affiliate kit.</p>
+                        <textarea name="marketing_kit_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($affiliate_kit, JSON_PRETTY_PRINT)); ?></textarea>
                     </div>
 
                     <p class="submit">
@@ -774,6 +809,46 @@ class Saas_Admin_Settings {
                     ['title' => 'Sales Target Progress', 'url' => '#', 'type' => 'milestone', 'extra' => 'Volume:$42M'],
                 ]
             ],
+            'politician' => [
+                'headline' => 'Dedicated to Progress & Community Service. 🏛️',
+                'bio' => 'Serving as your advocate in public office. Building a more resilient and inclusive community.',
+                'color' => '#e84118', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Latest Community Update', 'url' => '#', 'type' => 'video'],
+                    ['title' => 'Join the Volunteer Team', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'My Vision for 2024', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ]
+            ],
+            'artist' => [
+                'headline' => 'Visual Storytelling through Digital Art. 🎨',
+                'bio' => 'Independent designer creating immersive visual experiences for forward-thinking brands.',
+                'color' => '#f472b6', 'theme' => 'vibrant', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Portfolio Gallery', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400\nhttps://via.placeholder.com/401"],
+                    ['title' => 'Project Inquiry', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Follow my Process', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                ]
+            ],
+            'agency' => [
+                'headline' => 'Scaling Brands through Performance Marketing. 🏢',
+                'bio' => 'We build high-performance funnels that drive revenue for elite founders.',
+                'color' => '#111827', 'theme' => 'dark', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Get a Free Quote', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Our Pricing Models', 'url' => '#', 'type' => 'pricing', 'extra' => "$2,500+\nFull CRM Sync\nScale Strategy"],
+                    ['title' => 'Latest Campaign Results', 'url' => '#', 'type' => 'video'],
+                ]
+            ],
+            'speaker' => [
+                'headline' => 'Inspiring Transformation through Keynotes. 🎙️',
+                'bio' => 'Helping organizations navigate change and build resilient cultures. Global Keynote Speaker.',
+                'color' => '#d4af37', 'theme' => 'luxury', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Watch Highlight Reel', 'url' => '#', 'type' => 'video'],
+                    ['title' => 'Inquire for Speaking', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Speaker One-Sheet', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ]
+            ],
             'freelancer' => [
                 'headline' => 'Visual Identity & Web Design for Modern Brands. 🎨',
                 'bio' => 'Helping DTC brands stand out through minimalist design and high-converting interfaces.',
@@ -807,6 +882,13 @@ class Saas_Admin_Settings {
                     ['title' => 'Save VCard to Phone', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
                 ]
             ]
+        ];
+    }
+
+    private function get_default_marketing_kit() {
+        return [
+            ['title' => 'Elite Branding Guide', 'content' => '<p>Always use high-contrast images. Target coaches who make $10k+.</p>'],
+            ['title' => 'Sample Email Campaign', 'content' => '<p>Use the cold email outreach script in the scripts tab.</p>']
         ];
     }
 
@@ -1209,6 +1291,23 @@ class Saas_Admin_Settings {
                 <div id="tab-tools" class="tab-content" style="display:none; padding:20px; background:#fff; border:1px solid #ddd;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                         <div>
+                            <h3>Bulk License Factory</h3>
+                            <p>Generate multiple license keys at once for bulk sales or promos.</p>
+                            <form id="saas-bulk-license-form" style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #eee;">
+                                <div class="field">
+                                    <label>Quantity</label><br>
+                                    <input type="number" name="count" value="10" min="1" max="100">
+                                </div>
+                                <div class="field" style="margin-top:10px;">
+                                    <label>Plan Type</label><br>
+                                    <select name="plan">
+                                        <option value="pro">ELITE PRO</option>
+                                        <option value="agency">AGENCY UNLIMITED</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="button button-primary" style="margin-top:15px;">Generate Bulk Keys</button>
+                            </form>
+                            <hr>
                             <h3>Environment Management</h3>
                             <p>Automatically create Login, Register, and Dashboard pages with correct shortcodes.</p>
                             <a href="<?php echo admin_url('admin-post.php?action=saas_generate_pages'); ?>" class="button button-secondary">Generate System Pages</a>
@@ -1284,6 +1383,18 @@ class Saas_Admin_Settings {
                         body: new URLSearchParams({ action: 'saas_generate_samples' })
                     })
                     .then(r => r.json()).then(data => { alert(data.data); location.reload(); });
+                });
+
+                jQuery('#saas-bulk-license-form').on('submit', function(e) {
+                    e.preventDefault();
+                    var $btn = jQuery(this).find('button');
+                    $btn.prop('disabled', true).text('Generating...');
+                    jQuery.post(ajaxurl, jQuery(this).serialize() + '&action=saas_generate_bulk_licenses&security=<?php echo wp_create_nonce("saas_dashboard_nonce"); ?>', function(res) {
+                        if(res.success) {
+                            alert(res.data);
+                            location.reload();
+                        }
+                    });
                 });
 
                 jQuery('#saas-broadcast-form').on('submit', function(e) {

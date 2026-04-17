@@ -1133,6 +1133,21 @@ class Saas_Dashboard {
                                 </div>
                             <?php endforeach; ?>
                         </div>
+                        <?php
+                        $affiliate_kit = get_option('saas_affiliate_marketing_kit') ?: [];
+                        if($affiliate_kit) : ?>
+                            <div style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
+                                <h4>Pro Marketing Strategy Kit</h4>
+                                <div style="display:grid; gap:15px;">
+                                    <?php foreach($affiliate_kit as $kit) : ?>
+                                        <div style="padding:20px; background:#fff; border-radius:12px; border:1px solid var(--border);">
+                                            <h5 style="margin:0 0-10px; font-weight:800;"><?php echo esc_html($kit['title']); ?></h5>
+                                            <div style="font-size:0.9rem; color:var(--text-muted);"><?php echo wp_kses_post($kit['content']); ?></div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="dashboard-card">

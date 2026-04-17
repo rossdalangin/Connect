@@ -510,6 +510,7 @@ function saas_ajax_apply_template() {
                     update_post_meta($link_id, '_saas_gallery_images', $urls);
                 }
                 if ($b['type'] === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
+                if ($b['type'] === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
                 if ($b['type'] === 'pricing' || $b['type'] === 'product') {
                     $lines = explode("\n", $extra);
                     update_post_meta($link_id, '_saas_price', $lines[0]);
@@ -534,6 +535,9 @@ function saas_ajax_apply_template() {
                         }
                     }
                     update_post_meta($link_id, '_saas_social_data', $data);
+                }
+                if ($b['type'] === 'video') {
+                    // Title and URL already set globally, no extra meta needed for standard video
                 }
             }
         }
@@ -911,14 +915,15 @@ function saas_ajax_generate_samples() {
     // 6. Populate Analytics Table
     global $wpdb;
     $table = $wpdb->prefix . 'saas_analytics';
-    $types = ['view', 'click', 'lead_conversion'];
-    for($i=0; $i<50; $i++) {
+    $types = ['view', 'click', 'lead_conversion', 'nfc_tap'];
+    for($i=0; $i<500; $i++) {
         $wpdb->insert($table, [
             'user_id' => $user_id,
             'event_type' => $types[array_rand($types)],
             'target_id' => 0,
-            'ip_address' => '127.0.0.1',
-            'user_agent' => 'Mozilla/5.0',
+            'ip_address' => rand(1,255).'.'.rand(1,255).'.'.rand(1,255).'.'.rand(1,255),
+            'user_agent' => (rand(0,1) ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'),
+            'referrer' => (rand(0,1) ? 'https://instagram.com' : 'https://linkedin.com'),
             'created_at' => date('Y-m-d H:i:s', strtotime('-' . rand(0, 30) . ' days'))
         ]);
     }
