@@ -711,6 +711,13 @@ class Saas_Admin_Settings {
                 }
             }
 
+            if (isset($_POST['email_templates_json'])) {
+                $emails = json_decode(stripslashes($_POST['email_templates_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_email_templates', $emails);
+                }
+            }
+
             echo '<div class="updated"><p>Content Hub updated successfully!</p></div>';
         }
 
@@ -720,6 +727,7 @@ class Saas_Admin_Settings {
         $marketing = get_option('saas_marketing_materials') ?: $this->get_default_marketing();
         $scripts   = get_option('saas_sales_scripts') ?: $this->get_default_scripts();
         $affiliate_kit = get_option('saas_affiliate_marketing_kit') ?: $this->get_default_marketing_kit();
+        $emails    = get_option('saas_email_templates') ?: $this->get_default_emails();
         ?>
         <div class="wrap saas-admin-wrapper">
             <h1>SaaS Content Hub</h1>
@@ -733,6 +741,7 @@ class Saas_Admin_Settings {
                     <a href="#tab-marketing" class="nav-tab">Marketing Materials</a>
                     <a href="#tab-scripts" class="nav-tab">Sales Scripts</a>
                     <a href="#tab-marketing-kit" class="nav-tab">Marketing Kit</a>
+                    <a href="#tab-emails" class="nav-tab">Email Templates</a>
                 </h2>
 
                 <form method="post" action="">
@@ -772,6 +781,12 @@ class Saas_Admin_Settings {
                         <h3>Affiliate Marketing Kit Content (HTML/JSON)</h3>
                         <p class="description">Define custom HTML and detailed assets for the affiliate kit.</p>
                         <textarea name="marketing_kit_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($affiliate_kit, JSON_PRETTY_PRINT)); ?></textarea>
+                    </div>
+
+                    <div id="tab-emails" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>System Email Templates (JSON)</h3>
+                        <p class="description">Customize the subject and body of system emails using placeholders like {name}, {email}, {profile_url}.</p>
+                        <textarea name="email_templates_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($emails, JSON_PRETTY_PRINT)); ?></textarea>
                     </div>
 
                     <p class="submit">
@@ -907,6 +922,19 @@ class Saas_Admin_Settings {
         return [
             ['title' => 'Elite Branding Guide', 'content' => '<p>Always use high-contrast images. Target coaches who make $10k+.</p>'],
             ['title' => 'Sample Email Campaign', 'content' => '<p>Use the cold email outreach script in the scripts tab.</p>']
+        ];
+    }
+
+    private function get_default_emails() {
+        return [
+            'new_lead_admin' => [
+                'subject' => '🚀 New Lead Captured: {name}',
+                'body' => "<h2>You've got a new lead!</h2><p><strong>Name:</strong> {name}<br><strong>Email:</strong> {email}<br><strong>Source:</strong> {profile_title}</p><p><a href='{dashboard_url}'>View in Dashboard</a></p>"
+            ],
+            'lead_autoresponder' => [
+                'subject' => 'Re: Your inquiry to {profile_title}',
+                'body' => "Hi {name},<br><br>Thank you for reaching out! I've received your inquiry and will get back to you shortly.<br><br>Best,<br>{profile_title}"
+            ]
         ];
     }
 

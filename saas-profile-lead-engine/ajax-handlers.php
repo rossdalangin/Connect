@@ -794,7 +794,22 @@ function saas_ajax_generate_samples() {
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error('Unauthorized');
 
     $user_id = get_current_user_id();
-    // Fetch richer templates from DB first
+    // Ensure content hub options are populated with at least some data if empty
+    if (!get_option('saas_templates')) {
+        $default_tpls = [
+            'coach' => ['headline' => 'Scale Your Impact 🚀', 'bio' => 'Certified high-performance coach.', 'color' => '#6c5ce7', 'theme' => 'light', 'shadow' => 'soft', 'links' => [['title' => 'Book Strategy Session', 'url' => '#', 'type' => 'button', 'style' => 'featured']]],
+            'business' => ['headline' => 'Enterprise Solutions 🏢', 'bio' => 'Driving growth through tech.', 'color' => '#0073aa', 'theme' => 'light', 'shadow' => 'hard', 'links' => [['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => "$99/mo\nSupport\nUpdates"]]]
+        ];
+        update_option('saas_templates', $default_tpls);
+    }
+    if (!get_option('saas_training_academy')) {
+        update_option('saas_training_academy', [['title' => 'Platform Overview', 'desc' => 'Master the basics in 5 minutes.', 'video_id' => 'basics']]);
+    }
+    if (!get_option('saas_marketing_materials')) {
+        update_option('saas_marketing_materials', [['name' => 'Join Elite Banner', 'img' => 'https://via.placeholder.com/600x200', 'size' => '600x200']]);
+    }
+
+    // Fetch richer templates from DB
     $all_templates = get_option('saas_templates');
     $samples = [];
 

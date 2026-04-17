@@ -4,6 +4,7 @@
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php
+    $global_favicon = get_option('saas_global_favicon');
     $slug = get_query_var( 'saas_profile' );
     if ($slug) :
         $profile = saas_get_profile_by_slug($slug);
@@ -12,7 +13,7 @@
             $p_meta = saas_get_profile_meta($p_id);
             $custom_title = get_post_meta($p_id, '_saas_seo_title', true);
             $custom_desc = get_post_meta($p_id, '_saas_seo_desc', true);
-            $custom_favicon = get_post_meta($p_id, '_saas_favicon', true);
+            $custom_favicon = get_post_meta($p_id, '_saas_favicon', true) ?: $global_favicon;
             ?>
             <title><?php echo esc_html($custom_title ?: $profile->post_title . ' | Digital Business Card'); ?></title>
             <meta name="description" content="<?php echo esc_attr($custom_desc ?: wp_trim_words($p_meta['bio'], 25)); ?>">
@@ -38,6 +39,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@400;700;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
     <?php wp_head(); ?>
+    <?php if(!empty($global_favicon) && !get_query_var('saas_profile')) : ?>
+        <link rel="icon" href="<?php echo esc_url($global_favicon); ?>">
+    <?php endif; ?>
+    <?php
+    $global_css = get_option('saas_global_css');
+    if ($global_css) : ?>
+        <style id="saas-global-dynamic-css"><?php echo $global_css; ?></style>
+    <?php endif; ?>
     <?php
     if ($slug) {
         $profile = saas_get_profile_by_slug($slug);
