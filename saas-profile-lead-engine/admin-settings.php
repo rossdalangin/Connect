@@ -1053,12 +1053,45 @@ class Saas_Admin_Settings {
 
         $payouts = get_posts(['post_type' => 'saas_payout', 'post_status' => 'any', 'numberposts' => -1]);
         $orders  = get_posts(['post_type' => 'saas_order', 'post_status' => 'any', 'numberposts' => -1]);
+
+        $gross_rev = 0;
+        foreach($orders as $o) {
+            if(get_post_meta($o->ID, '_saas_order_status', true) === 'completed') {
+                $gross_rev += floatval(get_post_meta($o->ID, '_saas_order_amount', true));
+            }
+        }
+
+        $commissions = 0;
+        $users = get_users(['fields' => ['ID', 'display_name']]);
+        foreach($users as $u) {
+            $commissions += floatval(get_user_meta($u->ID, '_saas_affiliate_earned', true));
+        }
+        foreach($payouts as $p) {
+            if(get_post_meta($p->ID, '_status', true) === 'paid') {
+                $commissions += floatval(get_post_meta($p->ID, '_amount', true));
+            }
+        }
         $aff_coupons = get_option('saas_affiliate_coupons') ?: [];
         $users = get_users(['fields' => ['ID', 'display_name']]);
         ?>
         <div class="wrap saas-admin-wrapper">
             <h1>Financial & Affiliate Management</h1>
             <p>Monitor global revenue and process affiliate commission requests.</p>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin:20px 0;">
+                <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+                    <small style="text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:1px;">Gross Revenue</small>
+                    <div style="font-size:2rem; font-weight:900; color:#10b981;">$<?php echo number_format($gross_rev, 2); ?></div>
+                </div>
+                <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+                    <small style="text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:1px;">Affiliate Obligations</small>
+                    <div style="font-size:2rem; font-weight:900; color:#6c5ce7;">$<?php echo number_format($commissions, 2); ?></div>
+                </div>
+                <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+                    <small style="text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:1px;">Net Profit (Est)</small>
+                    <div style="font-size:2rem; font-weight:900; color:#0f172a;">$<?php echo number_format($gross_rev - $commissions, 2); ?></div>
+                </div>
+            </div>
 
             <div class="saas-tabs-container">
                 <h2 class="nav-tab-wrapper">

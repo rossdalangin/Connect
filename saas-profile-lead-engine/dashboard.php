@@ -220,7 +220,19 @@ class Saas_Dashboard {
                     <button data-tab="billing">💳 Pro</button>
                     <button data-tab="seo">🔍 SEO</button>
                     <button data-tab="tracking">📊 Tracking</button>
-                    <button data-tab="inbox">📩 Inbox</button>
+                    <?php
+                    $unread_msgs = get_posts([
+                        'post_type' => 'saas_message',
+                        'meta_query' => [
+                            ['key' => '_saas_msg_recipient', 'value' => $user_id],
+                            ['key' => '_saas_msg_status', 'value' => 'unread']
+                        ],
+                        'fields' => 'ids',
+                        'numberposts' => -1
+                    ]);
+                    $msg_count = count($unread_msgs);
+                    ?>
+                    <button data-tab="inbox" style="position:relative;">📩 Inbox <?php if($msg_count > 0) echo '<span class="notif-count" style="top:-5px; right:-5px; font-size:0.6rem; padding:1px 4px;">'.$msg_count.'</span>'; ?></button>
                     <button data-tab="training">🎓 Training</button>
                     <button data-tab="account">👤 Account</button>
                 </nav>
