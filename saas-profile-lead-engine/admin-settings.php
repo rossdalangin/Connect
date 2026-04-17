@@ -270,10 +270,10 @@ class Saas_Admin_Settings {
     }
 
     public function settings_init() {
-        register_setting( 'saas_settings_group', 'saas_stripe_enabled' );
-        register_setting( 'saas_settings_group', 'saas_stripe_secret_key' );
-        register_setting( 'saas_settings_group', 'saas_paypal_enabled' );
-        register_setting( 'saas_settings_group', 'saas_paypal_email' );
+        register_setting( 'saas_settings_group', 'saas_stripe_enabled', ['type' => 'boolean', 'sanitize_callback' => 'rest_sanitize_boolean', 'default' => 0] );
+        register_setting( 'saas_settings_group', 'saas_stripe_secret_key', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field'] );
+        register_setting( 'saas_settings_group', 'saas_paypal_enabled', ['type' => 'boolean', 'sanitize_callback' => 'rest_sanitize_boolean', 'default' => 0] );
+        register_setting( 'saas_settings_group', 'saas_paypal_email', ['type' => 'string', 'sanitize_callback' => 'sanitize_email'] );
         register_setting( 'saas_settings_group', 'saas_affiliate_percentage' );
         register_setting( 'saas_settings_group', 'saas_global_logo' );
         register_setting( 'saas_settings_group', 'saas_global_favicon' );
@@ -658,8 +658,21 @@ class Saas_Admin_Settings {
         if (!current_user_can('manage_options')) wp_send_json_error('Unauthorized');
         check_ajax_referer('saas_dashboard_nonce', 'security');
 
-        $coupons = $_POST['coupons'] ?? [];
-        update_option('saas_affiliate_coupons', $coupons);
+        $raw_coupons = $_POST['coupons'] ?? [];
+        $sanitized_coupons = [];
+
+        if (is_array($raw_coupons)) {
+            foreach ($raw_coupons as $c) {
+                if (!isset($c['user_id']) || !isset($c['code'])) continue;
+                $sanitized_coupons[] = [
+                    'user_id'  => intval($c['user_id']),
+                    'code'     => strtoupper(sanitize_text_field($c['code'])),
+                    'discount' => floatval($c['discount'] ?? 0)
+                ];
+            }
+        }
+
+        update_option('saas_affiliate_coupons', $sanitized_coupons);
         wp_send_json_success('Affiliate coupons saved successfully!');
     }
 
@@ -1398,6 +1411,35 @@ class Saas_Admin_Settings {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div style="background:#fff; padding:25px; border-radius:12px; border:1px solid #ddd; margin-top:30px;">
+                                <h3>Latest Global Leads</h3>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Lead Name</th>
+                                            <th>Source Profile</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $latest_leads = get_posts(['post_type' => 'saas_lead', 'numberposts' => 5]);
+                                        foreach($latest_leads as $ll) :
+                                            $source_id = get_post_meta($ll->ID, '_saas_lead_source_id', true);
+                                            $status = get_post_meta($ll->ID, '_saas_lead_status', true) ?: 'New';
+                                        ?>
+                                            <tr>
+                                                <td><strong><?php echo esc_html(get_post_meta($ll->ID, '_saas_lead_name', true)); ?></strong></td>
+                                                <td><?php echo $source_id ? get_the_title($source_id) : 'Unknown'; ?></td>
+                                                <td><span class="status-badge status-<?php echo strtolower($status); ?>"><?php echo strtoupper($status); ?></span></td>
+                                                <td><?php echo get_the_date('M j, g:i a', $ll->ID); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
