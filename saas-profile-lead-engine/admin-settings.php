@@ -84,10 +84,10 @@ class Saas_Admin_Settings {
             ['label' => 'Consultant Branding', 'basic' => 'Basic', 'elite' => '✓ Premium Glassy/Luxury Themes']
         ];
 
-        update_option('saas_home_title', 'Your "Link in Bio" is Leaking Leads. Here is the Fix.');
-        update_option('saas_home_hero', 'As a consultant, you are working too hard to lose clients at the last step. Turn your digital identity into a high-converting funnel that captures leads and builds trust on autopilot.');
-        update_option('saas_home_cta', 'Launch My Elite Profile');
-        update_option('saas_home_founder_letter', "Hey, I am a consultant just like you. I know how hard you work to sharpen your skills and help your clients. You spend hours creating content and showing up for people. But I saw so many of us losing 90% of our social traffic because we were using 'link lists' instead of 'sales funnels.' That is why I built this. Not just to give you a link, but to give you a system that honors your hard work and actually grows your business. Let's help more people together.");
+        update_option('saas_home_title', 'Stop Leaking High-Ticket Leads From Your Bio Link.');
+        update_option('saas_home_hero', 'Ditch the digital graveyard. Build an Authority Engine that captures leads, automates trust, and represents the Elite professional you actually are.');
+        update_option('saas_home_cta', 'Yes! Build My Authority Engine');
+        update_option('saas_home_founder_letter', "I was posting every day. 50k followers. But my bank account didn't match my reach. I realized I was sending traffic to a 'link tree' that offered too many choices. People were curious, but they weren't inquiring. I built Elite Funnels to create a path, not a list. The first day I switched, I got 3 discovery call bookings. You work too hard to lose clients at the finish line. Let's build your engine together.");
         update_option('saas_home_testimonials_title', 'What Elite Consultants Are Saying');
         update_option('saas_home_features', json_encode($features));
         update_option('saas_home_benefits', json_encode($benefits));
@@ -1101,6 +1101,32 @@ class Saas_Admin_Settings {
                 </h2>
 
                 <div id="tab-coupons" class="tab-content" style="display:none;">
+                    <div style="background:#f8fafc; padding:30px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:30px;">
+                        <h3>🏆 Affiliate Leaderboard (All Time)</h3>
+                        <table class="wp-list-table widefat fixed striped">
+                            <thead><tr><th>Affiliate</th><th>Active Referrals</th><th>Total Earned</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $affiliates = get_users([
+                                    'meta_key' => '_saas_affiliate_earned',
+                                    'orderby'  => 'meta_value_num',
+                                    'order'    => 'DESC',
+                                    'number'   => 5
+                                ]);
+                                foreach($affiliates as $aff) :
+                                    $earned = get_user_meta($aff->ID, '_saas_affiliate_earned', true);
+                                    $refs = count(get_users(['meta_key' => '_saas_referred_by', 'meta_value' => $aff->ID, 'fields' => 'ID']));
+                                ?>
+                                    <tr>
+                                        <td><strong><?php echo $aff->display_name; ?></strong></td>
+                                        <td><?php echo $refs; ?></td>
+                                        <td style="color:#10b981; font-weight:800;">$<?php echo number_format($earned, 2); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <h3>Affiliate Discount Mappings</h3>
                     <p>Assign unique coupon codes to affiliates. When used during checkout, the customer gets a discount and the affiliate gets credit.</p>
                     <form id="saas-affiliate-coupons-form">
@@ -1218,7 +1244,12 @@ class Saas_Admin_Settings {
                             ?>
                             <tr>
                                 <td><strong><?php echo $user->display_name; ?></strong></td>
-                                <td><?php echo $o->post_title; ?></td>
+                                    <td>
+                                        <?php echo $o->post_title; ?>
+                                        <?php if($coupon = get_post_meta($o->ID, '_saas_order_coupon', true)): ?>
+                                            <br><span class="pro-badge" style="background:var(--secondary); font-size:0.6rem;"><?php echo $coupon; ?></span>
+                                        <?php endif; ?>
+                                    </td>
                                 <td>$<?php echo number_format(get_post_meta($o->ID, '_saas_order_amount', true), 2); ?></td>
                                     <td>
                                         <span class="status-badge status-<?php echo get_post_meta($o->ID, '_saas_order_status', true); ?>">

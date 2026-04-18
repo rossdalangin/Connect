@@ -18,8 +18,9 @@ class Saas_Dashboard {
         wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', [], '4.0.0', true );
         wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'jquery' ], '2.7', true );
         wp_localize_script( 'saas-dashboard-js', 'saas_dashboard_data', [
-            'ajax_url' => admin_url( 'admin-ajax.php' ),
-            'nonce'    => wp_create_nonce( 'saas_dashboard_nonce' )
+            'ajax_url'  => admin_url( 'admin-ajax.php' ),
+            'nonce'     => wp_create_nonce( 'saas_dashboard_nonce' ),
+            'templates' => get_option('saas_templates') ?: []
         ]);
     }
 

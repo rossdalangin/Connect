@@ -564,23 +564,8 @@
         $(document).on('click', '.next-step', function() {
             if (currentStep === 1) {
                 var niche = $('#wizard-niche').val();
-                var suggestions = {
-                    'servant': { headline: 'Dedicated to Progress & Community Service 🏛️', bio: 'Serving as your advocate in public office. I am dedicated to sustainable growth and fiscal responsibility.' },
-                    'coach': { headline: 'Scaling Founders from 6 to 7 Figures 🚀', bio: 'Certified high-performance coach. I work with CEOs and founders to scale their impact.' },
-                    'creator': { headline: 'Building the Next Generation of Digital Brands 🎬', bio: 'Daily tips on content strategy and community building. Join 50k+ others on the journey.' },
-                    'realtor': { headline: 'Bespoke Advisory for Elite Homeowners', bio: 'Specializing in off-market luxury listings. Member of the Top 0.1% Global Network.' },
-                    'business': { headline: 'Operational Efficiency for Modern SaaS', bio: 'I help seed-stage startups optimize their unit economics and reduce churn.' },
-                    'speaker': { headline: 'Inspiring Transformation through Keynotes 🎙️', bio: 'Helping organizations navigate change and build resilient cultures. Global Keynote Speaker.' },
-                    'author': { headline: 'Exploring the Intersection of Tech & Humanity ✍️', bio: 'Bestselling Author. My work helps modern professionals build meaningful lives in an era of distraction.' },
-                    'consultant': { headline: 'Strategic Advisory for High-Growth Startups', bio: 'I help seed-stage companies optimize their unit economics and reduce churn.' },
-                    'lawyer': { headline: 'Strategic Legal Advocacy for Elite Clients ⚖️', bio: 'Providing expert legal counsel with a focus on results. High-stakes litigation and advisory.' },
-                    'doctor': { headline: 'Compassionate Care, Precision Medicine 🩺', bio: 'Your Partner in Health and Longevity. Evidence-based wellness for modern lives.' },
-                    'artist': { headline: 'Visual Storytelling through Digital Art 🎨', bio: 'Independent designer creating immersive visual experiences for forward-thinking brands.' },
-                    'agency': { headline: 'Scaling Brands through Performance Marketing 🏢', bio: 'We build high-performance funnels that drive revenue for elite founders.' },
-                    'freelancer': { headline: 'Visual Identity & Web Experience Design', bio: 'Helping DTC brands stand out through minimalist design and high-converting interfaces.' },
-                    'tiktok': { headline: 'Shop My Top Tech & Setup Finds 🛍️', bio: 'Sharing the best tech deals and home office aesthetic finds. Check my links for exclusive discounts!' },
-                    'luxury': { headline: 'Bespoke Private Advisory', bio: 'Curating exclusive opportunities for the discerning individual.' }
-                };
+                var suggestions = saas_dashboard_data.templates || {};
+
                 if (suggestions[niche]) {
                     $('#wizard-headline').val(suggestions[niche].headline);
                     $('#wizard-bio').val(suggestions[niche].bio);

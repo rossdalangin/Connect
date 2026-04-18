@@ -668,6 +668,20 @@ function saas_ajax_get_lead_details() {
             </div>
             <button type="submit" class="btn-primary" style="width:100%;">Update Status & Notes</button>
         </form>
+        <hr>
+        <h4>Activity History</h4>
+        <div class="lead-log" style="font-size:0.85rem; max-height:200px; overflow-y:auto; background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #eee;">
+            <?php if ($log) :
+                foreach (array_reverse($log) as $entry) : ?>
+                    <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed #ddd;">
+                        <span style="color:#94a3b8; font-size:0.75rem; display:block;"><?php echo $entry['time']; ?></span>
+                        <span style="color:#1e293b;"><?php echo esc_html($entry['msg']); ?></span>
+                    </div>
+                <?php endforeach;
+            else : ?>
+                <p style="color:#94a3b8; margin:0;">No activity recorded yet.</p>
+            <?php endif; ?>
+        </div>
     </div>
     <?php
     wp_send_json_success( ob_get_clean() );

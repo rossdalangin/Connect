@@ -96,6 +96,7 @@ class Saas_Payments {
             // If a coupon is used, it sets/overrides the referrer
             if ($affiliate_id) {
                 update_user_meta($user_id, '_saas_referred_by', $affiliate_id);
+                update_user_meta($user_id, '_saas_active_coupon', $coupon_code);
             }
         }
 
@@ -115,6 +116,7 @@ class Saas_Payments {
             update_post_meta($order_id, '_saas_order_status', 'pending');
             update_post_meta($order_id, '_saas_order_plan', $plan_id);
             update_post_meta($order_id, '_saas_gateway', 'stripe');
+            if($coupon_code) update_post_meta($order_id, '_saas_order_coupon', $coupon_code);
             if ($is_product) {
                 update_post_meta($order_id, '_saas_product_id', $block_id);
                 update_post_meta($order_id, '_saas_customer_id', $user_id);
@@ -135,6 +137,7 @@ class Saas_Payments {
             update_post_meta($order_id, '_saas_order_status', 'pending');
             update_post_meta($order_id, '_saas_order_plan', $plan_id);
             update_post_meta($order_id, '_saas_gateway', 'paypal');
+            if($coupon_code) update_post_meta($order_id, '_saas_order_coupon', $coupon_code);
 
             $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id) . "&amount=" . urlencode($amount) . "&currency_code=USD&custom=" . $order_id . "&return=" . urlencode(home_url('/dashboard?payment=success')) . "&cancel_return=" . urlencode(home_url('/dashboard?payment=cancel'));
             wp_send_json_success([ 'redirect_url' => $paypal_url ]);
