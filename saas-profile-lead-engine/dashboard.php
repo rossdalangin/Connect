@@ -994,8 +994,9 @@ class Saas_Dashboard {
                             <hr>
                             <h4>Advanced Triggers</h4>
                             <div class="field <?php echo $payments->is_agency_user($user_id) ? '' : 'pro-gated-inline'; ?>" data-tier="agency">
-                                <label>Webhook URL (Zapier/Make) <span class="pro-badge" style="background:var(--accent);">Agency</span></label>
+                                <label>Webhook URL (Zapier/Make) <span class="pro-badge" style="background:#0f172a; color:#f59e0b; border:1px solid #f59e0b;">Agency</span></label>
                                 <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" <?php echo $payments->is_agency_user($user_id) ? '' : 'readonly'; ?>>
+                                <p class="field-hint">Automatically send new leads to Zapier, Make, or your own API.</p>
                             </div>
                             <div class="field">
                                 <label>Redirect after Submission</label>
@@ -1193,10 +1194,14 @@ class Saas_Dashboard {
                         ];
                         ?>
                         <div style="display:grid; gap:15px;">
-                            <?php foreach($scripts as $script) : ?>
+                            <?php
+                            $ref_link = home_url('/?ref=' . wp_get_current_user()->user_login);
+                            foreach($scripts as $script) :
+                                $parsed_content = str_replace(['[Link]', '[My Link]'], $ref_link, $script['content']);
+                            ?>
                                 <div style="padding:20px; background:var(--bg-main); border-radius:12px; border:1px solid var(--border);">
                                     <h5 style="margin:0 0 10px; font-weight:800;"><?php echo esc_html($script['title']); ?></h5>
-                                    <pre style="white-space: pre-wrap; font-size: 0.85rem; color: var(--text-dark); background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd;"><?php echo esc_html($script['content']); ?></pre>
+                                    <pre style="white-space: pre-wrap; font-size: 0.85rem; color: var(--text-dark); background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd;"><?php echo esc_html($parsed_content); ?></pre>
                                     <button class="button" onclick="const p = this.previousElementSibling; const t = document.createElement('textarea'); t.value = p.innerText; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); this.innerText='Copied! ✅'; setTimeout(() => this.innerText='Copy Script', 2000);">Copy Script</button>
                                 </div>
                             <?php endforeach; ?>

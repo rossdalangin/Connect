@@ -1186,6 +1186,7 @@ class Saas_Admin_Settings {
 
         $payouts = get_posts(['post_type' => 'saas_payout', 'post_status' => 'any', 'numberposts' => -1]);
         $orders  = get_posts(['post_type' => 'saas_order', 'post_status' => 'any', 'numberposts' => -1]);
+        $export_url = admin_url('admin-ajax.php?action=saas_export_orders&security=' . wp_create_nonce('saas_export_nonce'));
 
         $gross_rev = 0;
         foreach($orders as $o) {
@@ -1360,7 +1361,10 @@ class Saas_Admin_Settings {
                 </div>
 
                 <div id="tab-orders" class="tab-content" style="display:none;">
-                    <h3>Customer Order History</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3>Customer Order History</h3>
+                        <a href="<?php echo $export_url; ?>" class="button">📥 Export All Orders (CSV)</a>
+                    </div>
                     <table class="wp-list-table widefat fixed striped">
                         <thead>
                             <tr>

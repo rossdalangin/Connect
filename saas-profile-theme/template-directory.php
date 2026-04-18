@@ -13,7 +13,15 @@ get_header();
         <h1 style="font-size:3rem; font-weight:900;">Discover Elite Creators</h1>
         <p style="font-size:1.2rem; color:#666;">Explore the best digital identities built with our platform.</p>
 
-        <div class="directory-filters" style="margin-top:40px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+        <div class="directory-search" style="margin-top:40px; max-width:500px; margin-left:auto; margin-right:auto;">
+            <form action="" method="GET" style="display:flex; background:#fff; border:1px solid #eee; border-radius:100px; padding:5px; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+                <input type="text" name="s" placeholder="Search creators by name..." value="<?php echo esc_attr($_GET['s'] ?? ''); ?>" style="flex:1; border:none; padding:12px 25px; outline:none; font-weight:600; background:transparent;">
+                <?php if($active_niche = $_GET['niche'] ?? '') : ?><input type="hidden" name="niche" value="<?php echo esc_attr($active_niche); ?>"><?php endif; ?>
+                <button type="submit" style="background:var(--primary-color); color:#fff; border:none; border-radius:50px; padding:10px 25px; font-weight:800; cursor:pointer;">Search</button>
+            </form>
+        </div>
+
+        <div class="directory-filters" style="margin-top:20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
             <?php
             $active_niche = $_GET['niche'] ?? '';
             $niches = [
@@ -52,13 +60,21 @@ get_header();
             $args['meta_query'][] = ['key' => '_saas_niche', 'value' => $active_niche];
         }
 
+        if ($search = $_GET['s'] ?? '') {
+            $args['s'] = $search;
+        }
+
         $profiles = get_posts($args);
 
         if($profiles) :
             foreach($profiles as $p) :
                 $p_meta = saas_get_profile_meta($p->ID);
+                $p_niche = get_post_meta($p->ID, '_saas_niche', true);
                 ?>
-                <a href="<?php echo home_url('/' . $p->post_name); ?>" class="profile-card" style="text-decoration:none; color:inherit; background:#fff; border-radius:24px; padding:30px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.05); transition:transform 0.3s ease;">
+                <a href="<?php echo home_url('/' . $p->post_name); ?>" class="profile-card" style="text-decoration:none; color:inherit; background:#fff; border-radius:24px; padding:30px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.05); transition:transform 0.3s ease; position:relative;">
+                    <?php if($p_niche): ?>
+                        <span style="position:absolute; top:20px; right:20px; background:var(--primary-color); color:#fff; font-size:0.6rem; font-weight:900; padding:4px 10px; border-radius:50px; text-transform:uppercase;"><?php echo $p_niche; ?></span>
+                    <?php endif; ?>
                     <div style="margin-bottom:20px;">
                         <?php echo get_the_post_thumbnail($p->ID, 'thumbnail', ['style' => 'width:100px; height:100px; border-radius:50%; object-fit:cover; border:4px solid var(--primary-color);']); ?>
                     </div>

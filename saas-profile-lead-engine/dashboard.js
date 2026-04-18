@@ -492,10 +492,13 @@
 
         // 10.1 Marketing Material Copy
         $('.copy-html-btn').on('click', function() {
-            var html = $(this).closest('div').find('img').prop('outerHTML');
+            var refLink = $('#saas-ref-link').val();
+            var imgHtml = $(this).closest('div').find('img').prop('outerHTML');
+            var fullHtml = '<a href="' + refLink + '">' + imgHtml + '</a>';
+
             var $temp = $("<input>");
             $("body").append($temp);
-            $temp.val(html).select();
+            $temp.val(fullHtml).select();
             document.execCommand("copy");
             $temp.remove();
             var $btn = $(this);

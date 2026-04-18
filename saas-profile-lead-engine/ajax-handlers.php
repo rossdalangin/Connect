@@ -581,6 +581,41 @@ function saas_ajax_export_analytics() {
 
 // 5. AJAX: Export Leads CSV
 add_action( 'wp_ajax_saas_export_leads', 'saas_ajax_export_leads' );
+add_action( 'wp_ajax_saas_export_orders', 'saas_ajax_export_orders' );
+
+function saas_ajax_export_orders() {
+    if (!current_user_can('manage_options')) wp_die('Unauthorized');
+    check_ajax_referer('saas_export_nonce', 'security');
+
+    $orders = get_posts([
+        'post_type'   => 'saas_order',
+        'post_status' => 'any',
+        'numberposts' => -1,
+    ]);
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="orders.csv"');
+
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Order ID', 'Customer', 'Item', 'Amount', 'Status', 'Gateway', 'Coupon', 'Date']);
+
+    foreach ($orders as $o) {
+        $user = get_userdata($o->post_author);
+        fputcsv($output, [
+            $o->ID,
+            $user ? $user->display_name : 'Unknown',
+            $o->post_title,
+            get_post_meta($o->ID, '_saas_order_amount', true),
+            get_post_meta($o->ID, '_saas_order_status', true),
+            get_post_meta($o->ID, '_saas_gateway', true),
+            get_post_meta($o->ID, '_saas_order_coupon', true),
+            get_the_date('Y-m-d H:i', $o->ID)
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
 function saas_ajax_export_leads() {
     check_ajax_referer( 'saas_export_nonce', 'security' );
 
