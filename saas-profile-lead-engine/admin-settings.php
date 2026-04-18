@@ -300,6 +300,9 @@ class Saas_Admin_Settings {
         register_setting( 'saas_settings_group', 'saas_pricing_title' );
         register_setting( 'saas_settings_group', 'saas_contact_title' );
         register_setting( 'saas_settings_group', 'saas_home_features' );
+        register_setting( 'saas_settings_group', 'saas_home_profile_offset' );
+        register_setting( 'saas_settings_group', 'saas_home_lead_offset' );
+        register_setting( 'saas_settings_group', 'saas_home_rev_offset' );
 
         add_settings_section(
             'saas_payment_section',
@@ -574,6 +577,33 @@ class Saas_Admin_Settings {
             [ 'id' => 'saas_home_features', 'desc' => 'JSON array of objects with "icon", "title", and "desc".' ]
         );
 
+        add_settings_field(
+            'home_profile_offset',
+            'Growth: Profile Offset',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_profile_offset', 'desc' => 'Number to add to the real profile count for social proof.' ]
+        );
+
+        add_settings_field(
+            'home_lead_offset',
+            'Growth: Lead Offset',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_lead_offset', 'desc' => 'Number to add to the real lead count.' ]
+        );
+
+        add_settings_field(
+            'home_rev_offset',
+            'Growth: Revenue Offset ($M)',
+            [ $this, 'text_render' ],
+            'saas_settings',
+            'saas_homepage_section',
+            [ 'id' => 'saas_home_rev_offset', 'desc' => 'Millions of dollars to add to tracked revenue (e.g. 42.5).' ]
+        );
+
         add_settings_section(
             'saas_license_section',
             'License Management',
@@ -735,6 +765,13 @@ class Saas_Admin_Settings {
             if (isset($_POST['saas_home_hero'])) update_option('saas_home_hero', sanitize_textarea_field($_POST['saas_home_hero']));
             if (isset($_POST['saas_home_founder_letter'])) update_option('saas_home_founder_letter', sanitize_textarea_field($_POST['saas_home_founder_letter']));
 
+            if (isset($_POST['featured_profiles_json'])) {
+                $featured = json_decode(stripslashes($_POST['featured_profiles_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_featured_profiles', $featured);
+                }
+            }
+
             echo '<div class="updated"><p>Content Hub updated successfully!</p></div>';
         }
 
@@ -745,6 +782,7 @@ class Saas_Admin_Settings {
         $scripts   = get_option('saas_sales_scripts') ?: $this->get_default_scripts();
         $affiliate_kit = get_option('saas_affiliate_marketing_kit') ?: $this->get_default_marketing_kit();
         $emails    = get_option('saas_email_templates') ?: $this->get_default_emails();
+        $featured  = get_option('saas_featured_profiles') ?: [];
         ?>
         <div class="wrap saas-admin-wrapper">
             <h1>SaaS Content Hub</h1>
@@ -760,6 +798,7 @@ class Saas_Admin_Settings {
                     <a href="#tab-marketing-kit" class="nav-tab">Marketing Kit</a>
                     <a href="#tab-emails" class="nav-tab">Email Templates</a>
                     <a href="#tab-vsl" class="nav-tab">🔥 Sales Letter / VSL</a>
+                    <a href="#tab-featured" class="nav-tab">⭐ Featured Profiles</a>
                 </h2>
 
                 <form method="post" action="">
@@ -775,15 +814,32 @@ class Saas_Admin_Settings {
                     <div id="tab-training" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Training Academy Videos (JSON)</h3>
                         <p class="description">Add/Edit tutorial videos for the user dashboard Training tab. Use <code>video_id</code> for embedding.</p>
-                        <textarea name="training_json" id="json-training" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($training, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="training_json" id="json-training" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($training, JSON_PRETTY_PRINT)); ?></textarea>
                         <button type="button" class="button reset-json" data-target="json-training" data-type="training">Reset to Default Training</button>
+
+                        <hr>
+                        <h4>Quick Add Tutorial</h4>
+                        <div style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #eee;">
+                            <input type="text" id="new-tr-title" placeholder="Video Title" style="width:100%; margin-bottom:10px;">
+                            <input type="text" id="new-tr-desc" placeholder="Brief Description" style="width:100%; margin-bottom:10px;">
+                            <input type="text" id="new-tr-vid" placeholder="Video ID (e.g. YouTube ID)" style="width:100%; margin-bottom:10px;">
+                            <button type="button" class="button" id="add-tr-row">Add to Training List</button>
+                        </div>
                     </div>
 
                     <div id="tab-kb" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Knowledge Base Articles (JSON)</h3>
                         <p class="description">Manage the links and titles shown in the Knowledge Base section of the user training tab.</p>
-                        <textarea name="kb_json" id="json-kb" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($kb, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="kb_json" id="json-kb" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($kb, JSON_PRETTY_PRINT)); ?></textarea>
                         <button type="button" class="button reset-json" data-target="json-kb" data-type="kb">Reset to Default KB</button>
+
+                        <hr>
+                        <h4>Quick Add KB Article</h4>
+                        <div style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #eee;">
+                            <input type="text" id="new-kb-title" placeholder="Article Title" style="width:100%; margin-bottom:10px;">
+                            <input type="text" id="new-kb-url" placeholder="Article URL" style="width:100%; margin-bottom:10px;">
+                            <button type="button" class="button" id="add-kb-row">Add to KB List</button>
+                        </div>
                     </div>
 
                     <div id="tab-marketing" class="tab-content" style="display:none; padding:20px; background:#fff;">
@@ -829,6 +885,12 @@ class Saas_Admin_Settings {
                         <p class="description">Customize the subject and body of system emails using placeholders like {name}, {email}, {profile_url}.</p>
                         <textarea name="email_templates_json" id="json-emails" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($emails, JSON_PRETTY_PRINT)); ?></textarea>
                         <button type="button" class="button reset-json" data-target="json-emails" data-type="emails">Reset to Default Emails</button>
+                    </div>
+
+                    <div id="tab-featured" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>Manual Featured Profiles</h3>
+                        <p class="description">Enter a JSON list of Profile slugs to show on the landing page (e.g. ["john-doe", "sarah-pro"]). Leave empty to show latest public profiles.</p>
+                        <textarea name="featured_profiles_json" style="width:100%; height:200px; font-family:monospace;"><?php echo esc_textarea(json_encode($featured, JSON_PRETTY_PRINT)); ?></textarea>
                     </div>
 
                     <div id="tab-vsl" class="tab-content" style="display:none; padding:20px; background:#fff;">
@@ -895,6 +957,29 @@ class Saas_Admin_Settings {
                 });
                 $('[name="scripts_json"]').val(JSON.stringify(list, null, 4));
                 $('#new-script-title, #new-script-content').val('');
+                alert('Added! Click "Save All" to commit changes.');
+            });
+
+            $('#add-tr-row').on('click', function() {
+                var list = JSON.parse($('#json-training').val() || '[]');
+                list.push({
+                    title: $('#new-tr-title').val(),
+                    desc: $('#new-tr-desc').val(),
+                    video_id: $('#new-tr-vid').val()
+                });
+                $('#json-training').val(JSON.stringify(list, null, 4));
+                $('#new-tr-title, #new-tr-desc, #new-tr-vid').val('');
+                alert('Added! Click "Save All" to commit changes.');
+            });
+
+            $('#add-kb-row').on('click', function() {
+                var list = JSON.parse($('#json-kb').val() || '[]');
+                list.push({
+                    title: $('#new-kb-title').val(),
+                    url: $('#new-kb-url').val()
+                });
+                $('#json-kb').val(JSON.stringify(list, null, 4));
+                $('#new-kb-title, #new-kb-url').val('');
                 alert('Added! Click "Save All" to commit changes.');
             });
         });

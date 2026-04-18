@@ -172,18 +172,22 @@ $h_img   = get_option('saas_home_image');
     $count_leads = wp_count_posts('saas_lead')->publish;
     global $wpdb;
     $total_rev = (float)$wpdb->get_var("SELECT SUM(meta_value) FROM $wpdb->postmeta WHERE meta_key = '_saas_order_amount'");
+
+    $p_offset = (int) get_option('saas_home_profile_offset') ?: 1250;
+    $l_offset = (int) get_option('saas_home_lead_offset') ?: 8500;
+    $r_offset = (float) get_option('saas_home_rev_offset') ?: 42.5;
     ?>
     <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 50px; text-align: center;">
         <div>
-            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><?php echo number_format($count_profiles + 1250); ?>+</div>
+            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><?php echo number_format($count_profiles + $p_offset); ?>+</div>
             <p style="font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem;">Elite Profiles Launched</p>
         </div>
         <div>
-            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">$<?php echo number_format(($total_rev / 1000) + 42.5, 1); ?>M+</div>
+            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">$<?php echo number_format(($total_rev / 1000000) + $r_offset, 1); ?>M+</div>
             <p style="font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem;">Revenue Processed</p>
         </div>
         <div>
-            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><?php echo number_format($count_leads + 8500); ?>+</div>
+            <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><?php echo number_format($count_leads + $l_offset); ?>+</div>
             <p style="font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem;">High-Intent Leads Captured</p>
         </div>
     </div>
@@ -303,15 +307,29 @@ $h_img   = get_option('saas_home_image');
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
             <?php
-            $featured_profiles = get_posts([
-                'post_type' => 'saas_profile',
-                'post_status' => 'publish',
-                'meta_key' => '_saas_show_in_directory',
-                'meta_value' => '1',
-                'numberposts' => 3,
-                'orderby' => 'date',
-                'order' => 'DESC'
-            ]);
+            $featured_slugs = get_option('saas_featured_profiles') ?: [];
+            $featured_profiles = [];
+
+            if ($featured_slugs) {
+                $featured_profiles = get_posts([
+                    'post_type' => 'saas_profile',
+                    'post_name__in' => $featured_slugs,
+                    'post_status' => 'publish',
+                    'orderby' => 'post_name__in'
+                ]);
+            }
+
+            if (empty($featured_profiles)) {
+                $featured_profiles = get_posts([
+                    'post_type' => 'saas_profile',
+                    'post_status' => 'publish',
+                    'meta_key' => '_saas_show_in_directory',
+                    'meta_value' => '1',
+                    'numberposts' => 3,
+                    'orderby' => 'date',
+                    'order' => 'DESC'
+                ]);
+            }
 
             if ($featured_profiles) :
                 foreach ($featured_profiles as $fp) :
