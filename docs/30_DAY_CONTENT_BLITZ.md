@@ -31,7 +31,7 @@
 - **Day 22 (Story):** "Last chance to lock in Founding Member pricing."
 - **Day 23 (DM Outreach):** "Hey [Name], I'm helping 5 coaches setup their Elite Engines this week. Want a spot?"
 - **Day 24 (LinkedIn):** "The cost of inaction."
-- **Day 25 (Email):** "Two paths. One choice."
+- **Day 25 (Email):** "Two futures. One choice."
 - **Day 26 (FB):** "The future of networking is here."
 - **Day 27 (Story):** "3 spots left for the bonus marketing kit."
 - **Day 28 (LinkedIn):** "My personal results after 30 days of Elite."
