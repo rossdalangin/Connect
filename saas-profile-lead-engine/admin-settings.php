@@ -779,6 +779,34 @@ class Saas_Admin_Settings {
                 }
             }
 
+            if (isset($_POST['features_grid_json'])) {
+                $grid = json_decode(stripslashes($_POST['features_grid_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_home_features', json_encode($grid));
+                }
+            }
+
+            if (isset($_POST['benefits_json'])) {
+                $benefits = json_decode(stripslashes($_POST['benefits_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_home_benefits', json_encode($benefits));
+                }
+            }
+
+            if (isset($_POST['faq_json'])) {
+                $faq = json_decode(stripslashes($_POST['faq_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_home_faq', json_encode($faq));
+                }
+            }
+
+            if (isset($_POST['testimonials_json'])) {
+                $testi = json_decode(stripslashes($_POST['testimonials_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_home_testimonials', json_encode($testi));
+                }
+            }
+
             if (isset($_POST['featured_profiles_json'])) {
                 $featured = json_decode(stripslashes($_POST['featured_profiles_json']), true);
                 if (json_last_error() === JSON_ERROR_NONE) {
@@ -936,6 +964,24 @@ class Saas_Admin_Settings {
                                     <label><strong>Pricing Strategy (JSON)</strong></label>
                                     <p class="description">Manage price points, features, and plan CTAs.</p>
                                     <textarea name="pricing_json" rows="8" class="large-text" style="width:100%; font-family:monospace;"><?php echo esc_textarea(json_encode(json_decode(get_option('saas_home_pricing_json')), JSON_PRETTY_PRINT)); ?></textarea>
+                                </div>
+                                <div class="field" style="margin-top:20px;">
+                                    <label><strong>Features Grid (JSON)</strong></label>
+                                    <p class="description">Manage the "Everything you need" icons and cards.</p>
+                                    <textarea name="features_grid_json" rows="8" class="large-text" style="width:100%; font-family:monospace;"><?php echo esc_textarea(json_encode(json_decode(get_option('saas_home_features')), JSON_PRETTY_PRINT)); ?></textarea>
+                                </div>
+                                <div class="field" style="margin-top:20px;">
+                                    <label><strong>Success Benefits (JSON)</strong></label>
+                                    <p class="description">Bullet points for "Stop losing traffic" section.</p>
+                                    <textarea name="benefits_json" rows="6" class="large-text" style="width:100%; font-family:monospace;"><?php echo esc_textarea(json_encode(json_decode(get_option('saas_home_benefits')), JSON_PRETTY_PRINT)); ?></textarea>
+                                </div>
+                                <div class="field" style="margin-top:20px;">
+                                    <label><strong>Landing Page FAQ (JSON)</strong></label>
+                                    <textarea name="faq_json" rows="6" class="large-text" style="width:100%; font-family:monospace;"><?php echo esc_textarea(json_encode(json_decode(get_option('saas_home_faq')), JSON_PRETTY_PRINT)); ?></textarea>
+                                </div>
+                                <div class="field" style="margin-top:20px;">
+                                    <label><strong>Wall of Love / Testimonials (JSON)</strong></label>
+                                    <textarea name="testimonials_json" rows="8" class="large-text" style="width:100%; font-family:monospace;"><?php echo esc_textarea(json_encode(json_decode(get_option('saas_home_testimonials')), JSON_PRETTY_PRINT)); ?></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1321,16 +1367,20 @@ class Saas_Admin_Settings {
             }
         }
 
-        $commissions = 0;
-        $users = get_users(['fields' => ['ID', 'display_name']]);
-        foreach($users as $u) {
-            $commissions += floatval(get_user_meta($u->ID, '_saas_affiliate_earned', true));
-        }
+        $pending_payouts_amt = 0;
         foreach($payouts as $p) {
-            if(get_post_meta($p->ID, '_status', true) === 'paid') {
-                $commissions += floatval(get_post_meta($p->ID, '_amount', true));
+            if(get_post_meta($p->ID, '_status', true) === 'pending') {
+                $pending_payouts_amt += floatval(get_post_meta($p->ID, '_amount', true));
             }
         }
+
+        $total_balances = 0;
+        $users = get_users(['fields' => ['ID', 'display_name']]);
+        foreach($users as $u) {
+            $total_balances += floatval(get_user_meta($u->ID, '_saas_affiliate_earned', true));
+        }
+
+        $obligations = $total_balances + $pending_payouts_amt;
         $aff_coupons = get_option('saas_affiliate_coupons') ?: [];
         $users = get_users(['fields' => ['ID', 'display_name']]);
         ?>
@@ -1345,11 +1395,11 @@ class Saas_Admin_Settings {
                 </div>
                 <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
                     <small style="text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:1px;">Affiliate Obligations</small>
-                    <div style="font-size:2rem; font-weight:900; color:#6c5ce7;">$<?php echo number_format($commissions, 2); ?></div>
+                    <div style="font-size:2rem; font-weight:900; color:#6c5ce7;">$<?php echo number_format($obligations, 2); ?></div>
                 </div>
                 <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
                     <small style="text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:1px;">Net Profit (Est)</small>
-                    <div style="font-size:2rem; font-weight:900; color:#0f172a;">$<?php echo number_format($gross_rev - $commissions, 2); ?></div>
+                    <div style="font-size:2rem; font-weight:900; color:#0f172a;">$<?php echo number_format($gross_rev - $obligations, 2); ?></div>
                 </div>
             </div>
 
@@ -1357,8 +1407,44 @@ class Saas_Admin_Settings {
                 <h2 class="nav-tab-wrapper">
                     <a href="#tab-payouts" class="nav-tab nav-tab-active">Affiliate Payouts</a>
                     <a href="#tab-orders" class="nav-tab">Customer Orders</a>
+                    <a href="#tab-commissions" class="nav-tab">Commission Log</a>
+                    <a href="#tab-referrals" class="nav-tab">Recent Referrals</a>
                     <a href="#tab-coupons" class="nav-tab">Affiliate Discount Codes</a>
                 </h2>
+
+                <div id="tab-referrals" class="tab-content" style="display:none;">
+                    <h3>New Affiliate Referrals (Latest 50)</h3>
+                    <table class="wp-list-table widefat fixed striped">
+                        <thead>
+                            <tr>
+                                <th>New User</th>
+                                <th>Referred By</th>
+                                <th>Target Plan</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $recent_refs = get_users([
+                                'meta_key' => '_saas_referred_by',
+                                'orderby'  => 'user_registered',
+                                'order'    => 'DESC',
+                                'number'   => 50
+                            ]);
+                            foreach($recent_refs as $ru):
+                                $referrer = get_userdata(get_user_meta($ru->ID, '_saas_referred_by', true));
+                                $target_plan = get_user_meta($ru->ID, '_saas_registration_target_plan', true) ?: 'free';
+                            ?>
+                                <tr>
+                                    <td><strong><?php echo $ru->display_name; ?></strong></td>
+                                    <td><?php echo $referrer ? $referrer->display_name : 'Unknown'; ?></td>
+                                    <td><span class="status-badge status-<?php echo $target_plan; ?>"><?php echo strtoupper($target_plan); ?></span></td>
+                                    <td><?php echo date('M j, Y', strtotime($ru->user_registered)); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div id="tab-coupons" class="tab-content" style="display:none;">
                     <div style="background:#f8fafc; padding:30px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:30px;">
@@ -1481,6 +1567,38 @@ class Saas_Admin_Settings {
                                     <?php endif; ?>
                                 </td>
                             </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="tab-commissions" class="tab-content" style="display:none;">
+                    <h3>Global Commission Log</h3>
+                    <table class="wp-list-table widefat fixed striped">
+                        <thead>
+                            <tr>
+                                <th>Affiliate</th>
+                                <th>Order ID</th>
+                                <th>Order Amt</th>
+                                <th>Comm Amt</th>
+                                <th>%</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $commissions_log = get_posts(['post_type' => 'saas_commission', 'numberposts' => 50]);
+                            foreach($commissions_log as $cl):
+                                $aff = get_userdata($cl->post_author);
+                            ?>
+                                <tr>
+                                    <td><strong><?php echo $aff ? $aff->display_name : 'Unknown'; ?></strong></td>
+                                    <td>#<?php echo get_post_meta($cl->ID, '_saas_order_id', true); ?></td>
+                                    <td>$<?php echo number_format(get_post_meta($cl->ID, '_saas_order_amount', true), 2); ?></td>
+                                    <td style="color:#10b981; font-weight:700;">$<?php echo number_format(get_post_meta($cl->ID, '_saas_commission_amount', true), 2); ?></td>
+                                    <td><?php echo get_post_meta($cl->ID, '_saas_percentage', true); ?>%</td>
+                                    <td><?php echo get_the_date('', $cl->ID); ?></td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>

@@ -108,6 +108,24 @@ class Saas_Affiliates {
         update_post_meta($payout_id, '_status', 'paid');
         update_post_meta($payout_id, '_paid_at', current_time('mysql'));
 
+        // Log the event as a commission record with negative value or just as a transaction log?
+        // For this system, we'll log it as a saas_commission entry with a negative amount to keep balances accurate in logs
+        $payout = get_post($payout_id);
+        $amount = get_post_meta($payout_id, '_amount', true);
+
+        wp_insert_post([
+            'post_type'   => 'saas_commission',
+            'post_title'  => 'Payout Processed - Request #' . $payout_id,
+            'post_status' => 'publish',
+            'post_author' => $payout->post_author,
+            'meta_input'  => [
+                '_saas_commission_amount' => -$amount,
+                '_saas_payout_id'        => $payout_id,
+                '_saas_order_amount'     => 0,
+                '_saas_percentage'       => 0
+            ]
+        ]);
+
         wp_send_json_success('Payout marked as paid successfully!');
     }
 
