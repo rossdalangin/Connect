@@ -762,26 +762,30 @@ class Saas_Admin_Settings {
 
                     <div id="tab-templates" class="tab-content" style="padding:20px; background:#fff;">
                         <h3>Manage Profile Templates (JSON)</h3>
-                        <p class="description">Define the headline, bio, colors, and default blocks for each niche template.</p>
-                        <textarea name="templates_json" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($templates, JSON_PRETTY_PRINT)); ?></textarea>
+                        <p class="description">Define the headline, bio, colors, and default blocks for each niche template. These are used by the Setup Wizard.</p>
+                        <textarea name="templates_json" id="json-templates" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($templates, JSON_PRETTY_PRINT)); ?></textarea>
+                        <button type="button" class="button reset-json" data-target="json-templates" data-type="templates">Reset to Default Templates</button>
                     </div>
 
                     <div id="tab-training" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Training Academy Videos (JSON)</h3>
-                        <p class="description">Add/Edit tutorial videos for the user dashboard Training tab.</p>
-                        <textarea name="training_json" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($training, JSON_PRETTY_PRINT)); ?></textarea>
+                        <p class="description">Add/Edit tutorial videos for the user dashboard Training tab. Use <code>video_id</code> for embedding.</p>
+                        <textarea name="training_json" id="json-training" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($training, JSON_PRETTY_PRINT)); ?></textarea>
+                        <button type="button" class="button reset-json" data-target="json-training" data-type="training">Reset to Default Training</button>
                     </div>
 
                     <div id="tab-kb" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Knowledge Base Articles (JSON)</h3>
-                        <p class="description">Manage the links and titles shown in the Knowledge Base section.</p>
-                        <textarea name="kb_json" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($kb, JSON_PRETTY_PRINT)); ?></textarea>
+                        <p class="description">Manage the links and titles shown in the Knowledge Base section of the user training tab.</p>
+                        <textarea name="kb_json" id="json-kb" style="width:100%; height:400px; font-family:monospace;"><?php echo esc_textarea(json_encode($kb, JSON_PRETTY_PRINT)); ?></textarea>
+                        <button type="button" class="button reset-json" data-target="json-kb" data-type="kb">Reset to Default KB</button>
                     </div>
 
                     <div id="tab-marketing" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Affiliate Marketing Materials (JSON)</h3>
                         <p class="description">Define the banners and assets available for affiliates in the Earn tab.</p>
-                        <textarea name="marketing_json" style="width:100%; height:200px; font-family:monospace;"><?php echo esc_textarea(json_encode($marketing, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="marketing_json" id="json-marketing" style="width:100%; height:200px; font-family:monospace;"><?php echo esc_textarea(json_encode($marketing, JSON_PRETTY_PRINT)); ?></textarea>
+                        <button type="button" class="button reset-json" data-target="json-marketing" data-type="marketing">Reset to Default Marketing</button>
 
                         <hr>
                         <h4>Quick Add Banner</h4>
@@ -796,7 +800,8 @@ class Saas_Admin_Settings {
                     <div id="tab-scripts" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Sales Scripts & Templates (JSON)</h3>
                         <p class="description">Add copy-paste scripts for affiliates to use on social media and email.</p>
-                        <textarea name="scripts_json" style="width:100%; height:200px; font-family:monospace;"><?php echo esc_textarea(json_encode($scripts, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="scripts_json" id="json-scripts" style="width:100%; height:200px; font-family:monospace;"><?php echo esc_textarea(json_encode($scripts, JSON_PRETTY_PRINT)); ?></textarea>
+                        <button type="button" class="button reset-json" data-target="json-scripts" data-type="scripts">Reset to Default Scripts</button>
 
                         <hr>
                         <h4>Quick Add Script</h4>
@@ -827,6 +832,23 @@ class Saas_Admin_Settings {
         </div>
         <script>
         jQuery(document).ready(function($) {
+            $('.reset-json').on('click', function() {
+                var type = $(this).data('type');
+                var target = $(this).data('target');
+                if(!confirm('Are you sure? This will overwrite your current JSON with system defaults.')) return;
+
+                var defaults = {
+                    templates: <?php echo json_encode($this->get_default_templates(), JSON_PRETTY_PRINT); ?>,
+                    training: <?php echo json_encode($this->get_default_training(), JSON_PRETTY_PRINT); ?>,
+                    kb: <?php echo json_encode($this->get_default_kb(), JSON_PRETTY_PRINT); ?>,
+                    marketing: <?php echo json_encode($this->get_default_marketing(), JSON_PRETTY_PRINT); ?>,
+                    scripts: <?php echo json_encode($this->get_default_scripts(), JSON_PRETTY_PRINT); ?>
+                };
+
+                $('#' + target).val(JSON.stringify(defaults[type], null, 4));
+                alert('Default ' + type + ' loaded! Remember to click "Save All" below.');
+            });
+
             $('#add-mm-row').on('click', function() {
                 var list = JSON.parse($('[name="marketing_json"]').val() || '[]');
                 list.push({
@@ -1436,7 +1458,9 @@ class Saas_Admin_Settings {
                         <div class="saas-admin-main" style="margin:0;">
                             <div style="background:#fff; padding:30px; border-radius:12px; border:1px solid #ddd; margin-bottom:30px;">
                                 <h3>System Growth Trends (6 Months)</h3>
-                                <canvas id="saas-admin-chart" height="150"></canvas>
+                                <div style="height:800px;">
+                                    <canvas id="saas-admin-chart"></canvas>
+                                </div>
                             </div>
 
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
