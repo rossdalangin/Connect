@@ -1101,6 +1101,33 @@ class Saas_Dashboard {
                     </div>
 
                     <div class="dashboard-card">
+                        <h4 style="color:var(--secondary); margin-bottom:15px;">Affiliate Earning History</h4>
+                        <?php
+                        $commissions = get_posts(['post_type' => 'saas_commission', 'author' => $user_id, 'numberposts' => 20]);
+                        if($commissions) : ?>
+                            <table class="saas-table">
+                                <thead><tr><th>Date</th><th>Type</th><th>Order Amount</th><th>Your Commission</th></tr></thead>
+                                <tbody>
+                                    <?php foreach($commissions as $c) :
+                                        $order_amt = get_post_meta($c->ID, '_saas_order_amount', true);
+                                        $comm_amt  = get_post_meta($c->ID, '_saas_commission_amount', true);
+                                        $perc      = get_post_meta($c->ID, '_saas_percentage', true);
+                                        ?>
+                                        <tr>
+                                            <td><?php echo get_the_date('M j, Y', $c->ID); ?></td>
+                                            <td><small>Recurring (<?php echo $perc; ?>%)</small></td>
+                                            <td>$<?php echo number_format($order_amt, 2); ?></td>
+                                            <td style="color:var(--secondary); font-weight:800;">+$<?php echo number_format($comm_amt, 2); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p style="color:var(--text-muted); font-size:0.9rem;">No commissions earned yet. Share your link to start earning!</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="dashboard-card">
                         <h4>Recent Payouts</h4>
                         <?php
                         $payouts = get_posts(['post_type' => 'saas_payout', 'author' => $user_id, 'numberposts' => 10]);
@@ -1108,13 +1135,19 @@ class Saas_Dashboard {
                             <table class="saas-table">
                                 <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
                                 <tbody>
-                                    <?php foreach($payouts as $p) : ?>
-                                        <tr><td><?php echo get_the_date('', $p->ID); ?></td><td>$<?php echo get_post_meta($p->ID, '_amount', true); ?></td><td>Paid</td></tr>
+                                    <?php foreach($payouts as $p) :
+                                        $p_status = get_post_meta($p->ID, '_status', true) ?: 'pending';
+                                        ?>
+                                        <tr>
+                                            <td><?php echo get_the_date('', $p->ID); ?></td>
+                                            <td>$<?php echo number_format(get_post_meta($p->ID, '_amount', true), 2); ?></td>
+                                            <td><span class="pro-badge" style="background:<?php echo ($p_status==='paid') ? 'var(--secondary)' : '#94a3b8'; ?>"><?php echo strtoupper($p_status); ?></span></td>
+                                        </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
                         <?php else: ?>
-                            <p style="color:var(--text-muted); font-size:0.9rem;">No payouts recorded yet. Start sharing to earn!</p>
+                            <p style="color:var(--text-muted); font-size:0.9rem;">No payouts recorded yet.</p>
                         <?php endif; ?>
                     </div>
 
@@ -1394,16 +1427,31 @@ class Saas_Dashboard {
                             $all_tpls = get_option('saas_templates') ?: [];
                             $tpl_icons = [
                                 'coach' => '🚀', 'business' => '🏢', 'luxury' => '⚜️', 'freelancer' => '🎨',
-                                'realtor' => '🏡', 'politician' => '🏛️', 'elite_card' => '💳', 'tiktok' => '📱', 'consultant' => '🧠'
+                                'realtor' => '🏡', 'politician' => '🏛️', 'tiktok' => '📱', 'consultant' => '🧠',
+                                'author' => '📘', 'lawyer' => '⚖️', 'doctor' => '🩺', 'influencer' => '📸', 'servant' => '🏛️', 'artist' => '🎨',
+                                'podcast' => '🎙️', 'course' => '🎓', 'shop' => '🛒', 'charity' => '❤️'
                             ];
-                            foreach($all_tpls as $id => $t) :
-                                $icon = $tpl_icons[$id] ?? '✨';
-                            ?>
-                                <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s;">
-                                    <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $icon; ?></div>
-                                    <h4 style="margin:0 0 15px;"><?php echo esc_html(ucfirst($id)); ?></h4>
-                                    <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none;">Apply Template</button>
+
+                            $categories = [
+                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course'],
+                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'shop'],
+                                'Public & Professional' => ['servant', 'politician', 'doctor', 'speaker', 'luxury', 'charity']
+                            ];
+
+                            foreach ($categories as $cat_title => $tpl_ids) : ?>
+                                <div style="grid-column: 1 / -1; margin-top: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                                    <h4 style="margin:0; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-size: 0.8rem;"><?php echo $cat_title; ?></h4>
                                 </div>
+                                <?php foreach($tpl_ids as $id) :
+                                    if (!isset($all_tpls[$id])) continue;
+                                    $icon = $tpl_icons[$id] ?? '✨';
+                                ?>
+                                    <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s; background:#fff;">
+                                        <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $icon; ?></div>
+                                        <h4 style="margin:0 0 15px; font-size: 1rem;"><?php echo esc_html(ucfirst(str_replace('_', ' ', $id))); ?></h4>
+                                        <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none;">Apply Template</button>
+                                    </div>
+                                <?php endforeach; ?>
                             <?php endforeach; ?>
                         </div>
                     </div>

@@ -191,7 +191,7 @@ class Saas_Payments {
                 $referrer_id = get_user_meta($user_id, '_saas_referred_by', true);
                 if ($referrer_id) {
                     $aff = new Saas_Affiliates();
-                    $aff->record_referral_sale($referrer_id, floatval($amount));
+                    $aff->record_referral_sale($referrer_id, floatval($amount), $order_id);
                 }
             }
 

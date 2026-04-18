@@ -21,7 +21,7 @@ class Saas_Affiliates {
     /**
      * Calculate recurring commissions
      */
-    public function record_referral_sale( $referrer_id, $order_amount ) {
+    public function record_referral_sale( $referrer_id, $order_amount, $order_id = 0 ) {
         $percentage = get_option('saas_affiliate_percentage') ?: 30;
 
         // Log the commission calculation for debugging
@@ -30,8 +30,19 @@ class Saas_Affiliates {
         $total_earned = floatval(get_user_meta( $referrer_id, '_saas_affiliate_earned', true )) ?: 0;
         update_user_meta( $referrer_id, '_saas_affiliate_earned', round($total_earned + $commission, 2) );
 
-        // Log the event as a meta on the order if possible, but we don't have order_id here.
-        // We could pass it, but this is the primary engine.
+        // Log as saas_commission post for dashboard history
+        wp_insert_post([
+            'post_type'   => 'saas_commission',
+            'post_title'  => 'Commission for Order #' . $order_id,
+            'post_status' => 'publish',
+            'post_author' => $referrer_id,
+            'meta_input'  => [
+                '_saas_commission_amount' => $commission,
+                '_saas_order_id'         => $order_id,
+                '_saas_order_amount'     => $order_amount,
+                '_saas_percentage'       => $percentage
+            ]
+        ]);
     }
 
     public function ajax_get_stats() {

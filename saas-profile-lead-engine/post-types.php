@@ -98,6 +98,19 @@ function saas_register_post_types() {
         'supports' => [ 'title', 'editor', 'author' ],
         'show_in_rest' => true,
     ]);
+
+    // 8. Commissions CPT (Affiliate Earnings Log)
+    register_post_type( 'saas_commission', [
+        'labels' => [
+            'name' => 'Commissions',
+            'singular_name' => 'Commission',
+        ],
+        'public' => false,
+        'show_ui' => true,
+        'menu_icon' => 'dashicons-chart-line',
+        'supports' => [ 'title', 'author' ],
+        'show_in_rest' => true,
+    ]);
 }
 add_action( 'init', 'saas_register_post_types' );
 
@@ -106,7 +119,7 @@ add_action( 'init', 'saas_register_post_types' );
  */
 function saas_enforce_data_isolation( $query ) {
     if ( is_admin() && ! current_user_can( 'manage_options' ) && $query->is_main_query() ) {
-        $post_types = ['saas_profile', 'saas_link', 'saas_lead', 'saas_order', 'saas_payout', 'saas_message', 'saas_license'];
+        $post_types = ['saas_profile', 'saas_link', 'saas_lead', 'saas_order', 'saas_payout', 'saas_message', 'saas_license', 'saas_commission'];
         if ( in_array( $query->get( 'post_type' ), $post_types ) ) {
             // For messages, we also need to consider recipient meta
             if ($query->get('post_type') === 'saas_message') {

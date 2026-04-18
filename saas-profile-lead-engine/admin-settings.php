@@ -765,6 +765,20 @@ class Saas_Admin_Settings {
             if (isset($_POST['saas_home_hero'])) update_option('saas_home_hero', sanitize_textarea_field($_POST['saas_home_hero']));
             if (isset($_POST['saas_home_founder_letter'])) update_option('saas_home_founder_letter', sanitize_textarea_field($_POST['saas_home_founder_letter']));
 
+            if (isset($_POST['comparison_json'])) {
+                $comp = json_decode(stripslashes($_POST['comparison_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_home_comparison_json', json_encode($comp));
+                }
+            }
+
+            if (isset($_POST['pricing_json'])) {
+                $pricing = json_decode(stripslashes($_POST['pricing_json']), true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    update_option('saas_home_pricing_json', json_encode($pricing));
+                }
+            }
+
             if (isset($_POST['featured_profiles_json'])) {
                 $featured = json_decode(stripslashes($_POST['featured_profiles_json']), true);
                 if (json_last_error() === JSON_ERROR_NONE) {
@@ -896,17 +910,34 @@ class Saas_Admin_Settings {
                     <div id="tab-vsl" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>VSL & Landing Page Copy</h3>
                         <p class="description">Manage the high-converting copy used on the main landing page and sales letter.</p>
-                        <div class="field">
-                            <label><strong>VSL Headline</strong></label>
-                            <input type="text" name="saas_home_title" value="<?php echo esc_attr(get_option('saas_home_title')); ?>" class="large-text">
-                        </div>
-                        <div class="field" style="margin-top:20px;">
-                            <label><strong>VSL Sub-headline / Hero</strong></label>
-                            <textarea name="saas_home_hero" rows="3" class="large-text"><?php echo esc_textarea(get_option('saas_home_hero')); ?></textarea>
-                        </div>
-                        <div class="field" style="margin-top:20px;">
-                            <label><strong>Founder's Bridge Story</strong></label>
-                            <textarea name="saas_home_founder_letter" rows="8" class="large-text"><?php echo esc_textarea(get_option('saas_home_founder_letter')); ?></textarea>
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                            <div>
+                                <div class="field">
+                                    <label><strong>VSL Headline (The Big Hook)</strong></label>
+                                    <input type="text" name="saas_home_title" value="<?php echo esc_attr(get_option('saas_home_title')); ?>" class="large-text" style="width:100%;">
+                                </div>
+                                <div class="field" style="margin-top:20px;">
+                                    <label><strong>VSL Sub-headline / Hero Description</strong></label>
+                                    <textarea name="saas_home_hero" rows="4" class="large-text" style="width:100%;"><?php echo esc_textarea(get_option('saas_home_hero')); ?></textarea>
+                                </div>
+                                <div class="field" style="margin-top:20px;">
+                                    <label><strong>Founder's Bridge Story (Emotional Connection)</strong></label>
+                                    <textarea name="saas_home_founder_letter" rows="12" class="large-text" style="width:100%;"><?php echo esc_textarea(get_option('saas_home_founder_letter')); ?></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="field">
+                                    <label><strong>Comparison Table (JSON)</strong></label>
+                                    <p class="description">What makes you better than "basic" solutions?</p>
+                                    <textarea name="comparison_json" rows="8" class="large-text" style="width:100%; font-family:monospace;"><?php echo esc_textarea(json_encode(json_decode(get_option('saas_home_comparison_json')), JSON_PRETTY_PRINT)); ?></textarea>
+                                </div>
+                                <div class="field" style="margin-top:20px;">
+                                    <label><strong>Pricing Strategy (JSON)</strong></label>
+                                    <p class="description">Manage price points, features, and plan CTAs.</p>
+                                    <textarea name="pricing_json" rows="8" class="large-text" style="width:100%; font-family:monospace;"><?php echo esc_textarea(json_encode(json_decode(get_option('saas_home_pricing_json')), JSON_PRETTY_PRINT)); ?></textarea>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1101,6 +1132,101 @@ class Saas_Admin_Settings {
                     ['title' => 'Exclusive Asset Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Asset+1\nhttps://via.placeholder.com/800x600?text=Asset+2"],
                     ['title' => 'Secure Documentation', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
                     ['title' => 'Save VCard to Phone', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
+                ]
+            ],
+            'author' => [
+                'headline' => 'Exploring the Intersection of Tech & Humanity. ✍️',
+                'bio' => 'Bestselling Author of "The Elite Mindset". Writing at the frontiers of personal growth.',
+                'color' => '#4b6584', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => '📘 Buy My Latest Book', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Weekly Newsletter', 'url' => '#', 'type' => 'newsletter'],
+                    ['title' => 'Latest Blog Posts', 'url' => '#', 'type' => 'button'],
+                    ['title' => 'Speaking Inquiries', 'url' => '#', 'type' => 'lead_form'],
+                ]
+            ],
+            'lawyer' => [
+                'headline' => 'Strategic Legal Advocacy for Elite Clients. ⚖️',
+                'bio' => 'Providing sophisticated representation that honors your unique goals.',
+                'color' => '#1e3799', 'theme' => 'light', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Schedule Case Review', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Practice Areas', 'url' => '#', 'type' => 'pricing', 'extra' => "Litigation\nCorporate Law\nIP Protection"],
+                    ['title' => 'Client Success Records', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Unbeatable results in complex litigation.'],
+                ]
+            ],
+            'doctor' => [
+                'headline' => 'Compassionate Care, Precision Medicine. 🩺',
+                'bio' => 'Advancing the future of medicine through patient-centered care.',
+                'color' => '#0097e6', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Book Appointment', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                    ['title' => 'Patient Portal', 'url' => '#', 'type' => 'button'],
+                    ['title' => 'Wellness FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'Available 24/7 for urgent care.'],
+                ]
+            ],
+            'influencer' => [
+                'headline' => 'Daily Tech Inspo & Lifestyle Hacks. 📸',
+                'bio' => 'Sharing the journey with 1M+ followers. Check my links for exclusive gear deals!',
+                'color' => '#f8a5c2', 'theme' => 'vibrant', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'My Amazon Finds', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                    ['title' => 'Latest YouTube Video', 'url' => '#', 'type' => 'video'],
+                    ['title' => 'Brand Collaboration', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Exclusive Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                ]
+            ],
+            'servant' => [
+                'headline' => 'Dedicated to Progress & Community. 🏛️',
+                'bio' => 'Serving as your advocate in public office. Transparency and Integrity.',
+                'color' => '#eb4d4b', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Join My Newsletter', 'url' => '#', 'type' => 'newsletter'],
+                    ['title' => 'Community Update Video', 'url' => '#', 'type' => 'video'],
+                    ['title' => 'Volunteer Today', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'My Vision for 2024', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ]
+            ],
+            'podcast' => [
+                'headline' => 'Deep Dives into the Elite Mindset. 🎙️',
+                'bio' => 'New episodes every Tuesday. We interview the world\'s top 1% to deconstruct their success.',
+                'color' => '#6c5ce7', 'theme' => 'dark', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Listen on Spotify', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                    ['title' => 'Watch on YouTube', 'url' => '#', 'type' => 'video'],
+                    ['title' => 'Be a Guest (Application)', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Latest Episode Show Notes', 'url' => '#', 'type' => 'button'],
+                ]
+            ],
+            'course' => [
+                'headline' => 'Master Your Craft with Elite Systems. 🎓',
+                'bio' => 'Practical, results-driven courses for high-ticket consultants and coaches.',
+                'color' => '#0984e3', 'theme' => 'light', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Enroll in Masterclass', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Course Curriculum', 'url' => '#', 'type' => 'pricing', 'extra' => "12 Modules\nWeekly Group Coaching\nPrivate Community\nLifetime Access"],
+                    ['title' => 'Free 5-Day Mini-Course', 'url' => '#', 'type' => 'lead_form'],
+                ]
+            ],
+            'shop' => [
+                'headline' => 'Curated Gear for the Elite Creator. 🛒',
+                'bio' => 'Minimalist essentials designed to elevate your workspace and productivity.',
+                'color' => '#2d3436', 'theme' => 'vibrant', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Browse Best Sellers', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                    ['title' => 'Elite Mechanical Keyboard', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Keyboard+A\nhttps://via.placeholder.com/400?text=Keyboard+B"],
+                    ['title' => 'Limited Edition Drop ⏳', 'url' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+24 hours'))],
+                ]
+            ],
+            'charity' => [
+                'headline' => 'Building a Brighter Future Together. ❤️',
+                'bio' => 'Empowering communities through sustainable impact and transparent giving.',
+                'color' => '#00b894', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Support Our Mission', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'See Our Impact (2023)', 'url' => '#', 'type' => 'milestone', 'extra' => 'Impact:1.2M+ Lives'],
+                    ['title' => 'Volunteer Information', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Annual Report (PDF)', 'url' => '#', 'type' => 'button'],
                 ]
             ]
         ];
