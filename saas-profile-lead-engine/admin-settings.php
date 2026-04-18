@@ -731,6 +731,10 @@ class Saas_Admin_Settings {
                 }
             }
 
+            if (isset($_POST['saas_home_title'])) update_option('saas_home_title', sanitize_text_field($_POST['saas_home_title']));
+            if (isset($_POST['saas_home_hero'])) update_option('saas_home_hero', sanitize_textarea_field($_POST['saas_home_hero']));
+            if (isset($_POST['saas_home_founder_letter'])) update_option('saas_home_founder_letter', sanitize_textarea_field($_POST['saas_home_founder_letter']));
+
             echo '<div class="updated"><p>Content Hub updated successfully!</p></div>';
         }
 
@@ -755,6 +759,7 @@ class Saas_Admin_Settings {
                     <a href="#tab-scripts" class="nav-tab">Sales Scripts</a>
                     <a href="#tab-marketing-kit" class="nav-tab">Marketing Kit</a>
                     <a href="#tab-emails" class="nav-tab">Email Templates</a>
+                    <a href="#tab-vsl" class="nav-tab">🔥 Sales Letter / VSL</a>
                 </h2>
 
                 <form method="post" action="">
@@ -815,13 +820,32 @@ class Saas_Admin_Settings {
                     <div id="tab-marketing-kit" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>Affiliate Marketing Kit Content (HTML/JSON)</h3>
                         <p class="description">Define custom HTML and detailed assets for the affiliate kit.</p>
-                        <textarea name="marketing_kit_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($affiliate_kit, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="marketing_kit_json" id="json-kit" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($affiliate_kit, JSON_PRETTY_PRINT)); ?></textarea>
+                        <button type="button" class="button reset-json" data-target="json-kit" data-type="kit">Reset to Default Kit</button>
                     </div>
 
                     <div id="tab-emails" class="tab-content" style="display:none; padding:20px; background:#fff;">
                         <h3>System Email Templates (JSON)</h3>
                         <p class="description">Customize the subject and body of system emails using placeholders like {name}, {email}, {profile_url}.</p>
-                        <textarea name="email_templates_json" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($emails, JSON_PRETTY_PRINT)); ?></textarea>
+                        <textarea name="email_templates_json" id="json-emails" style="width:100%; height:300px; font-family:monospace;"><?php echo esc_textarea(json_encode($emails, JSON_PRETTY_PRINT)); ?></textarea>
+                        <button type="button" class="button reset-json" data-target="json-emails" data-type="emails">Reset to Default Emails</button>
+                    </div>
+
+                    <div id="tab-vsl" class="tab-content" style="display:none; padding:20px; background:#fff;">
+                        <h3>VSL & Landing Page Copy</h3>
+                        <p class="description">Manage the high-converting copy used on the main landing page and sales letter.</p>
+                        <div class="field">
+                            <label><strong>VSL Headline</strong></label>
+                            <input type="text" name="saas_home_title" value="<?php echo esc_attr(get_option('saas_home_title')); ?>" class="large-text">
+                        </div>
+                        <div class="field" style="margin-top:20px;">
+                            <label><strong>VSL Sub-headline / Hero</strong></label>
+                            <textarea name="saas_home_hero" rows="3" class="large-text"><?php echo esc_textarea(get_option('saas_home_hero')); ?></textarea>
+                        </div>
+                        <div class="field" style="margin-top:20px;">
+                            <label><strong>Founder's Bridge Story</strong></label>
+                            <textarea name="saas_home_founder_letter" rows="8" class="large-text"><?php echo esc_textarea(get_option('saas_home_founder_letter')); ?></textarea>
+                        </div>
                     </div>
 
                     <p class="submit">
@@ -842,7 +866,9 @@ class Saas_Admin_Settings {
                     training: <?php echo json_encode($this->get_default_training(), JSON_PRETTY_PRINT); ?>,
                     kb: <?php echo json_encode($this->get_default_kb(), JSON_PRETTY_PRINT); ?>,
                     marketing: <?php echo json_encode($this->get_default_marketing(), JSON_PRETTY_PRINT); ?>,
-                    scripts: <?php echo json_encode($this->get_default_scripts(), JSON_PRETTY_PRINT); ?>
+                    scripts: <?php echo json_encode($this->get_default_scripts(), JSON_PRETTY_PRINT); ?>,
+                    kit: <?php echo json_encode($this->get_default_marketing_kit(), JSON_PRETTY_PRINT); ?>,
+                    emails: <?php echo json_encode($this->get_default_emails(), JSON_PRETTY_PRINT); ?>
                 };
 
                 $('#' + target).val(JSON.stringify(defaults[type], null, 4));

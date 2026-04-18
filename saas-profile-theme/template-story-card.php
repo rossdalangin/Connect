@@ -22,7 +22,7 @@ $theme_color = get_post_meta($profile_id, '_saas_theme_color', true) ?: '#6c5ce7
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Story Card - <?php echo esc_html($profile->post_title); ?></title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Inter', sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Inter', sans-serif; overflow: hidden; background: #111; }
         .story-card {
             width: 1080px;
             height: 1920px;
@@ -35,6 +35,22 @@ $theme_color = get_post_meta($profile_id, '_saas_theme_color', true) ?: '#6c5ce7
             padding: 100px;
             box-sizing: border-box;
             position: relative;
+            overflow: hidden;
+        }
+        .story-card:before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .story-card:after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            pointer-events: none;
         }
         .avatar {
             width: 350px;

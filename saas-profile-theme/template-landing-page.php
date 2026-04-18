@@ -16,7 +16,24 @@ $h_img   = get_option('saas_home_image');
     <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.1;">
         <div style="position:absolute; width:150%; height:150%; background:radial-gradient(circle, #6e45e2 0%, transparent 50%); top:-25%; left:-25%; animation: rotate 20s linear infinite;"></div>
     </div>
-    <style> @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style>
+    <style>
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .sticky-buy { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; display: none; background: #fff; padding: 15px 30px; border-radius: 100px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid #eee; align-items: center; gap: 20px; animation: slideUp 0.5s ease forwards; }
+        @keyframes slideUp { from { bottom: -100px; } to { bottom: 30px; } }
+    </style>
+
+    <div class="sticky-buy" id="landing-sticky-cta">
+        <p style="margin:0; font-weight:700; color:#1e293b;">Join 12,000+ elite creators today.</p>
+        <a href="<?php echo home_url('/register'); ?>" style="background:#6c5ce7; color:#fff; padding:10px 25px; border-radius:50px; text-decoration:none; font-weight:800; font-size:0.9rem;">Get Started Free →</a>
+    </div>
+
+    <script>
+        window.addEventListener('scroll', function() {
+            var cta = document.getElementById('landing-sticky-cta');
+            if (window.scrollY > 800) cta.style.display = 'flex';
+            else cta.style.display = 'none';
+        });
+    </script>
 
     <div class="landing-content" style="max-width: 1000px; text-align: center;">
         <header class="landing-header" style="margin-bottom: 60px; width:100%;">
