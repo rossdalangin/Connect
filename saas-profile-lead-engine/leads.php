@@ -66,6 +66,15 @@ function saas_ajax_submit_lead() {
 
         // Automation Hooks
         $redirect_url = get_post_meta( $profile_id, '_saas_lead_redirect', true );
+
+        // Priority: Block-level redirect
+        if (isset($_POST['block_id'])) {
+            $block_redirect = get_post_meta(intval($_POST['block_id']), '_saas_link_url', true);
+            if ($block_redirect && $block_redirect !== '#') {
+                $redirect_url = $block_redirect;
+            }
+        }
+
         $webhook_url  = get_post_meta( $profile_id, '_saas_lead_webhook', true );
 
         if ( $webhook_url ) {

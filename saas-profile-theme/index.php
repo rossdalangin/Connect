@@ -357,6 +357,10 @@ include __DIR__ . '/header.php';
                             <?php endif; ?>
                             <button type="submit">Submit Request</button>
                         </form>
+                        <?php
+                        $footer = get_post_meta($block->ID, '_saas_link_desc', true);
+                        if ($footer) echo '<p class="field-hint" style="text-align:center; margin-top:15px; opacity:0.7;">' . esc_html($footer) . '</p>';
+                        ?>
                         <div class="lead-feedback"></div>
                     </section>
                 <?php endif; ?>

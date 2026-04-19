@@ -55,8 +55,8 @@ function saas_ajax_add_link() {
         wp_send_json_error('Unauthorized profile access');
     }
 
-    if ( empty( $title ) || empty( $url ) ) {
-        wp_send_json_error( 'Missing fields' );
+    if ( empty( $title ) ) {
+        wp_send_json_error( 'Missing title' );
     }
 
     $link_id = wp_insert_post([
@@ -75,7 +75,7 @@ function saas_ajax_add_link() {
 
         // Extended meta for complex blocks
         $extra = isset($_POST['extra']) ? $_POST['extra'] : '';
-        if ($type === 'button') {
+        if ($type === 'button' || $type === 'lead_form') {
             update_post_meta($link_id, '_saas_link_desc', sanitize_textarea_field($extra));
         } elseif ($type === 'testimonial') {
             update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($extra));
@@ -381,7 +381,7 @@ function saas_ajax_save_link() {
 
     // Determine meta key based on type
     $type = get_post_meta( $link_id, '_saas_block_type', true );
-    if ($type === 'button') update_post_meta($link_id, '_saas_link_desc', $extra);
+    if ($type === 'button' || $type === 'lead_form') update_post_meta($link_id, '_saas_link_desc', $extra);
     elseif ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
     elseif ($type === 'pricing' || $type === 'product') {

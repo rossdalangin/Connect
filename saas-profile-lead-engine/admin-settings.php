@@ -1274,6 +1274,69 @@ class Saas_Admin_Settings {
                     ['title' => 'Volunteer Information', 'url' => '#', 'type' => 'lead_form'],
                     ['title' => 'Annual Report (PDF)', 'url' => '#', 'type' => 'button'],
                 ]
+            ],
+            'saas' => [
+                'headline' => 'Software that Scales with Your Ambition. 💻',
+                'bio' => 'Building the next generation of digital tools for elite teams. Fast, secure, and intuitive.',
+                'color' => '#4834d4', 'theme' => 'dark', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Start Your Free Trial', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                    ['title' => 'Watch Product Demo', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Enterprise Pricing', 'url' => '#', 'type' => 'pricing', 'extra' => "$499/mo\nSSO Support\nDedicated Account Manager\n99.9% SLA"],
+                    ['title' => 'Technical Documentation', 'url' => '#', 'type' => 'button'],
+                ]
+            ],
+            'fitness' => [
+                'headline' => 'Transform Your Body, Elevate Your Life. 🏋️',
+                'bio' => 'Certified Elite Trainer. Helping high-performers build sustainable fitness habits that last.',
+                'color' => '#ff4757', 'theme' => 'vibrant', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Apply for 1-on-1 Coaching', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Free 7-Day Meal Plan', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Transformation Gallery', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Result+1\nhttps://via.placeholder.com/400?text=Result+2"],
+                    ['title' => 'Client Success Log', 'url' => '#', 'type' => 'milestone', 'extra' => 'Lbs Lost:4,200+'],
+                ]
+            ],
+            'medical' => [
+                'headline' => 'Modern Care, Compassionate Service. 🩺',
+                'bio' => 'Full-service medical clinic specializing in preventative wellness and elite diagnostic care.',
+                'color' => '#1e90ff', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Book Appointment', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Patient Portal Login', 'url' => '#', 'type' => 'button'],
+                    ['title' => 'New Patient Forms', 'url' => '#', 'type' => 'button', 'style' => 'outline'],
+                    ['title' => 'Common Health FAQs', 'url' => '#', 'type' => 'faq', 'extra' => 'We are open Mon-Fri, 8am - 6pm.'],
+                ]
+            ],
+            'startup' => [
+                'headline' => 'Shipping the Future of SaaS. 🤖',
+                'bio' => 'Hyper-growth team focused on building intuitive tools for elite professionals.',
+                'color' => '#6c5ce7', 'theme' => 'dark', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Join the Waitlist', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Watch Product Demo', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Public Roadmap', 'url' => '#', 'type' => 'milestone', 'extra' => 'Alpha:85'],
+                ]
+            ],
+            'wellness' => [
+                'headline' => 'Find Your Inner Calm. 🧘‍♀️',
+                'bio' => 'Yoga and Mindfulness Coach. Helping high-performers find balance in a chaotic world.',
+                'color' => '#10b981', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Book Private Session', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Free Meditation Video', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Join our Retreat', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ]
+            ],
+            'photography' => [
+                'headline' => 'Capturing the Essence of Life. 📸',
+                'bio' => 'Professional Portrait & Lifestyle Photographer. Elite visual storytelling for brands and individuals.',
+                'color' => '#2d3436', 'theme' => 'light', 'shadow' => 'none',
+                'links' => [
+                    ['title' => 'Portfolio Highlights', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/600x400?text=Portrait+1\nhttps://via.placeholder.com/600x400?text=Nature+1\nhttps://via.placeholder.com/600x400?text=Event+1"],
+                    ['title' => 'Book a Photoshoot', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Latest Gear Review', 'url' => 'https://youtube.com', 'type' => 'video'],
+                ]
             ]
         ];
     }

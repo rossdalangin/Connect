@@ -123,11 +123,12 @@ function saas_enforce_data_isolation( $query ) {
         if ( in_array( $query->get( 'post_type' ), $post_types ) ) {
             // For messages, we also need to consider recipient meta
             if ($query->get('post_type') === 'saas_message') {
-                $query->set('meta_query', [
-                    'relation' => 'OR',
-                    [ 'key' => '_saas_msg_recipient', 'value' => get_current_user_id() ],
-                    [ 'author' => get_current_user_id() ]
-                ]);
+                $meta_query = $query->get('meta_query') ?: [];
+                $meta_query[] = [
+                    'key' => '_saas_msg_recipient',
+                    'value' => get_current_user_id()
+                ];
+                $query->set('meta_query', $meta_query);
             } else {
                 $query->set( 'author', get_current_user_id() );
             }

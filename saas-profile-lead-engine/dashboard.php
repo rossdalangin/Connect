@@ -272,7 +272,7 @@ class Saas_Dashboard {
                                     </div>
                                     <div class="field">
                                         <label id="label-url">Destination URL</label>
-                                        <input type="url" name="url" placeholder="https://calendly.com/yourname" required>
+                                        <input type="url" name="url" placeholder="https://calendly.com/yourname">
                                     </div>
                                     <div class="field">
                                         <label id="label-extra">Description (Optional)</label>
@@ -371,7 +371,7 @@ class Saas_Dashboard {
                                     </div>
 
                                     <div class="field"><label id="edit-label-title">Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
-                                    <div class="field"><label id="edit-label-url">URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
+                                    <div class="field"><label id="edit-label-url">URL / Destination</label><input type="url" name="url" id="edit-link-url"></div>
                                     <div class="field"><label id="edit-label-extra">Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
 
                                     <!-- Image Gallery Visual Selector (Edit) -->
@@ -1469,13 +1469,14 @@ class Saas_Dashboard {
                                 'coach' => '🚀', 'business' => '🏢', 'luxury' => '⚜️', 'freelancer' => '🎨',
                                 'realtor' => '🏡', 'politician' => '🏛️', 'tiktok' => '📱', 'consultant' => '🧠',
                                 'author' => '📘', 'lawyer' => '⚖️', 'doctor' => '🩺', 'influencer' => '📸', 'servant' => '🏛️', 'artist' => '🎨',
-                                'podcast' => '🎙️', 'course' => '🎓', 'shop' => '🛒', 'charity' => '❤️'
+                                'podcast' => '🎙️', 'course' => '🎓', 'shop' => '🛒', 'charity' => '❤️',
+                                'saas' => '💻', 'fitness' => '🏋️', 'medical' => '🏥', 'startup' => '🚀', 'wellness' => '🧘', 'photography' => '📸'
                             ];
 
                             $categories = [
-                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course'],
-                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'shop'],
-                                'Public & Professional' => ['servant', 'politician', 'doctor', 'speaker', 'luxury', 'charity']
+                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course', 'saas', 'startup'],
+                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'shop', 'fitness', 'wellness', 'photography'],
+                                'Public & Professional' => ['servant', 'politician', 'doctor', 'speaker', 'luxury', 'charity', 'medical']
                             ];
 
                             foreach ($categories as $cat_title => $tpl_ids) : ?>
