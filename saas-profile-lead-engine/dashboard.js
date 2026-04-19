@@ -99,6 +99,74 @@
             });
         }
 
+        // Guidance Helper Function
+        function updateGuidance(type, isEdit) {
+            var guidance = {
+                button: {
+                    instruction: "Standard Button: Perfect for links to your website, scheduler, or social profiles.",
+                    title: "Button Label", url: "Destination URL", extra: "Description (Optional)",
+                    title_ph: "e.g. Schedule a Call", url_ph: "https://calendly.com/yourname", extra_ph: "Brief sub-text to appear below the label."
+                },
+                video: {
+                    instruction: "Video Block: Paste a link from YouTube or Vimeo. We'll automatically embed the player.",
+                    title: "Video Title", url: "Video URL", extra: "Caption (Optional)",
+                    title_ph: "e.g. Watch my latest Masterclass", url_ph: "https://www.youtube.com/watch?v=...", extra_ph: "A short description of the video content."
+                },
+                testimonial: {
+                    instruction: "Testimonial: Social proof builds trust. Enter the client's quote and use the URL field if you want to link to a case study.",
+                    title: "Client Name / Citation", url: "Link to Proof (Optional)", extra: "The Testimonial / Quote",
+                    title_ph: "e.g. Sarah Jenkins, CEO", url_ph: "https://yourwebsite.com/case-study", extra_ph: "Alex helped me double my revenue in just 90 days! Highly recommended."
+                },
+                faq: {
+                    instruction: "FAQ: Answer common questions before they ask. This block creates a toggleable accordion.",
+                    title: "The Question", url: "Internal Link (Optional)", extra: "The Answer",
+                    title_ph: "e.g. What is included in the Elite package?", url_ph: "#", extra_ph: "The Elite package includes 4 strategy calls, private Slack access, and a custom audit."
+                },
+                pricing: {
+                    instruction: "Pricing Card: Show your offer clearly. Enter features one per line in the Extra Content box.",
+                    title: "Package Title", url: "Checkout / Buy Link", extra: "Price and Features (First line is price, rest are features)",
+                    title_ph: "e.g. Executive Coaching", url_ph: "https://stripe.com/checkout/...", extra_ph: "$2,500/mo\n4 Weekly Calls\nUnlimited Email Support\nFull Business Audit"
+                },
+                image_gallery: {
+                    instruction: "Image Gallery (Pro): Showcase your portfolio. Enter one image URL per line in the Extra Content box.",
+                    title: "Gallery Title", url: "Gallery View All Link", extra: "Image URLs (one per line)",
+                    title_ph: "e.g. Recent Logo Designs", url_ph: "https://behance.net/yourname", extra_ph: "https://yoursite.com/img1.jpg\nhttps://yoursite.com/img2.jpg"
+                },
+                social_icons: {
+                    instruction: "Social Icons: Display a row of icons. Enter platform:url per line (e.g. twitter:https://...).",
+                    title: "Section Heading", url: "Main Profile Link", extra: "Platforms (platform:url per line)",
+                    title_ph: "e.g. Connect with Me", url_ph: "https://linktr.ee/yourname", extra_ph: "twitter:https://twitter.com/...\nlinkedin:https://linkedin.com/in/...\ninstagram:https://instagram.com/..."
+                },
+                newsletter: {
+                    instruction: "Newsletter (Pro): Capture emails directly into your list. Connect Mailchimp in the Sync tab.",
+                    title: "Form Heading", url: "Privacy Policy Link", extra: "Success Message",
+                    title_ph: "e.g. Join my Weekly Newsletter", url_ph: "https://yoursite.com/privacy", extra_ph: "Thanks for joining! Check your inbox for your first issue."
+                },
+                lead_form: {
+                    instruction: "Custom Lead Form: Capture high-intent inquiries. Configure fields in the Settings tab.",
+                    title: "Form Title", url: "Redirect URL (Optional)", extra: "Footer / Disclaimer",
+                    title_ph: "e.g. Request a Quote", url_ph: "https://yoursite.com/thank-you", extra_ph: "We usually respond within 24 hours. No spam, ever."
+                },
+                calendar: {
+                    instruction: "Calendar (Pro): Embed your booking page (Calendly, etc) directly.",
+                    title: "Calendar Title", url: "Booking Page URL", extra: "Instructions",
+                    title_ph: "e.g. Book a Discovery Call", url_ph: "https://calendly.com/yourname/30min", extra_ph: "Please select a time that works best for you. Note: All calls are on Zoom."
+                }
+            };
+
+            var g = guidance[type] || guidance.button;
+            var prefix = isEdit ? 'edit-' : '';
+            $('#' + prefix + 'guidance-text').text(g.instruction);
+            $('#' + prefix + 'label-title').text(g.title);
+            $('#' + prefix + 'label-url').text(g.url);
+            $('#' + prefix + 'label-extra').text(g.extra);
+
+            var $form = isEdit ? $('#saas-edit-link-form') : $('#saas-add-link-form');
+            $form.find('[name="title"]').attr('placeholder', g.title_ph);
+            $form.find('[name="url"]').attr('placeholder', g.url_ph);
+            $form.find('[name="extra"]').attr('placeholder', g.extra_ph);
+        }
+
         // 4. Block Management (Edit/Delete/Clone)
         $(document).on('click', '.edit-link', function() {
             var $li = $(this).closest('li');
@@ -109,6 +177,8 @@
             $('#edit-link-title').val($li.find('.link-title').text());
             $('#edit-link-url').val($li.find('.link-url').text());
             $('#edit-block-type-badge').text(type.toUpperCase().replace('_', ' '));
+
+            updateGuidance(type, true);
 
             // Map data attributes to modal fields
             $('#edit-link-extra').val($li.attr('data-extra'));
@@ -423,16 +493,10 @@
             if ($(this).hasClass('pro-locked')) return;
             $('.picker-item').removeClass('active');
             $(this).addClass('active');
-            $('#saas-block-type-hidden').val($(this).attr('data-type'));
-
-            // Adjust form placeholders based on type
             var type = $(this).attr('data-type');
-            var $extra = $('#saas-add-link-form [name="extra"]');
-            if (type === 'faq') $extra.attr('placeholder', 'FAQ Answer');
-            else if (type === 'testimonial') $extra.attr('placeholder', 'The Quote');
-            else if (type === 'pricing') $extra.attr('placeholder', 'Price (e.g. $99/mo) and Features (one per line)');
-            else if (type === 'social_icons') $extra.attr('placeholder', 'Platform:URL (e.g. twitter:https://...)');
-            else $extra.attr('placeholder', 'Extra content / Description');
+            $('#saas-block-type-hidden').val(type);
+
+            updateGuidance(type, false);
         });
 
         $(document).on('click', '.check-integration', function() {

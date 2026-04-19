@@ -435,7 +435,7 @@ include __DIR__ . '/header.php';
     $hide_branding = get_post_meta($profile_id, '_saas_hide_branding', true);
     $footer_text   = get_post_meta($profile_id, '_saas_footer_text', true);
 
-    if ($is_pro && $hide_branding) : ?>
+    if ($is_pro) : ?>
         <div class="saas-growth-branding" style="margin-top:40px; padding-bottom:120px; opacity:0.6; font-size:0.8rem;">
             <?php echo esc_html($footer_text ?: ''); ?>
         </div>

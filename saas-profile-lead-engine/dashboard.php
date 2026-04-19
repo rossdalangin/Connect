@@ -260,9 +260,24 @@ class Saas_Dashboard {
                                 <form id="saas-add-link-form">
                                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
                                     <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
-                                    <div class="field"><input type="text" name="title" placeholder="Block Title (e.g. FAQ Question)" required></div>
-                                    <div class="field"><input type="url" name="url" placeholder="URL / Embed Link" required></div>
-                                    <div class="field"><textarea name="extra" placeholder="Extra content (e.g. FAQ Answer, Price, Quote)" rows="2"></textarea></div>
+
+                                    <div id="saas-block-guidance" style="background:var(--primary-soft); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--primary); font-size:0.8rem; line-height:1.4;">
+                                        <strong>💡 How to use this block:</strong><br>
+                                        <span id="guidance-text">Standard Button: Enter a label and the destination URL.</span>
+                                    </div>
+
+                                    <div class="field">
+                                        <label id="label-title">Button Label</label>
+                                        <input type="text" name="title" placeholder="e.g. Schedule a Call" required>
+                                    </div>
+                                    <div class="field">
+                                        <label id="label-url">Destination URL</label>
+                                        <input type="url" name="url" placeholder="https://calendly.com/yourname" required>
+                                    </div>
+                                    <div class="field">
+                                        <label id="label-extra">Description (Optional)</label>
+                                        <textarea name="extra" placeholder="Brief sub-text to appear below the label." rows="2"></textarea>
+                                    </div>
                                     <button type="submit" class="btn-primary" style="width:100%;">Add Block</button>
                                 </form>
                             </div>
@@ -342,9 +357,14 @@ class Saas_Dashboard {
                                 <form id="saas-edit-link-form">
                                     <input type="hidden" name="link_id" id="edit-link-id">
 
-                                    <div class="field"><label>Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
-                                    <div class="field"><label>URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
-                                    <div class="field"><label>Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
+                                    <div id="saas-edit-block-guidance" style="background:var(--primary-soft); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--primary); font-size:0.8rem; line-height:1.4;">
+                                        <strong>💡 Editing this block:</strong><br>
+                                        <span id="edit-guidance-text">Standard Button: Perfect for links to your website, scheduler, or social profiles.</span>
+                                    </div>
+
+                                    <div class="field"><label id="edit-label-title">Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
+                                    <div class="field"><label id="edit-label-url">URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
+                                    <div class="field"><label id="edit-label-extra">Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
 
                                     <button type="button" class="button toggle-advanced" style="width:100%; margin-bottom:20px; background:#f1f5f9; color:#475569; font-weight:bold;">⚙️ Advanced Options</button>
 
@@ -372,6 +392,7 @@ class Saas_Dashboard {
                                                 <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Variant B Title" style="flex:1;">
                                                 <input type="url" name="ab_url_b" id="edit-link-ab-url" placeholder="Variant B URL" style="flex:1;">
                                             </div>
+                                            <p class="field-hint">Variant B is served to 50% of your visitors. Measure which version converts better in the Stats tab.</p>
                                         </div>
 
                                         <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
@@ -383,6 +404,7 @@ class Saas_Dashboard {
                                                     <input type="url" name="url_geo" id="edit-link-url-geo" placeholder="Geo-specific URL" style="flex:1;">
                                                 </div>
                                             </div>
+                                            <p class="field-hint">Send visitors to different destinations based on their device or country (e.g. US, GB, CA).</p>
                                         </div>
 
                                         <div class="field">
@@ -409,11 +431,12 @@ class Saas_Dashboard {
                                         </div>
 
                                         <div class="field">
-                                            <label>Hour Range (0-23)</label>
+                                            <label>Hour-Based Visibility (0-23)</label>
                                             <div style="display:flex; gap:10px;">
-                                                <input type="number" name="hour_from" id="edit-link-hour-from" placeholder="From" min="0" max="23" style="flex:1;">
-                                                <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To" min="0" max="23" style="flex:1;">
+                                                <input type="number" name="hour_from" id="edit-link-hour-from" placeholder="From (e.g. 9)" min="0" max="23" style="flex:1;">
+                                                <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To (e.g. 17)" min="0" max="23" style="flex:1;">
                                             </div>
+                                            <p class="field-hint">Only show this block during specific hours of the day (24-hour format).</p>
                                         </div>
 
                                             <div class="field">
@@ -499,14 +522,14 @@ class Saas_Dashboard {
                                 <label>Profile Headline</label>
                                 <div style="display:flex; gap:10px;">
                                     <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" style="flex:1;" placeholder="e.g. Scaling Founders from 6 to 7 Figures">
-                                    <button type="button" class="ai-assist-btn button" data-target="headline" title="AI Generate Headline">✨</button>
+                                    <button type="button" class="ai-assist-btn button" data-target="headline" title="AI Generate Headline">✨ AI Assist</button>
                                 </div>
-                                <p class="field-hint"><strong>Pro Tip:</strong> Focus on the <em>result</em> you provide, not just your title.</p>
+                                <p class="field-hint"><strong>Pro Tip:</strong> Focus on the <em>transformation</em> you provide. Use AI Assist to generate ideas based on your niche.</p>
                             </div>
                             <div class="field">
                                 <label>Short Biography</label>
                                 <textarea name="bio" rows="4" placeholder="Briefly describe your expertise and how you help clients..."><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
-                                <p class="field-hint">Use 2-3 sentences to build authority and trust quickly.</p>
+                                <p class="field-hint">Use 2-3 sentences to build authority. Sample: "Ex-Google Exec turned Strategic Coach. I help high-ticket service providers automate their acquisition."</p>
                             </div>
 
                             <div class="field">
@@ -601,7 +624,7 @@ class Saas_Dashboard {
                             <div class="field" id="saas-bg-value-wrapper">
                                 <label id="saas-bg-value-label">Background Value</label>
                                 <input type="text" name="bg_value" id="saas-bg-value-input" value="<?php echo esc_attr($profile_bg_val ?: '#f3f3f1'); ?>">
-                                <p style="font-size:0.7rem; color:#888; margin-top:5px;">Hex color (e.g. #ffffff) or CSS gradient.</p>
+                                <p class="field-hint">Flat: #f3f3f1 | Gradient: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)</p>
                             </div>
 
                             <div class="field">
@@ -909,11 +932,13 @@ class Saas_Dashboard {
                             <input type="hidden" name="form_context" value="tracking">
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                                 <label>Header Scripts (e.g. Google Tag Manager)</label>
-                                <textarea name="header_scripts" rows="5" placeholder="<script>...</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_header_scripts', true)); ?></textarea>
+                                <textarea name="header_scripts" rows="5" placeholder="<script async src='https://www.googletagmanager.com/gtag/js?id=G-XXXXXX'></script>..."><?php echo esc_textarea(get_post_meta($profile_id, '_saas_header_scripts', true)); ?></textarea>
+                                <p class="field-hint">Paste your tracking code here to have it included in the &lt;head&gt; of your profile.</p>
                             </div>
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                                 <label>Footer Scripts (e.g. Conversion Pixels)</label>
-                                <textarea name="footer_scripts" rows="5" placeholder="<script>...</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_footer_scripts', true)); ?></textarea>
+                                <textarea name="footer_scripts" rows="5" placeholder="<script>fbq('track', 'PageView');</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_footer_scripts', true)); ?></textarea>
+                                <p class="field-hint">Scripts placed here will be loaded just before the closing &lt;/body&gt; tag.</p>
                             </div>
                             <button type="submit" class="btn-primary">Save Scripts</button>
                         </form>
@@ -995,8 +1020,8 @@ class Saas_Dashboard {
                             <h4>Advanced Triggers</h4>
                             <div class="field <?php echo $payments->is_agency_user($user_id) ? '' : 'pro-gated-inline'; ?>" data-tier="agency">
                                 <label>Webhook URL (Zapier/Make) <span class="pro-badge" style="background:#0f172a; color:#f59e0b; border:1px solid #f59e0b;">Agency</span></label>
-                                <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" <?php echo $payments->is_agency_user($user_id) ? '' : 'readonly'; ?>>
-                                <p class="field-hint">Automatically send new leads to Zapier, Make, or your own API.</p>
+                                <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" <?php echo $payments->is_agency_user($user_id) ? '' : 'readonly'; ?> placeholder="https://hooks.zapier.com/v1/event/...">
+                                <p class="field-hint">Automatically send new leads to Zapier, Make, or your own API. Test with a sample payload using the "Test Webhook" button.</p>
                             </div>
                             <div class="field">
                                 <label>Redirect after Submission</label>
