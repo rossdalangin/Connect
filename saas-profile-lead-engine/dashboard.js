@@ -101,6 +101,27 @@
 
         // Guidance Helper Function
         function updateGuidance(type, isEdit) {
+            // Toggle Gallery Visual UI
+            var wrapId = isEdit ? '#saas-edit-gallery-selector-wrap' : '#saas-gallery-selector-wrap';
+            var extraId = isEdit ? '#edit-link-extra' : '#saas-add-extra-field';
+
+            if (type === 'image_gallery') {
+                $(wrapId).show();
+                $(extraId).closest('.field').hide();
+                // If edit mode, populate previews from textarea
+                if (isEdit) {
+                    var urls = $(extraId).val().split('\n').filter(Boolean);
+                    var html = '';
+                    urls.forEach(function(u) {
+                        html += '<img src="' + u + '" style="width:100%; height:60px; object-fit:cover; border-radius:8px;">';
+                    });
+                    $('#saas-edit-gallery-previews').html(html);
+                }
+            } else {
+                $(wrapId).hide();
+                $(extraId).closest('.field').show();
+            }
+
             var guidance = {
                 button: {
                     instruction: "Standard Button: Perfect for links to your website, scheduler, or social profiles.",
@@ -128,9 +149,9 @@
                     title_ph: "e.g. Executive Coaching", url_ph: "https://stripe.com/checkout/...", extra_ph: "$2,500/mo\n4 Weekly Calls\nUnlimited Email Support\nFull Business Audit"
                 },
                 image_gallery: {
-                    instruction: "Image Gallery (Pro): Showcase your portfolio. Enter one image URL per line in the Extra Content box.",
-                    title: "Gallery Title", url: "Gallery View All Link", extra: "Image URLs (one per line)",
-                    title_ph: "e.g. Recent Logo Designs", url_ph: "https://behance.net/yourname", extra_ph: "https://yoursite.com/img1.jpg\nhttps://yoursite.com/img2.jpg"
+                    instruction: "Image Gallery (Pro): Showcase your portfolio. Use the visual selector below to pick multiple images from your library.",
+                    title: "Gallery Title", url: "Gallery View All Link", extra: "Image URLs (Auto-populated)",
+                    title_ph: "e.g. Recent Logo Designs", url_ph: "https://behance.net/yourname", extra_ph: "Visual selector active."
                 },
                 social_icons: {
                     instruction: "Social Icons: Display a row of icons. Enter platform:url per line (e.g. twitter:https://...).",
@@ -533,23 +554,39 @@
             e.preventDefault();
             var $btn = $(this);
             var target = $btn.data('target');
+            var isGallery = (target === 'gallery-add' || target === 'gallery-edit');
             var custom_uploader = wp.media({
-                title: 'Select Image',
-                button: { text: 'Use Image' },
-                multiple: false
+                title: isGallery ? 'Select Gallery Images' : 'Select Image',
+                button: { text: isGallery ? 'Add to Gallery' : 'Use Image' },
+                multiple: isGallery
             }).on('select', function() {
-                var attachment = custom_uploader.state().get('selection').first().toJSON();
-                if (target === 'profile-image') {
-                    $('#profile-image-id').val(attachment.id);
-                    $('#profile-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
-                    updatePreview('profile_image_update', attachment.url);
-                } else if (target === 'cover-image') {
-                    $('#cover-image-id').val(attachment.id);
-                    $('#cover-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
-                    updatePreview('cover_update', attachment.url);
-                } else if (target === 'link-image') {
-                    $('#edit-link-image-id').val(attachment.id);
-                    $('#edit-link-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                if (isGallery) {
+                    var selection = custom_uploader.state().get('selection');
+                    var urls = [];
+                    var html = '';
+                    selection.map(function(attachment) {
+                        attachment = attachment.toJSON();
+                        urls.push(attachment.url);
+                        html += '<img src="' + attachment.url + '" style="width:100%; height:60px; object-fit:cover; border-radius:8px;">';
+                    });
+                    var targetPreviews = (target === 'gallery-add') ? '#saas-gallery-previews' : '#saas-edit-gallery-previews';
+                    var targetInput = (target === 'gallery-add') ? '#saas-add-extra-field' : '#edit-link-extra';
+                    $(targetPreviews).html(html);
+                    $(targetInput).val(urls.join('\n'));
+                } else {
+                    var attachment = custom_uploader.state().get('selection').first().toJSON();
+                    if (target === 'profile-image') {
+                        $('#profile-image-id').val(attachment.id);
+                        $('#profile-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                        updatePreview('profile_image_update', attachment.url);
+                    } else if (target === 'cover-image') {
+                        $('#cover-image-id').val(attachment.id);
+                        $('#cover-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                        updatePreview('cover_update', attachment.url);
+                    } else if (target === 'link-image') {
+                        $('#edit-link-image-id').val(attachment.id);
+                        $('#edit-link-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                    }
                 }
             }).open();
         });

@@ -276,8 +276,16 @@ class Saas_Dashboard {
                                     </div>
                                     <div class="field">
                                         <label id="label-extra">Description (Optional)</label>
-                                        <textarea name="extra" placeholder="Brief sub-text to appear below the label." rows="2"></textarea>
+                                        <textarea name="extra" id="saas-add-extra-field" placeholder="Brief sub-text to appear below the label." rows="2"></textarea>
                                     </div>
+
+                                    <!-- Image Gallery Visual Selector -->
+                                    <div id="saas-gallery-selector-wrap" style="display:none; margin-bottom:20px; padding:15px; background:var(--bg-main); border:1px solid var(--border); border-radius:12px;">
+                                        <label style="display:block; margin-bottom:10px;">Gallery Images</label>
+                                        <div id="saas-gallery-previews" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap:10px; margin-bottom:10px;"></div>
+                                        <button type="button" class="button select-media" data-target="gallery-add" style="width:100%;">📸 Select Gallery Images</button>
+                                    </div>
+
                                     <button type="submit" class="btn-primary" style="width:100%;">Add Block</button>
                                 </form>
                             </div>
@@ -365,6 +373,13 @@ class Saas_Dashboard {
                                     <div class="field"><label id="edit-label-title">Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
                                     <div class="field"><label id="edit-label-url">URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
                                     <div class="field"><label id="edit-label-extra">Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
+
+                                    <!-- Image Gallery Visual Selector (Edit) -->
+                                    <div id="saas-edit-gallery-selector-wrap" style="display:none; margin-bottom:20px; padding:15px; background:var(--bg-main); border:1px solid var(--border); border-radius:12px;">
+                                        <label style="display:block; margin-bottom:10px;">Gallery Images</label>
+                                        <div id="saas-edit-gallery-previews" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap:10px; margin-bottom:10px;"></div>
+                                        <button type="button" class="button select-media" data-target="gallery-edit" style="width:100%;">📸 Select Gallery Images</button>
+                                    </div>
 
                                     <button type="button" class="button toggle-advanced" style="width:100%; margin-bottom:20px; background:#f1f5f9; color:#475569; font-weight:bold;">⚙️ Advanced Options</button>
 
