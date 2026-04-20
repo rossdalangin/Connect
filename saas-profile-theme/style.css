@@ -141,6 +141,34 @@ body.theme-rose {
     --glass-bg: rgba(255, 255, 255, 0.9);
 }
 
+body.theme-midnight {
+    --bg-color: #020617;
+    --primary-color: #38bdf8;
+    --text-color: #f8fafc;
+    --text-light: #94a3b8;
+    --glass-bg: rgba(15, 23, 42, 0.8);
+    --link-bg: #1e293b;
+}
+
+body.theme-gold {
+    background: #000000 fixed;
+    --primary-color: #fbbf24;
+    --text-color: #ffffff;
+    --text-light: #a3a3a3;
+    --glass-bg: rgba(23, 23, 23, 0.8);
+    --font-family: 'Playfair Display', serif;
+}
+body.theme-gold .saas-link-btn { border: 1px solid #fbbf24; color: #fbbf24; }
+body.theme-gold .saas-link-btn:hover { background: #fbbf24; color: #000; }
+
+body.theme-lavender {
+    background: #f5f3ff fixed;
+    --primary-color: #8b5cf6;
+    --text-color: #4c1d95;
+    --text-light: #7c3aed;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+}
+
 p { line-height: 1.6; color: var(--text-light); }
 
 body {
@@ -296,6 +324,7 @@ body {
 .animate-bouncein { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) both; }
 .animate-slideinleft { animation: slideInLeft 0.6s ease both; }
 .animate-slideinright { animation: slideInRight 0.6s ease both; }
+.animate-float { animation: float 3s ease-in-out infinite; }
 
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -317,6 +346,12 @@ body {
 @keyframes slideInRight {
     from { opacity: 0; transform: translateX(30px); }
     to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+	0% { transform: translateY(0px); }
+	50% { transform: translateY(-10px); }
+	100% { transform: translateY(0px); }
 }
 
 .block-button.style-outline .saas-link-btn {
@@ -388,10 +423,16 @@ body {
 .testimonial-block {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
-    padding: 24px;
-    border-radius: 24px;
+    padding: 32px;
+    border-radius: 32px;
     text-align: left;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: var(--transition);
+}
+.testimonial-block:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.08);
 }
 
 .testimonial-block .quote {
@@ -413,6 +454,14 @@ body {
     text-align: left;
     margin-bottom: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: var(--transition);
+}
+.faq-block:hover {
+    background: rgba(255,255,255,0.9);
+}
+body.theme-dark .faq-block:hover {
+    background: rgba(255,255,255,0.1);
 }
 
 .faq-block summary {
@@ -424,11 +473,16 @@ body {
 .pricing-card {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
-    padding: 32px;
-    border-radius: 24px;
-    border: 2px solid rgba(0,0,0,0.05);
+    padding: 40px;
+    border-radius: 40px;
+    border: 1px solid rgba(255,255,255,0.3);
     margin: 20px 0;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+    transition: var(--transition);
+}
+.pricing-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.1);
 }
 
 .pricing-card .price {

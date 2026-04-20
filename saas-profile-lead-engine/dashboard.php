@@ -431,6 +431,9 @@ class Saas_Dashboard {
                                     <option value="sunset" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'sunset'); ?>>Sunset (Warm & Moody)</option>
                                     <option value="forest" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'forest'); ?>>Forest (Deep & Natural)</option>
                                     <option value="rose" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'rose'); ?>>Rose (Soft & Elegant)</option>
+                                    <option value="midnight" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'midnight'); ?>>Midnight (Deep Blue)</option>
+                                    <option value="gold" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'gold'); ?>>Gold (Elegant Black)</option>
+                                    <option value="lavender" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'lavender'); ?>>Lavender (Soft Purple)</option>
                                 </select>
                                 <p class="field-hint"><strong>Recommendation:</strong> Use "Luxury" if you sell high-ticket services ($2,000+).</p>
                             </div>
@@ -504,6 +507,9 @@ class Saas_Dashboard {
                                     <button type="button" class="preset-btn button" data-preset="sunset">🌇 Sunset</button>
                                     <button type="button" class="preset-btn button" data-preset="forest">🌲 Forest</button>
                                     <button type="button" class="preset-btn button" data-preset="rose">🌹 Rose</button>
+                                    <button type="button" class="preset-btn button" data-preset="midnight">🌑 Night</button>
+                                    <button type="button" class="preset-btn button" data-preset="gold">✨ Gold</button>
+                                    <button type="button" class="preset-btn button" data-preset="lavender">🪻 Lavender</button>
                                 </div>
                             </div>
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
@@ -1390,6 +1396,7 @@ class Saas_Dashboard {
                                     <option value="bouncein">Bounce In</option>
                                     <option value="slideinleft">Slide In Left</option>
                                     <option value="slideinright">Slide In Right</option>
+                                    <option value="float">Floating</option>
                                 </select>
                             </div>
                         </div>

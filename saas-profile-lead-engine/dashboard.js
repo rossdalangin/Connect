@@ -372,7 +372,10 @@
                 ocean: { theme: 'ocean', bg_type: 'gradient', bg_value: 'linear-gradient(180deg, #2193b0 0%, #6dd5ed 100%)', accent: '#0077b6', shadow: 'soft', font: "'Inter', sans-serif" },
                 sunset: { theme: 'sunset', bg_type: 'gradient', bg_value: 'linear-gradient(135deg, #42275a 0%, #734b6d 100%)', accent: '#ff5e62', shadow: 'soft', font: "'Inter', sans-serif" },
                 forest: { theme: 'forest', bg_type: 'flat', bg_value: '#1b262c', accent: '#3282b8', shadow: 'soft', font: "'Inter', sans-serif" },
-                rose: { theme: 'rose', bg_type: 'flat', bg_value: '#fff5f5', accent: '#f687b3', shadow: 'soft', font: "'Inter', sans-serif" }
+                rose: { theme: 'rose', bg_type: 'flat', bg_value: '#fff5f5', accent: '#f687b3', shadow: 'soft', font: "'Inter', sans-serif" },
+                midnight: { theme: 'midnight', bg_type: 'flat', bg_value: '#020617', accent: '#38bdf8', shadow: 'soft', font: "'Inter', sans-serif" },
+                gold: { theme: 'gold', bg_type: 'flat', bg_value: '#000000', accent: '#fbbf24', shadow: 'hard', font: "'Playfair Display', serif" },
+                lavender: { theme: 'lavender', bg_type: 'flat', bg_value: '#f5f3ff', accent: '#8b5cf6', shadow: 'soft', font: "'Inter', sans-serif" }
             };
 
             var data = presets[p];
