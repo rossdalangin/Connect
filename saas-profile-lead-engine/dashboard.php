@@ -18,9 +18,8 @@ class Saas_Dashboard {
         wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', [], '4.0.0', true );
         wp_enqueue_script( 'saas-dashboard-js', plugin_dir_url( __FILE__ ) . 'dashboard.js', [ 'jquery' ], '2.7', true );
         wp_localize_script( 'saas-dashboard-js', 'saas_dashboard_data', [
-            'ajax_url'  => admin_url( 'admin-ajax.php' ),
-            'nonce'     => wp_create_nonce( 'saas_dashboard_nonce' ),
-            'templates' => get_option('saas_templates') ?: []
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'saas_dashboard_nonce' )
         ]);
     }
 
@@ -68,13 +67,11 @@ class Saas_Dashboard {
         $meta = saas_get_profile_meta( $profile_id );
         $is_pro = saas_is_profile_licensed($profile_id);
 
-        // Nudge for intended Pro/Agency users
-        $target_plan = get_user_meta($user_id, '_saas_registration_target_plan', true);
-        if ( ! $is_pro && in_array($target_plan, ['pro', 'agency']) ) {
-            $plan_label = ($target_plan === 'agency') ? 'Agency Unlimited' : 'Elite Pro';
+        // Nudge for intended Pro users
+        if ( ! $is_pro && get_user_meta($user_id, '_saas_registration_target_plan', true) === 'pro' ) {
             echo '<div class="saas-onboarding-card dashboard-card" style="background:var(--accent); margin-bottom:20px; border:none;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <p style="margin:0; font-weight:700; color:#fff;">🌟 Ready to complete your '. $plan_label .' upgrade? Unlock all features now.</p>
+                    <p style="margin:0; font-weight:700; color:#fff;">🌟 Ready to complete your Elite Pro upgrade? Unlock all features now.</p>
                     <button class="button" onclick="window.location.search=\'?tab=billing\'">Complete Upgrade</button>
                 </div>
             </div>';
@@ -127,7 +124,7 @@ class Saas_Dashboard {
 
                     <div class="dashboard-card" style="margin-bottom:0; padding:15px; border-left: 4px solid var(--secondary);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-muted);">Pulse: <?php echo date('F'); ?> Activity</h4>
+                            <h4 style="margin:0; font-size:0.85rem; color:var(--text-muted);">Pulse: Recent Activity</h4>
                             <span class="pulse-dot"></span>
                         </div>
                         <div class="recent-activity-list" style="font-size:0.75rem;">
@@ -221,19 +218,7 @@ class Saas_Dashboard {
                     <button data-tab="billing">💳 Pro</button>
                     <button data-tab="seo">🔍 SEO</button>
                     <button data-tab="tracking">📊 Tracking</button>
-                    <?php
-                    $unread_msgs = get_posts([
-                        'post_type' => 'saas_message',
-                        'meta_query' => [
-                            ['key' => '_saas_msg_recipient', 'value' => $user_id],
-                            ['key' => '_saas_msg_status', 'value' => 'unread']
-                        ],
-                        'fields' => 'ids',
-                        'numberposts' => -1
-                    ]);
-                    $msg_count = count($unread_msgs);
-                    ?>
-                    <button data-tab="inbox" style="position:relative;">📩 Inbox <?php if($msg_count > 0) echo '<span class="notif-count" style="top:-5px; right:-5px; font-size:0.6rem; padding:1px 4px;">'.$msg_count.'</span>'; ?></button>
+                    <button data-tab="inbox">📩 Inbox</button>
                     <button data-tab="training">🎓 Training</button>
                     <button data-tab="account">👤 Account</button>
                 </nav>
@@ -260,32 +245,9 @@ class Saas_Dashboard {
                                 <form id="saas-add-link-form">
                                     <input type="hidden" name="profile_id" value="<?php echo $profile_id; ?>">
                                     <input type="hidden" name="block_type" id="saas-block-type-hidden" value="button">
-
-                                    <div id="saas-block-guidance" style="background:var(--primary-soft); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--primary); font-size:0.8rem; line-height:1.4;">
-                                        <strong>💡 How to use this block:</strong><br>
-                                        <span id="guidance-text">Standard Button: Enter a label and the destination URL.</span>
-                                    </div>
-
-                                    <div class="field">
-                                        <label id="label-title">Button Label</label>
-                                        <input type="text" name="title" placeholder="e.g. Schedule a Call" required>
-                                    </div>
-                                    <div class="field">
-                                        <label id="label-url">Destination URL</label>
-                                        <input type="url" name="url" placeholder="https://calendly.com/yourname">
-                                    </div>
-                                    <div class="field">
-                                        <label id="label-extra">Description (Optional)</label>
-                                        <textarea name="extra" id="saas-add-extra-field" placeholder="Brief sub-text to appear below the label." rows="2"></textarea>
-                                    </div>
-
-                                    <!-- Image Gallery Visual Selector -->
-                                    <div id="saas-gallery-selector-wrap" style="display:none; margin-bottom:20px; padding:15px; background:var(--bg-main); border:1px solid var(--border); border-radius:12px;">
-                                        <label style="display:block; margin-bottom:10px;">Gallery Images</label>
-                                        <div id="saas-gallery-previews" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap:10px; margin-bottom:10px;"></div>
-                                        <button type="button" class="button select-media" data-target="gallery-add" style="width:100%;">📸 Select Gallery Images</button>
-                                    </div>
-
+                                    <div class="field"><input type="text" name="title" placeholder="Block Title (e.g. FAQ Question)" required></div>
+                                    <div class="field"><input type="url" name="url" placeholder="URL / Embed Link" required></div>
+                                    <div class="field"><textarea name="extra" placeholder="Extra content (e.g. FAQ Answer, Price, Quote)" rows="2"></textarea></div>
                                     <button type="submit" class="btn-primary" style="width:100%;">Add Block</button>
                                 </form>
                             </div>
@@ -295,29 +257,11 @@ class Saas_Dashboard {
                             <ul id="saas-links-list" class="sortable">
                             <?php foreach ( $links as $link ) :
                                 $type = get_post_meta($link->ID, '_saas_block_type', true);
-                                $extra = get_post_meta($link->ID, '_saas_link_desc', true) ?: (get_post_meta($link->ID, '_saas_testimonial_text', true) ?: get_post_meta($link->ID, '_saas_faq_answer', true));
+                                $extra = get_post_meta($link->ID, '_saas_testimonial_text', true) ?: get_post_meta($link->ID, '_saas_faq_answer', true);
                                 if (!$extra) {
-                                    if ($type === 'pricing' || $type === 'product') {
-                                        $price = get_post_meta($link->ID, '_saas_price', true);
-                                        $feats = get_post_meta($link->ID, '_saas_features', true);
-                                        if ($price) $extra = $price . ($feats ? "\n" . (is_array($feats) ? implode("\n", $feats) : $feats) : "");
-                                    } elseif ($type === 'image_gallery') {
-                                        $imgs = get_post_meta($link->ID, '_saas_gallery_images', true);
-                                        if ($imgs) $extra = is_array($imgs) ? implode("\n", $imgs) : $imgs;
-                                    } elseif ($type === 'social_icons') {
-                                        $socials = get_post_meta($link->ID, '_saas_social_data', true);
-                                        if ($socials && is_array($socials)) {
-                                            $lines = [];
-                                            foreach($socials as $p => $u) $lines[] = "$p:$u";
-                                            $extra = implode("\n", $lines);
-                                        }
-                                    } elseif ($type === 'countdown') {
-                                        $extra = get_post_meta($link->ID, '_saas_expiry', true);
-                                    } elseif ($type === 'milestone') {
-                                        $lbl = get_post_meta($link->ID, '_saas_ms_label', true);
-                                        $per = get_post_meta($link->ID, '_saas_ms_percent', true);
-                                        if ($lbl) $extra = "$lbl:$per";
-                                    }
+                                    $price = get_post_meta($link->ID, '_saas_price', true);
+                                    $feats = get_post_meta($link->ID, '_saas_features', true);
+                                    if ($price) $extra = $price . ($feats ? "\n" . implode("\n", $feats) : "");
                                 }
                                 ?>
                                 <li data-id="<?php echo $link->ID; ?>"
@@ -336,7 +280,6 @@ class Saas_Dashboard {
                                     data-hour-to="<?php echo esc_attr(get_post_meta($link->ID, '_saas_hour_to', true)); ?>"
                                     data-custom-bg="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_bg', true)); ?>"
                                     data-custom-text="<?php echo esc_attr(get_post_meta($link->ID, '_saas_custom_text', true)); ?>"
-                                    data-link-image-id="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_image_id', true)); ?>"
                                     data-password="<?php echo esc_attr(get_post_meta($link->ID, '_saas_link_password', true)); ?>">
                                     <span class="handle">⠿</span>
                                     <div class="link-info">
@@ -351,139 +294,6 @@ class Saas_Dashboard {
                                 </li>
                             <?php endforeach; ?>
                             </ul>
-
-                            <!-- Inline Edit Block Content -->
-                            <div id="saas-edit-inline" class="dashboard-card saas-inline-container" style="display:none; margin-top:20px; border: 2px solid var(--primary);">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                                    <div style="display:flex; align-items:center; gap:15px;">
-                                        <h3 style="margin:0;">✏️ Edit Block</h3>
-                                        <span id="edit-block-type-badge" class="pro-badge" style="background:#64748b; font-size:0.7rem; padding:4px 10px; border-radius:8px;">BUTTON</span>
-                                    </div>
-                                    <button type="button" class="close-inline button" data-target="saas-edit-inline">&times;</button>
-                                </div>
-                                <p class="field-hint" style="margin-bottom:20px;">Optimize this block for maximum conversion. Use the advanced options to add A/B testing or device-specific routing.</p>
-                                <form id="saas-edit-link-form">
-                                    <input type="hidden" name="link_id" id="edit-link-id">
-
-                                    <div id="saas-edit-block-guidance" style="background:var(--primary-soft); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--primary); font-size:0.8rem; line-height:1.4;">
-                                        <strong>💡 Editing this block:</strong><br>
-                                        <span id="edit-guidance-text">Standard Button: Perfect for links to your website, scheduler, or social profiles.</span>
-                                    </div>
-
-                                    <div class="field"><label id="edit-label-title">Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
-                                    <div class="field"><label id="edit-label-url">URL / Destination</label><input type="url" name="url" id="edit-link-url"></div>
-                                    <div class="field"><label id="edit-label-extra">Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
-
-                                    <!-- Image Gallery Visual Selector (Edit) -->
-                                    <div id="saas-edit-gallery-selector-wrap" style="display:none; margin-bottom:20px; padding:15px; background:var(--bg-main); border:1px solid var(--border); border-radius:12px;">
-                                        <label style="display:block; margin-bottom:10px;">Gallery Images</label>
-                                        <div id="saas-edit-gallery-previews" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap:10px; margin-bottom:10px;"></div>
-                                        <button type="button" class="button select-media" data-target="gallery-edit" style="width:100%;">📸 Select Gallery Images</button>
-                                    </div>
-
-                                    <button type="button" class="button toggle-advanced" style="width:100%; margin-bottom:20px; background:#f1f5f9; color:#475569; font-weight:bold;">⚙️ Advanced Options</button>
-
-                                    <div id="edit-advanced-fields" style="display:none; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
-                                        <div class="field">
-                                            <label>Style & Animation</label>
-                                            <div style="display:flex; gap:10px;">
-                                                <select name="block_style" id="edit-link-style" style="flex:1;">
-                                                    <option value="regular">Regular</option>
-                                                    <option value="featured">Featured (Pulse)</option>
-                                                    <option value="outline">Outline</option>
-                                                    <option value="glow">Glow</option>
-                                                </select>
-                                                <select name="block_animation" id="edit-link-animation" style="flex:1;">
-                                                    <option value="none">No Animation</option>
-                                                    <option value="fadeinup">Fade In Up</option>
-                                                    <option value="bouncein">Bounce In</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
-                                            <label>A/B Testing (Pro)</label>
-                                            <div style="display:flex; gap:10px;">
-                                                <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Variant B Title" style="flex:1;">
-                                                <input type="url" name="ab_url_b" id="edit-link-ab-url" placeholder="Variant B URL" style="flex:1;">
-                                            </div>
-                                            <p class="field-hint">Variant B is served to 50% of your visitors. Measure which version converts better in the Stats tab.</p>
-                                        </div>
-
-                                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
-                                            <label>Conditional Routing (Pro)</label>
-                                            <div style="display:flex; flex-direction:column; gap:10px;">
-                                                <input type="url" name="url_mobile" id="edit-link-url-mobile" placeholder="Mobile-only URL">
-                                                <div style="display:flex; gap:10px;">
-                                                    <input type="text" name="url_geo_country" id="edit-link-geo-country" placeholder="Country Code (e.g. US)" style="flex:1;">
-                                                    <input type="url" name="url_geo" id="edit-link-url-geo" placeholder="Geo-specific URL" style="flex:1;">
-                                                </div>
-                                            </div>
-                                            <p class="field-hint">Send visitors to different destinations based on their device or country (e.g. US, GB, CA).</p>
-                                        </div>
-
-                                        <div class="field">
-                                            <label>Custom Design</label>
-                                            <div style="display:flex; gap:10px;">
-                                                <div style="flex:1;">
-                                                    <small>Background</small>
-                                                    <input type="color" name="custom_bg" id="edit-link-custom-bg" style="height:40px; padding:2px;">
-                                                </div>
-                                                <div style="flex:1;">
-                                                    <small>Text</small>
-                                                    <input type="color" name="custom_text" id="edit-link-custom-text" style="height:40px; padding:2px;">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="field">
-                                            <label>Visibility Scheduling</label>
-                                            <div style="display:flex; gap:10px;">
-                                                <input type="date" name="start_date" id="edit-link-start" style="flex:1;" title="Start Date">
-                                                <input type="date" name="end_date" id="edit-link-end" style="flex:1;" title="End Date">
-                                            </div>
-                                            <p class="field-hint">Automate your promotions. This block will only be visible between these dates.</p>
-                                        </div>
-
-                                        <div class="field">
-                                            <label>Hour-Based Visibility (0-23)</label>
-                                            <div style="display:flex; gap:10px;">
-                                                <input type="number" name="hour_from" id="edit-link-hour-from" placeholder="From (e.g. 9)" min="0" max="23" style="flex:1;">
-                                                <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To (e.g. 17)" min="0" max="23" style="flex:1;">
-                                            </div>
-                                            <p class="field-hint">Only show this block during specific hours of the day (24-hour format).</p>
-                                        </div>
-
-                                            <div class="field">
-                                                <label>Icon/Thumb Image</label>
-                                                <div id="edit-link-image-preview" style="width:60px; height:60px; border-radius:10px; background:#eee; margin-bottom:10px; overflow:hidden; border:1px solid #ddd;"></div>
-                                                <input type="hidden" name="link_image_id" id="edit-link-image-id">
-                                                <button type="button" class="button select-media" data-target="link-image">Select Icon</button>
-                                            </div>
-
-                                        <div class="field">
-                                            <label>Password Unlock</label>
-                                            <input type="text" name="link_password" id="edit-link-pass" placeholder="Block password">
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="btn-primary" style="width:100%;">Save All Changes</button>
-                                </form>
-                            </div>
-
-                            <!-- Inline Real-Time Preview -->
-                            <div id="saas-preview-inline" class="dashboard-card saas-inline-container" style="display:none; margin-top:20px; border: 2px solid var(--secondary);">
-                                <div class="preview-header" style="width:100%; color:var(--text-dark); margin-bottom:20px;">
-                                    <h3 style="margin:0;">📱 Real-Time Preview</h3>
-                                    <div style="display:flex; gap:10px;">
-                                        <button onclick="document.getElementById('saas-preview-frame').contentWindow.location.reload();" class="button">🔄 Refresh</button>
-                                        <button type="button" class="close-inline button" data-target="saas-preview-inline">&times;</button>
-                                    </div>
-                                </div>
-                                <div class="preview-frame-container" style="margin: 0 auto;">
-                                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name . '?preview=1'); ?>"></iframe>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -537,14 +347,14 @@ class Saas_Dashboard {
                                 <label>Profile Headline</label>
                                 <div style="display:flex; gap:10px;">
                                     <input type="text" name="headline" value="<?php echo esc_attr( $meta['headline'] ); ?>" style="flex:1;" placeholder="e.g. Scaling Founders from 6 to 7 Figures">
-                                    <button type="button" class="ai-assist-btn button" data-target="headline" title="AI Generate Headline">✨ AI Assist</button>
+                                    <button type="button" class="ai-assist-btn button" data-target="headline" title="AI Generate Headline">✨</button>
                                 </div>
-                                <p class="field-hint"><strong>Pro Tip:</strong> Focus on the <em>transformation</em> you provide. Use AI Assist to generate ideas based on your niche.</p>
+                                <p class="field-hint"><strong>Pro Tip:</strong> Focus on the <em>result</em> you provide, not just your title.</p>
                             </div>
                             <div class="field">
                                 <label>Short Biography</label>
                                 <textarea name="bio" rows="4" placeholder="Briefly describe your expertise and how you help clients..."><?php echo esc_textarea( $meta['bio'] ); ?></textarea>
-                                <p class="field-hint">Use 2-3 sentences to build authority. Sample: "Ex-Google Exec turned Strategic Coach. I help high-ticket service providers automate their acquisition."</p>
+                                <p class="field-hint">Use 2-3 sentences to build authority and trust quickly.</p>
                             </div>
 
                             <div class="field">
@@ -561,23 +371,7 @@ class Saas_Dashboard {
                                 <select name="niche" id="profile-niche">
                                     <?php
                                     $niche = get_post_meta($profile_id, '_saas_niche', true);
-                                    $niches = [
-                                        'servant' => 'Public Servant / Official',
-                                        'coach' => 'Business Coach',
-                                        'creator' => 'Digital Creator',
-                                        'realtor' => 'Real Estate Pro',
-                                        'business' => 'Corporate Entity',
-                                        'speaker' => 'Public Speaker',
-                                        'author' => 'Author / Writer',
-                                        'consultant' => 'Strategy Consultant',
-                                        'lawyer' => 'Lawyer / Legal',
-                                        'doctor' => 'Doctor / Healthcare',
-                                        'artist' => 'Artist / Designer',
-                                        'agency' => 'Agency Owner',
-                                        'freelancer' => 'Creative Freelancer',
-                                        'tiktok' => 'Influencer / TikTok',
-                                        'luxury' => 'Luxury Advisory'
-                                    ];
+                                    $niches = ['coach' => 'Coach', 'creator' => 'Creator', 'realtor' => 'Real Estate', 'business' => 'Business'];
                                     foreach($niches as $k => $v) : ?>
                                         <option value="<?php echo $k; ?>" <?php selected($niche, $k); ?>><?php echo $v; ?></option>
                                     <?php endforeach; ?>
@@ -594,19 +388,9 @@ class Saas_Dashboard {
                                 </div>
                             </div>
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                    <label style="margin:0;">Custom Domain / Subdomain (Pro)</label>
-                                    <button type="button" id="saas-domain-guide-trigger" class="button" style="font-size:0.7rem; padding:4px 10px; background:var(--primary-soft); color:var(--primary); border:1px solid var(--primary);">❓ How to setup?</button>
-                                </div>
+                                <label>Custom Domain / Subdomain (Pro)</label>
                                 <input type="text" name="custom_domain" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_custom_domain', true)); ?>" placeholder="profile.yourdomain.com">
-                                <div style="background:rgba(0,0,0,0.02); border-left:3px solid var(--primary); padding:12px; border-radius:8px; margin-top:10px; font-size:0.8rem; line-height:1.5;">
-                                    <strong>🚀 Quick Start:</strong>
-                                    <ol style="margin:8px 0 0 18px; padding:0;">
-                                        <li>Login to your domain provider (e.g. GoDaddy, Namecheap).</li>
-                                        <li>Add a <strong>CNAME</strong> record pointing your subdomain (e.g. <em>bio</em>) to <code><?php echo parse_url(home_url(), PHP_URL_HOST); ?></code></li>
-                                        <li>Enter your full domain above and click Update Profile.</li>
-                                    </ol>
-                                </div>
+                                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:5px;">Point your CNAME record to our server to use your own domain.</p>
                             </div>
 
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
@@ -649,7 +433,7 @@ class Saas_Dashboard {
                             <div class="field" id="saas-bg-value-wrapper">
                                 <label id="saas-bg-value-label">Background Value</label>
                                 <input type="text" name="bg_value" id="saas-bg-value-input" value="<?php echo esc_attr($profile_bg_val ?: '#f3f3f1'); ?>">
-                                <p class="field-hint">Flat: #f3f3f1 | Gradient: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)</p>
+                                <p style="font-size:0.7rem; color:#888; margin-top:5px;">Hex color (e.g. #ffffff) or CSS gradient.</p>
                             </div>
 
                             <div class="field">
@@ -957,13 +741,11 @@ class Saas_Dashboard {
                             <input type="hidden" name="form_context" value="tracking">
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                                 <label>Header Scripts (e.g. Google Tag Manager)</label>
-                                <textarea name="header_scripts" rows="5" placeholder="<script async src='https://www.googletagmanager.com/gtag/js?id=G-XXXXXX'></script>..."><?php echo esc_textarea(get_post_meta($profile_id, '_saas_header_scripts', true)); ?></textarea>
-                                <p class="field-hint">Paste your tracking code here to have it included in the &lt;head&gt; of your profile.</p>
+                                <textarea name="header_scripts" rows="5" placeholder="<script>...</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_header_scripts', true)); ?></textarea>
                             </div>
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
                                 <label>Footer Scripts (e.g. Conversion Pixels)</label>
-                                <textarea name="footer_scripts" rows="5" placeholder="<script>fbq('track', 'PageView');</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_footer_scripts', true)); ?></textarea>
-                                <p class="field-hint">Scripts placed here will be loaded just before the closing &lt;/body&gt; tag.</p>
+                                <textarea name="footer_scripts" rows="5" placeholder="<script>...</script>"><?php echo esc_textarea(get_post_meta($profile_id, '_saas_footer_scripts', true)); ?></textarea>
                             </div>
                             <button type="submit" class="btn-primary">Save Scripts</button>
                         </form>
@@ -1043,10 +825,9 @@ class Saas_Dashboard {
 
                             <hr>
                             <h4>Advanced Triggers</h4>
-                            <div class="field <?php echo $payments->is_agency_user($user_id) ? '' : 'pro-gated-inline'; ?>" data-tier="agency">
-                                <label>Webhook URL (Zapier/Make) <span class="pro-badge" style="background:#0f172a; color:#f59e0b; border:1px solid #f59e0b;">Agency</span></label>
-                                <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>" <?php echo $payments->is_agency_user($user_id) ? '' : 'readonly'; ?> placeholder="https://hooks.zapier.com/v1/event/...">
-                                <p class="field-hint">Automatically send new leads to Zapier, Make, or your own API. Test with a sample payload using the "Test Webhook" button.</p>
+                            <div class="field">
+                                <label>Webhook URL (Zapier/Make)</label>
+                                <input type="url" name="lead_webhook" value="<?php echo esc_url(get_post_meta($profile_id, '_saas_lead_webhook', true)); ?>">
                             </div>
                             <div class="field">
                                 <label>Redirect after Submission</label>
@@ -1114,10 +895,6 @@ class Saas_Dashboard {
                         <?php
                         $earned = get_user_meta($user_id, '_saas_affiliate_earned', true) ?: 0;
                         $refs_count = count(get_users(['meta_key' => '_saas_referred_by', 'meta_value' => $user_id, 'fields' => 'ID']));
-                        $marketing_materials = get_option('saas_marketing_materials') ?: [
-                            ['name' => 'Standard Banner', 'img' => 'https://via.placeholder.com/300x100?text=Claim+Your+Elite+Bio', 'size' => '300x100'],
-                            ['name' => 'Sidebar Ad', 'img' => 'https://via.placeholder.com/150x150?text=Stop+Losing+Leads', 'size' => '150x150']
-                        ];
                         ?>
                         <div class="stats-grid" style="margin:20px 0;">
                             <div class="stat-card" style="background:#fff;"><small>TOTAL EARNED</small><div class="value" style="color:var(--secondary);">$<?php echo number_format($earned, 2); ?></div></div>
@@ -1129,52 +906,6 @@ class Saas_Dashboard {
                             <input type="text" id="saas-ref-link" value="<?php echo home_url('/?ref=' . wp_get_current_user()->user_login); ?>" readonly style="width:100%; border:none; font-weight:bold; background:transparent;">
                         </div>
                         <button id="saas-copy-ref-btn" class="btn-primary" style="background:var(--secondary); width:100%;">Copy Referral Link</button>
-
-                        <div style="margin-top:30px; padding-top:20px; border-top:1px solid rgba(16, 185, 129, 0.2);">
-                            <h4 style="color:var(--secondary); margin-bottom:15px;">Your Assigned Discount Codes</h4>
-                            <?php
-                            $all_coupons = get_option('saas_affiliate_coupons') ?: [];
-                            $my_coupons = array_filter($all_coupons, function($c) use ($user_id) { return $c['user_id'] == $user_id; });
-                            if ($my_coupons) : ?>
-                                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:10px;">
-                                    <?php foreach($my_coupons as $mc) : ?>
-                                        <div style="background:#fff; padding:12px; border-radius:12px; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-                                            <code style="display:block; font-size:1.1rem; color:var(--secondary); font-weight:900; margin-bottom:5px;"><?php echo esc_html($mc['code']); ?></code>
-                                            <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted);"><?php echo $mc['discount']; ?>% Discount</span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php else : ?>
-                                <p style="font-size:0.85rem; color:var(--text-muted);">Ask the admin to assign you a custom coupon code to share with your audience!</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <h4 style="color:var(--secondary); margin-bottom:15px;">Affiliate Earning History</h4>
-                        <?php
-                        $commissions = get_posts(['post_type' => 'saas_commission', 'author' => $user_id, 'numberposts' => 20]);
-                        if($commissions) : ?>
-                            <table class="saas-table">
-                                <thead><tr><th>Date</th><th>Type</th><th>Order Amount</th><th>Your Commission</th></tr></thead>
-                                <tbody>
-                                    <?php foreach($commissions as $c) :
-                                        $order_amt = get_post_meta($c->ID, '_saas_order_amount', true);
-                                        $comm_amt  = get_post_meta($c->ID, '_saas_commission_amount', true);
-                                        $perc      = get_post_meta($c->ID, '_saas_percentage', true);
-                                        ?>
-                                        <tr>
-                                            <td><?php echo get_the_date('M j, Y', $c->ID); ?></td>
-                                            <td><small>Recurring (<?php echo $perc; ?>%)</small></td>
-                                            <td>$<?php echo number_format($order_amt, 2); ?></td>
-                                            <td style="color:var(--secondary); font-weight:800;">+$<?php echo number_format($comm_amt, 2); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        <?php else: ?>
-                            <p style="color:var(--text-muted); font-size:0.9rem;">No commissions earned yet. Share your link to start earning!</p>
-                        <?php endif; ?>
                     </div>
 
                     <div class="dashboard-card">
@@ -1185,19 +916,13 @@ class Saas_Dashboard {
                             <table class="saas-table">
                                 <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
                                 <tbody>
-                                    <?php foreach($payouts as $p) :
-                                        $p_status = get_post_meta($p->ID, '_status', true) ?: 'pending';
-                                        ?>
-                                        <tr>
-                                            <td><?php echo get_the_date('', $p->ID); ?></td>
-                                            <td>$<?php echo number_format(get_post_meta($p->ID, '_amount', true), 2); ?></td>
-                                            <td><span class="pro-badge" style="background:<?php echo ($p_status==='paid') ? 'var(--secondary)' : '#94a3b8'; ?>"><?php echo strtoupper($p_status); ?></span></td>
-                                        </tr>
+                                    <?php foreach($payouts as $p) : ?>
+                                        <tr><td><?php echo get_the_date('', $p->ID); ?></td><td>$<?php echo get_post_meta($p->ID, '_amount', true); ?></td><td>Paid</td></tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
                         <?php else: ?>
-                            <p style="color:var(--text-muted); font-size:0.9rem;">No payouts recorded yet.</p>
+                            <p style="color:var(--text-muted); font-size:0.9rem;">No payouts recorded yet. Start sharing to earn!</p>
                         <?php endif; ?>
                     </div>
 
@@ -1242,52 +967,17 @@ class Saas_Dashboard {
                     <div class="dashboard-card">
                         <h4>Marketing Materials</h4>
                         <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Use these elite assets to boost your referrals.</p>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px;">
-                            <?php foreach($marketing_materials as $mm) : ?>
-                                <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
-                                    <small style="font-weight:bold; display:block; margin-bottom:5px;"><?php echo esc_html($mm['name']); ?> (<?php echo esc_html($mm['size']); ?>)</small>
-                                    <img src="<?php echo esc_url($mm['img']); ?>" style="width:100%; border-radius:5px; margin-bottom:10px;">
-                                    <button class="button copy-html-btn" style="width:100%;">Copy HTML</button>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                        <?php
-                        $affiliate_kit = get_option('saas_affiliate_marketing_kit') ?: [];
-                        if($affiliate_kit) : ?>
-                            <div style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
-                                <h4>Pro Marketing Strategy Kit</h4>
-                                <div style="display:grid; gap:15px;">
-                                    <?php foreach($affiliate_kit as $kit) : ?>
-                                        <div style="padding:20px; background:#fff; border-radius:12px; border:1px solid var(--border);">
-                                            <h5 style="margin:0 0-10px; font-weight:800;"><?php echo esc_html($kit['title']); ?></h5>
-                                            <div style="font-size:0.9rem; color:var(--text-muted);"><?php echo wp_kses_post($kit['content']); ?></div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                            <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
+                                <small style="font-weight:bold; display:block; margin-bottom:5px;">Standard Banner</small>
+                                <img src="https://via.placeholder.com/300x100?text=Claim+Your+Elite+Bio" style="width:100%; border-radius:5px;">
+                                <button class="button copy-html-btn" style="width:100%; margin-top:10px;">Copy HTML</button>
                             </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <h4>Elite Sales Scripts</h4>
-                        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Copy and paste these high-converting scripts to your favorite platforms.</p>
-                        <?php
-                        $scripts = get_option('saas_sales_scripts') ?: [
-                            ['title' => 'Sample Outreach', 'content' => 'Hey [Name], I noticed your bio...']
-                        ];
-                        ?>
-                        <div style="display:grid; gap:15px;">
-                            <?php
-                            $ref_link = home_url('/?ref=' . wp_get_current_user()->user_login);
-                            foreach($scripts as $script) :
-                                $parsed_content = str_replace(['[Link]', '[My Link]'], $ref_link, $script['content']);
-                            ?>
-                                <div style="padding:20px; background:var(--bg-main); border-radius:12px; border:1px solid var(--border);">
-                                    <h5 style="margin:0 0 10px; font-weight:800;"><?php echo esc_html($script['title']); ?></h5>
-                                    <pre style="white-space: pre-wrap; font-size: 0.85rem; color: var(--text-dark); background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd;"><?php echo esc_html($parsed_content); ?></pre>
-                                    <button class="button" onclick="const p = this.previousElementSibling; const t = document.createElement('textarea'); t.value = p.innerText; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); this.innerText='Copied! ✅'; setTimeout(() => this.innerText='Copy Script', 2000);">Copy Script</button>
-                                </div>
-                            <?php endforeach; ?>
+                            <div style="padding:15px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border);">
+                                <small style="font-weight:bold; display:block; margin-bottom:5px;">Sidebar Ad</small>
+                                <img src="https://via.placeholder.com/150x150?text=Stop+Losing+Leads" style="width:100%; border-radius:5px;">
+                                <button class="button copy-html-btn" style="width:100%; margin-top:10px;">Copy HTML</button>
+                            </div>
                         </div>
                     </div>
 
@@ -1359,7 +1049,7 @@ class Saas_Dashboard {
                             </div>
 
                             <div class="plan-card" style="background:var(--primary-soft); padding:32px; border-radius:24px; border:2px solid var(--primary); position:relative; overflow:hidden;">
-                                <div style="position:absolute; top:20px; right:-35px; background:var(--primary); color:#fff; padding:5px 40px; transform:rotate(45deg); font-size:0.75rem; font-weight:bold;">POPULAR</div>
+                                <div style="position:absolute; top:20px; right:-35px; background:var(--primary); color:#fff; padding:5px 40px; transform:rotate(45deg); font-size:0.7rem; font-weight:bold;">POPULAR</div>
                                 <h4 style="font-size:1.5rem; margin:0; color:var(--primary);">Elite Pro</h4>
                                 <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$19<small style="font-size:1rem;">/mo</small></div>
                                 <ul style="list-style:none; padding:0; margin-bottom: 24px; line-height:2.2; font-size: 0.9rem; text-align:left;">
@@ -1368,80 +1058,38 @@ class Saas_Dashboard {
                                     <li>✓ Real-time Deep Analytics</li>
                                     <li>✓ Custom Domain Mapping</li>
                                     <li>✓ Remove All Branding</li>
+                                    <li>✓ Priority 24/7 Support</li>
                                 </ul>
-                            <?php if ($is_pro && get_user_meta($user_id, '_saas_subscription_plan', true) === 'pro') :
+                            <?php if ($is_pro) :
                                 $expiry = get_user_meta($user_id, '_saas_subscription_expiry', true);
                                 ?>
                                 <div style="color:var(--secondary); font-weight:bold; margin-bottom:15px;">✓ Your elite subscription is active</div>
+                                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;">
+                                    Plan: Elite Pro<br>
+                                    Next Billing: <?php echo $expiry ? date('M j, Y', $expiry) : 'Never'; ?>
+                                </p>
                                 <button id="saas-cancel-sub" class="button" style="width:100%; color:var(--danger);">Cancel Subscription</button>
-                            <?php elseif (!$is_pro) : ?>
+                            <?php else : ?>
                                 <div class="payment-options" style="display:flex; flex-direction:column; gap:10px;">
                                     <?php
                                     $gateway_mode = $payments->get_active_gateway();
                                     if ($gateway_mode === 'stripe' || $gateway_mode === 'user_select') : ?>
                                         <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="pro" style="width:100%;">Upgrade with Stripe</button>
                                     <?php endif; ?>
+
                                     <?php if ($gateway_mode === 'paypal' || $gateway_mode === 'user_select') : ?>
                                         <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="pro" style="width:100%; background:#0070ba;">Upgrade with PayPal</button>
                                     <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
 
-                        <div class="plan-card" style="background:#0f172a; padding:32px; border-radius:24px; border:2px solid #1e293b; position:relative; overflow:hidden; color:#fff;">
-                                <div style="position:absolute; top:20px; right:-35px; background:var(--accent); color:#000; padding:5px 40px; transform:rotate(45deg); font-size:0.75rem; font-weight:bold;">MAX SCALE</div>
-                                <h4 style="font-size:1.5rem; margin:0; color:var(--accent);">Agency Unlimited</h4>
-                                <div style="font-size:2.5rem; font-weight:900; margin:16px 0;">$49<small style="font-size:1rem;">/mo</small></div>
-                                <ul style="list-style:none; padding:0; margin-bottom: 24px; line-height:2.2; font-size: 0.9rem; text-align:left; color:rgba(255,255,255,0.7);">
-                                    <li>✓ Everything in Pro</li>
-                                    <li>✓ Unlimited Sub-accounts</li>
-                                    <li>✓ API & Webhook Access</li>
-                                    <li>✓ White-label Client Funnels</li>
-                                    <li>✓ Dedicated Account Manager</li>
-                                </ul>
-                            <?php if ($is_pro && get_user_meta($user_id, '_saas_subscription_plan', true) === 'agency') : ?>
-                                <div style="color:var(--secondary); font-weight:bold; margin-bottom:15px;">✓ Your agency subscription is active</div>
-                                <button id="saas-cancel-sub" class="button" style="width:100%; color:var(--danger); background:transparent;">Cancel Subscription</button>
-                            <?php elseif (!$is_pro || get_user_meta($user_id, '_saas_subscription_plan', true) === 'pro') : ?>
-                                <div class="payment-options" style="display:flex; flex-direction:column; gap:10px;">
-                                    <?php
-                                    $gateway_mode = $payments->get_active_gateway();
-                                    if ($gateway_mode === 'stripe' || $gateway_mode === 'user_select') : ?>
-                                        <button class="btn-primary saas-checkout-btn" data-gateway="stripe" data-plan="agency" style="width:100%; background:var(--accent); color:#000;">Upgrade to Agency (Stripe)</button>
-                                    <?php endif; ?>
-                                    <?php if ($gateway_mode === 'paypal' || $gateway_mode === 'user_select') : ?>
-                                        <button class="btn-primary saas-checkout-btn" data-gateway="paypal" data-plan="agency" style="width:100%; background:#0070ba;">Upgrade to Agency (PayPal)</button>
+                                <button id="saas-demo-upgrade-btn" class="button" style="width:100%; margin-top:10px; background:var(--accent-soft); border-color:var(--accent); color:var(--accent);">⚡ Instant Demo Upgrade (UID: <?php echo $user_id; ?>)</button>
+                                <button id="saas-simulate-payment-btn" class="button" style="width:100%; margin-top:10px; background:var(--secondary-soft); border-color:var(--secondary); color:var(--secondary);">💸 Simulate Stripe Success ($19)</button>
+
+                                    <?php if ($gateway_mode === 'none') : ?>
+                                        <p style="color:var(--text-muted); font-size:0.8rem;">Online payments are currently disabled. Please contact support to upgrade.</p>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
-                    </div>
-
-                    <div style="max-width:600px; margin:40px auto 0;" class="dashboard-card">
-                        <div class="field">
-                            <label>Have an affiliate coupon?</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="text" id="saas-checkout-coupon" placeholder="Enter coupon code" style="flex:1;">
-                                <button type="button" class="button" id="saas-apply-checkout-coupon">Apply</button>
-                            </div>
-                            <div id="coupon-status" style="font-size:0.75rem; margin-top:5px; font-weight:bold;"></div>
-                        </div>
-
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
-                            <button id="saas-demo-upgrade-btn" class="button" style="background:var(--accent-soft); border-color:var(--accent); color:var(--accent);">⚡ Instant Demo Upgrade</button>
-                            <button id="saas-simulate-payment-btn" class="button" style="background:var(--secondary-soft); border-color:var(--secondary); color:var(--secondary);">💸 Simulate Stripe Success</button>
-                        </div>
-
-                        <?php if ($is_pro) :
-                            $expiry = get_user_meta($user_id, '_saas_subscription_expiry', true);
-                            $u_plan = get_user_meta($user_id, '_saas_subscription_plan', true);
-                            ?>
-                            <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; font-size:0.85rem; color:var(--text-muted);">
-                                <strong>Plan:</strong> <?php echo strtoupper($u_plan); ?><br>
-                                <strong>Next Billing:</strong> <?php echo $expiry ? date('M j, Y', $expiry) : 'Never'; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
                     </div>
 
                     <div class="dashboard-card">
@@ -1469,49 +1117,28 @@ class Saas_Dashboard {
 
                 <div id="tab-templates" class="saas-tab-content">
                     <div class="dashboard-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
-                            <h3 style="margin:0;">Template Library</h3>
-                            <input type="text" id="tpl-search" placeholder="🔍 Search niches (e.g. coach, gym)..." style="max-width:300px; background:#fff; border-radius:12px; border:1px solid var(--border); padding:10px 15px;">
-                        </div>
+                        <h3>Template Library</h3>
                         <p style="margin-bottom:20px; color:var(--text-muted);">Choose a high-converting template to jumpstart your profile. ⚠️ Warning: Applying a template will replace your current blocks.</p>
 
-                        <div id="templates-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
                             <?php
-                            $all_tpls = array_merge(saas_get_default_templates(), get_option('saas_templates') ?: []);
-                            $tpl_icons = [
-                                'coach' => '🚀', 'business' => '🏢', 'luxury' => '⚜️', 'freelancer' => '🎨',
-                                'realtor' => '🏡', 'politician' => '🏛️', 'tiktok' => '📱', 'consultant' => '🧠',
-                                'author' => '📘', 'lawyer' => '⚖️', 'doctor' => '🩺', 'influencer' => '📸', 'servant' => '🏛️', 'artist' => '🎨',
-                                'podcast' => '🎙️', 'course' => '🎓', 'shop' => '🛒', 'charity' => '❤️',
-                                'saas' => '💻', 'fitness' => '🏋️', 'medical' => '🏥', 'startup' => '🚀',
-                                'wellness' => '🌿', 'photography' => '📷', 'restaurant' => '🍴', 'event_planner' => '✨', 'therapist' => '🧠',
-                                'trainer' => '🏋️‍♀️', 'interior_design' => '🛋️', 'yoga' => '🧘', 'coffee_shop' => '☕', 'non_profit' => '🤝',
-                                'travel' => '✈️', 'chef' => '👨‍🍳', 'makeup' => '💄', 'web3' => '🌐', 'gaming' => '🎮',
-                                'personal' => '✨', 'mobile_app' => '📱', 'webinar' => '🎤', 'musician' => '🎵',
-                                'model' => '👗', 'dentist' => '🦷', 'gym' => '💪', 'architecture' => '📐'
+                            $tpls = [
+                                'coach' => ['name' => 'Executive Coach', 'icon' => '🚀'],
+                                'freelancer' => ['name' => 'Creative Freelancer', 'icon' => '🎨'],
+                                'realtor' => ['name' => 'Luxury Realtor', 'icon' => '🏡'],
+                                'business' => ['name' => 'Corporate Entity', 'icon' => '🏢'],
+                                'politician' => ['name' => 'Public Official', 'icon' => '🏛️'],
+                                'elite_card' => ['name' => 'Digital Card Pro', 'icon' => '💳'],
+                                'tiktok' => ['name' => 'Viral Influencer', 'icon' => '📱'],
+                                'consultant' => ['name' => 'Strategy Expert', 'icon' => '🧠'],
+                                'luxury' => ['name' => 'Luxury Private', 'icon' => '⚜️']
                             ];
-
-                            $categories = [
-                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course', 'saas', 'startup', 'web3', 'architecture'],
-                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'musician', 'model', 'gaming', 'personal'],
-                                'Lifestyle & Wellness' => ['fitness', 'trainer', 'yoga', 'wellness', 'gym', 'chef', 'makeup', 'travel', 'photography', 'interior_design'],
-                                'Public & Professional' => ['servant', 'politician', 'doctor', 'dentist', 'therapist', 'speaker', 'luxury', 'charity', 'medical', 'non_profit', 'restaurant', 'coffee_shop', 'event_planner', 'mobile_app', 'webinar']
-                            ];
-
-                            foreach ($categories as $cat_title => $tpl_ids) : ?>
-                                <div class="templates-category-header" style="grid-column: 1 / -1; margin-top: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
-                                    <h4 style="margin:0; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-size: 0.8rem;"><?php echo $cat_title; ?></h4>
+                            foreach($tpls as $id => $t) : ?>
+                                <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s;">
+                                    <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $t['icon']; ?></div>
+                                    <h4 style="margin:0 0 15px;"><?php echo $t['name']; ?></h4>
+                                    <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none;">Apply Template</button>
                                 </div>
-                                <?php foreach($tpl_ids as $id) :
-                                    if (!isset($all_tpls[$id])) continue;
-                                    $icon = $tpl_icons[$id] ?? '✨';
-                                ?>
-                                    <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s; background:#fff; cursor:pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.05)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                                        <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $icon; ?></div>
-                                        <h4 style="margin:0 0 15px; font-size: 1rem;"><?php echo esc_html(ucfirst(str_replace('_', ' ', $id))); ?></h4>
-                                        <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none; border-radius:8px; padding:10px; font-weight:bold; cursor:pointer; transition: opacity 0.2s;">Apply Template</button>
-                                    </div>
-                                <?php endforeach; ?>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -1522,34 +1149,33 @@ class Saas_Dashboard {
                         <h3>Elite Training Academy 🎓</h3>
                         <p>I want you to succeed. That's why I've put together these short, high-impact tutorials to help you master your new digital salesman.</p>
 
-                        <?php
-                        $training_vids = get_option('saas_training_academy') ?: [
-                            ['title' => 'The 60-Second Setup', 'desc' => 'Go from zero to a live funnel in under a minute.', 'video_id' => 'setup'],
-                            ['title' => 'Lead Magnet Magic', 'desc' => 'Capture contact info and build your email list.', 'video_id' => 'leads']
-                        ];
-                        $kb_articles = get_option('saas_knowledge_base') ?: [
-                            ['title' => 'How to connect my own domain?', 'url' => '#'],
-                            ['title' => 'Setting up Stripe for product sales', 'url' => '#']
-                        ];
-                        ?>
-
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-top:30px;">
-                            <?php foreach($training_vids as $v) : ?>
-                                <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
-                                    <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial [<?php echo esc_js($v['video_id']); ?>] loading...')">▶️</div>
-                                    <h4><?php echo esc_html($v['title']); ?></h4>
-                                    <p class="field-hint"><?php echo esc_html($v['desc']); ?></p>
-                                    <button class="button" style="width:100%;">Watch Now</button>
-                                </div>
-                            <?php endforeach; ?>
+                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
+                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
+                                <h4>The 60-Second Setup</h4>
+                                <p class="field-hint">I'll show you how to go from zero to a live, high-converting funnel in under a minute.</p>
+                                <button class="button" style="width:100%;">Watch Now</button>
+                            </div>
+                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
+                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
+                                <h4>Lead Magnet Magic</h4>
+                                <p class="field-hint">Learn how to use Lead Forms to capture contact info and build your email list on autopilot.</p>
+                                <button class="button" style="width:100%;">Watch Now</button>
+                            </div>
+                            <div style="background:var(--bg-main); padding:20px; border-radius:15px; border:1px solid var(--border);">
+                                <div style="height:150px; background:linear-gradient(45deg, #000, #333); border-radius:10px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:3rem; cursor:pointer;" onclick="alert('Tutorial video loading...')">▶️</div>
+                                <h4>NFC & Real-World Sales</h4>
+                                <p class="field-hint">How to use your digital business card at networking events to close more deals.</p>
+                                <button class="button" style="width:100%;">Watch Now</button>
+                            </div>
                         </div>
 
                         <hr style="margin:40px 0;">
                         <h4>Knowledge Base</h4>
                         <ul style="list-style:none; padding:0;">
-                            <?php foreach($kb_articles as $art) : ?>
-                                <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="<?php echo esc_url($art['url']); ?>" style="text-decoration:none; color:var(--primary); font-weight:700;"><?php echo esc_html($art['title']); ?></a></li>
-                            <?php endforeach; ?>
+                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">How to connect my own domain?</a></li>
+                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">Setting up Stripe for product sales</a></li>
+                            <li style="padding:15px 0; border-bottom:1px solid #eee;"><a href="#" style="text-decoration:none; color:var(--primary); font-weight:700;">A/B Testing: How many variants should I use?</a></li>
                         </ul>
                     </div>
                 </div>
@@ -1613,6 +1239,16 @@ class Saas_Dashboard {
 
             </div> <!-- End Main Area -->
 
+            <div class="saas-preview-pane">
+                <div class="preview-header">
+                    <button id="saas-close-preview" class="close-preview-btn">&times;</button>
+                    <strong>Real-Time Preview</strong>
+                    <button onclick="document.getElementById('saas-preview-frame').contentWindow.location.reload();" class="button">🔄</button>
+                </div>
+                <div class="preview-frame-container">
+                    <iframe id="saas-preview-frame" src="<?php echo home_url('/' . $profile_obj->post_name); ?>"></iframe>
+                </div>
+            </div>
         </div>
 
         <!-- Modals -->
@@ -1641,21 +1277,12 @@ class Saas_Dashboard {
                     <h3>Welcome! Let's build your profile 🚀</h3>
                     <p>What is your primary niche?</p>
                     <select id="wizard-niche" class="field">
-                        <option value="servant">🏛️ Public Servant / Official</option>
                         <option value="coach">🚀 Business Coach</option>
-                        <option value="creator">🎬 Digital Creator</option>
+                        <option value="freelancer">🎨 Creative Freelancer</option>
                         <option value="realtor">🏡 Real Estate Pro</option>
                         <option value="business">🏢 Corporate Entity</option>
-                        <option value="speaker">🎙️ Public Speaker</option>
-                        <option value="author">✍️ Author / Writer</option>
-                        <option value="consultant">🧠 Strategy Consultant</option>
-                        <option value="lawyer">⚖️ Lawyer / Legal</option>
-                        <option value="doctor">🩺 Doctor / Healthcare</option>
-                        <option value="artist">🎨 Artist / Designer</option>
-                        <option value="agency">🏢 Agency Owner</option>
-                        <option value="freelancer">🎨 Creative Freelancer</option>
-                        <option value="tiktok">📱 Influencer / TikTok</option>
-                        <option value="luxury">⚜️ Luxury Advisory</option>
+                        <option value="tiktok">📱 Social Influencer</option>
+                        <option value="luxury">⚜️ Luxury Private Advisory</option>
                     </select>
                     <button class="btn-primary next-step" style="width:100%;">Next Step</button>
                 </div>
@@ -1713,63 +1340,105 @@ class Saas_Dashboard {
             </div>
         </div>
 
-        <div id="saas-domain-modal" class="saas-modal">
-            <div class="saas-modal-content" style="max-width:700px;">
+        <div id="saas-edit-modal" class="saas-modal">
+            <div class="saas-modal-content">
                 <span class="close-modal">&times;</span>
-                <div style="text-align:center; margin-bottom:30px;">
-                    <div style="font-size:3rem; margin-bottom:10px;">🌐</div>
-                    <h2 style="margin:0;">Custom Domain Setup Guide</h2>
-                    <p style="color:var(--text-muted);">Transform your profile into a professional branded asset.</p>
-                </div>
+                <h3>Edit Block Content</h3>
+                <p class="field-hint" style="margin-bottom:20px;">Optimize this block for maximum conversion. Use the advanced options to add A/B testing or device-specific routing.</p>
+                <form id="saas-edit-link-form">
+                    <input type="hidden" name="link_id" id="edit-link-id">
 
-                <div class="domain-guide-steps" style="display:grid; gap:25px;">
-                    <div style="display:flex; gap:20px; align-items:start;">
-                        <div style="width:40px; height:40px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">1</div>
-                        <div>
-                            <h4 style="margin:0 0 5px;">Choose Your Subdomain</h4>
-                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Decide what you want your link to be. Most elite creators use something like <code>link.yourdomain.com</code>, <code>bio.yourdomain.com</code>, or just <code>connect.yourdomain.com</code>.</p>
-                        </div>
-                    </div>
+                    <div class="field"><label>Block Label</label><input type="text" name="title" id="edit-link-title" required></div>
+                    <div class="field"><label>URL / Destination</label><input type="url" name="url" id="edit-link-url" required></div>
+                    <div class="field"><label>Description / Extra Content</label><textarea name="extra" id="edit-link-extra" rows="3"></textarea></div>
 
-                    <div style="display:flex; gap:20px; align-items:start;">
-                        <div style="width:40px; height:40px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">2</div>
-                        <div>
-                            <h4 style="margin:0 0 5px;">Configure DNS (CNAME)</h4>
-                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Login to where you bought your domain (GoDaddy, Namecheap, Cloudflare, etc.). Find the <strong>DNS Settings</strong> or <strong>Manage DNS</strong> section.</p>
-                            <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:10px; border:1px solid #e2e8f0; font-size:0.85rem;">
-                                <div style="margin-bottom:10px;"><strong>Type:</strong> CNAME</div>
-                                <div style="margin-bottom:10px;"><strong>Host/Name:</strong> (your subdomain, e.g. <code>bio</code>)</div>
-                                <div><strong>Value/Target:</strong> <code><?php echo parse_url(home_url(), PHP_URL_HOST); ?></code></div>
+                    <button type="button" class="button toggle-advanced" style="width:100%; margin-bottom:20px; background:#f1f5f9; color:#475569; font-weight:bold;">⚙️ Advanced Options</button>
+
+                    <div id="edit-advanced-fields" style="display:none; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                        <div class="field">
+                            <label>Style & Animation</label>
+                            <div style="display:flex; gap:10px;">
+                                <select name="block_style" id="edit-link-style" style="flex:1;">
+                                    <option value="regular">Regular</option>
+                                    <option value="featured">Featured (Pulse)</option>
+                                    <option value="outline">Outline</option>
+                                    <option value="glow">Glow</option>
+                                </select>
+                                <select name="block_animation" id="edit-link-animation" style="flex:1;">
+                                    <option value="none">No Animation</option>
+                                    <option value="fadeinup">Fade In Up</option>
+                                    <option value="bouncein">Bounce In</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
 
-                    <div style="display:flex; gap:20px; align-items:start;">
-                        <div style="width:40px; height:40px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">3</div>
-                        <div>
-                            <h4 style="margin:0 0 5px;">Link Your Profile</h4>
-                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Once you've saved the DNS record, come back here and enter your full domain (e.g. <code>bio.yourdomain.com</code>) into the box below and click <strong>Update Profile</strong>.</p>
+                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                            <label>A/B Testing (Pro)</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" name="ab_title_b" id="edit-link-ab-title" placeholder="Variant B Title" style="flex:1;">
+                                <input type="url" name="ab_url_b" id="edit-link-ab-url" placeholder="Variant B URL" style="flex:1;">
+                            </div>
+                        </div>
+
+                        <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
+                            <label>Conditional Routing (Pro)</label>
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <input type="url" name="url_mobile" id="edit-link-url-mobile" placeholder="Mobile-only URL">
+                                <div style="display:flex; gap:10px;">
+                                    <input type="text" name="url_geo_country" id="edit-link-geo-country" placeholder="Country Code (e.g. US)" style="flex:1;">
+                                    <input type="url" name="url_geo" id="edit-link-url-geo" placeholder="Geo-specific URL" style="flex:1;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Custom Design</label>
+                            <div style="display:flex; gap:10px;">
+                                <div style="flex:1;">
+                                    <small>Background</small>
+                                    <input type="color" name="custom_bg" id="edit-link-custom-bg" style="height:40px; padding:2px;">
+                                </div>
+                                <div style="flex:1;">
+                                    <small>Text</small>
+                                    <input type="color" name="custom_text" id="edit-link-custom-text" style="height:40px; padding:2px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Visibility Scheduling</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="date" name="start_date" id="edit-link-start" style="flex:1;" title="Start Date">
+                                <input type="date" name="end_date" id="edit-link-end" style="flex:1;" title="End Date">
+                            </div>
+                            <p class="field-hint">Automate your promotions. This block will only be visible between these dates.</p>
+                        </div>
+
+                        <div class="field">
+                            <label>Hour Range (0-23)</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="number" name="hour_from" id="edit-link-hour-from" placeholder="From" min="0" max="23" style="flex:1;">
+                                <input type="number" name="hour_to" id="edit-link-hour-to" placeholder="To" min="0" max="23" style="flex:1;">
+                            </div>
+                        </div>
+
+                            <div class="field">
+                                <label>Icon/Thumb Image</label>
+                                <div id="edit-link-image-preview" style="width:60px; height:60px; border-radius:10px; background:#eee; margin-bottom:10px; overflow:hidden; border:1px solid #ddd;"></div>
+                                <input type="hidden" name="link_image_id" id="edit-link-image-id">
+                                <button type="button" class="button select-media" data-target="link-image">Select Icon</button>
+                            </div>
+
+                        <div class="field">
+                            <label>Password Unlock</label>
+                            <input type="text" name="link_password" id="edit-link-pass" placeholder="Block password">
                         </div>
                     </div>
 
-                    <div style="display:flex; gap:20px; align-items:start;">
-                        <div style="width:40px; height:40px; background:var(--secondary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">✓</div>
-                        <div>
-                            <h4 style="margin:0 0 5px;">Verification & SSL</h4>
-                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Our system will automatically detect the connection and provision a secure SSL certificate within 24-48 hours.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top:40px; padding:20px; background:var(--primary-soft); border-radius:15px; border:1px solid var(--primary);">
-                    <p style="margin:0; font-size:0.85rem; font-weight:bold; color:var(--primary);">💡 Pro Tip: Need a naked domain (yourdomain.com)?</p>
-                    <p style="margin:5px 0 0; font-size:0.8rem; color:var(--text-dark);">Add an <strong>A Record</strong> pointing to our server IP: <code>(Contact Support for IP)</code> and set up a redirect from WWW to non-WWW.</p>
-                </div>
-
-                <button class="button" onclick="this.closest('.saas-modal').style.display='none'" style="width:100%; margin-top:30px; background:var(--primary); color:#fff; border:none; padding:15px;">Got it, thanks!</button>
+                    <button type="submit" class="btn-primary" style="width:100%;">Save All Changes</button>
+                </form>
             </div>
         </div>
-
         <?php
         return ob_get_clean();
     }

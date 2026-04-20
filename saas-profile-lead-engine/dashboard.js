@@ -99,107 +99,14 @@
             });
         }
 
-        // Guidance Helper Function
-        function updateGuidance(type, isEdit) {
-            // Toggle Gallery Visual UI
-            var wrapId = isEdit ? '#saas-edit-gallery-selector-wrap' : '#saas-gallery-selector-wrap';
-            var extraId = isEdit ? '#edit-link-extra' : '#saas-add-extra-field';
-
-            if (type === 'image_gallery') {
-                $(wrapId).show();
-                $(extraId).closest('.field').hide();
-                // If edit mode, populate previews from textarea
-                if (isEdit) {
-                    var urls = $(extraId).val().split('\n').filter(Boolean);
-                    var html = '';
-                    urls.forEach(function(u) {
-                        html += '<img src="' + u + '" style="width:100%; height:60px; object-fit:cover; border-radius:8px;">';
-                    });
-                    $('#saas-edit-gallery-previews').html(html);
-                }
-            } else {
-                $(wrapId).hide();
-                $(extraId).closest('.field').show();
-            }
-
-            var guidance = {
-                button: {
-                    instruction: "Standard Button: Perfect for links to your website, scheduler, or social profiles.",
-                    title: "Button Label", url: "Destination URL", extra: "Description (Optional)",
-                    title_ph: "e.g. Schedule a Call", url_ph: "https://calendly.com/yourname", extra_ph: "Brief sub-text to appear below the label."
-                },
-                video: {
-                    instruction: "Video Block: Paste a link from YouTube or Vimeo. We'll automatically embed the player.",
-                    title: "Video Title", url: "Video URL", extra: "Caption (Optional)",
-                    title_ph: "e.g. Watch my latest Masterclass", url_ph: "https://www.youtube.com/watch?v=...", extra_ph: "A short description of the video content."
-                },
-                testimonial: {
-                    instruction: "Testimonial: Social proof builds trust. Enter the client's quote and use the URL field if you want to link to a case study.",
-                    title: "Client Name / Citation", url: "Link to Proof (Optional)", extra: "The Testimonial / Quote",
-                    title_ph: "e.g. Sarah Jenkins, CEO", url_ph: "https://yourwebsite.com/case-study", extra_ph: "Alex helped me double my revenue in just 90 days! Highly recommended."
-                },
-                faq: {
-                    instruction: "FAQ: Answer common questions before they ask. This block creates a toggleable accordion.",
-                    title: "The Question", url: "Internal Link (Optional)", extra: "The Answer",
-                    title_ph: "e.g. What is included in the Elite package?", url_ph: "#", extra_ph: "The Elite package includes 4 strategy calls, private Slack access, and a custom audit."
-                },
-                pricing: {
-                    instruction: "Pricing Card: Show your offer clearly. Enter features one per line in the Extra Content box.",
-                    title: "Package Title", url: "Checkout / Buy Link", extra: "Price and Features (First line is price, rest are features)",
-                    title_ph: "e.g. Executive Coaching", url_ph: "https://stripe.com/checkout/...", extra_ph: "$2,500/mo\n4 Weekly Calls\nUnlimited Email Support\nFull Business Audit"
-                },
-                image_gallery: {
-                    instruction: "Image Gallery (Pro): Showcase your portfolio. Use the visual selector below to pick multiple images from your library.",
-                    title: "Gallery Title", url: "Gallery View All Link", extra: "Image URLs (Auto-populated)",
-                    title_ph: "e.g. Recent Logo Designs", url_ph: "https://behance.net/yourname", extra_ph: "Visual selector active."
-                },
-                social_icons: {
-                    instruction: "Social Icons: Display a row of icons. Enter platform:url per line (e.g. twitter:https://...).",
-                    title: "Section Heading", url: "Main Profile Link", extra: "Platforms (platform:url per line)",
-                    title_ph: "e.g. Connect with Me", url_ph: "https://linktr.ee/yourname", extra_ph: "twitter:https://twitter.com/...\nlinkedin:https://linkedin.com/in/...\ninstagram:https://instagram.com/..."
-                },
-                newsletter: {
-                    instruction: "Newsletter (Pro): Capture emails directly into your list. Connect Mailchimp in the Sync tab.",
-                    title: "Form Heading", url: "Privacy Policy Link", extra: "Success Message",
-                    title_ph: "e.g. Join my Weekly Newsletter", url_ph: "https://yoursite.com/privacy", extra_ph: "Thanks for joining! Check your inbox for your first issue."
-                },
-                lead_form: {
-                    instruction: "Custom Lead Form: Capture high-intent inquiries. Configure fields in the Settings tab.",
-                    title: "Form Title", url: "Redirect URL (Optional)", extra: "Footer / Disclaimer",
-                    title_ph: "e.g. Request a Quote", url_ph: "https://yoursite.com/thank-you", extra_ph: "We usually respond within 24 hours. No spam, ever."
-                },
-                calendar: {
-                    instruction: "Calendar (Pro): Embed your booking page (Calendly, etc) directly.",
-                    title: "Calendar Title", url: "Booking Page URL", extra: "Instructions",
-                    title_ph: "e.g. Book a Discovery Call", url_ph: "https://calendly.com/yourname/30min", extra_ph: "Please select a time that works best for you. Note: All calls are on Zoom."
-                }
-            };
-
-            var g = guidance[type] || guidance.button;
-            var prefix = isEdit ? 'edit-' : '';
-            $('#' + prefix + 'guidance-text').text(g.instruction);
-            $('#' + prefix + 'label-title').text(g.title);
-            $('#' + prefix + 'label-url').text(g.url);
-            $('#' + prefix + 'label-extra').text(g.extra);
-
-            var $form = isEdit ? $('#saas-edit-link-form') : $('#saas-add-link-form');
-            $form.find('[name="title"]').attr('placeholder', g.title_ph);
-            $form.find('[name="url"]').attr('placeholder', g.url_ph);
-            $form.find('[name="extra"]').attr('placeholder', g.extra_ph);
-        }
-
         // 4. Block Management (Edit/Delete/Clone)
         $(document).on('click', '.edit-link', function() {
             var $li = $(this).closest('li');
             var d = $li.data();
 
-            var type = $li.attr('data-type') || 'button';
             $('#edit-link-id').val($li.attr('data-id'));
             $('#edit-link-title').val($li.find('.link-title').text());
             $('#edit-link-url').val($li.find('.link-url').text());
-            $('#edit-block-type-badge').text(type.toUpperCase().replace('_', ' '));
-
-            updateGuidance(type, true);
 
             // Map data attributes to modal fields
             $('#edit-link-extra').val($li.attr('data-extra'));
@@ -221,13 +128,8 @@
             var imgUrl = $li.find('.btn-thumb').attr('src');
             $('#edit-link-image-preview').html(imgUrl ? '<img src="' + imgUrl + '" style="width:100%; height:100%; object-fit:cover;">' : '');
 
-            // Show Inline instead of Modal
-            $('#saas-edit-inline').slideDown(400, function() {
-                $('html, body').animate({
-                    scrollTop: $(this).offset().top - 120
-                }, 500);
-            });
-
+            $('#saas-edit-modal').css('display', 'flex');
+            $('body').css('overflow', 'hidden');
         });
 
         $(document).on('click', '.delete-link', function() {
@@ -402,27 +304,11 @@
         $('.saas-checkout-btn').on('click', function() {
             var data = {
                 gateway: $(this).data('gateway'),
-                plan_id: $(this).data('plan'),
-                coupon: $('#saas-checkout-coupon').val()
+                plan_id: $(this).data('plan')
             };
             saasFetch('saas_checkout', data, $(this)).done(function(res) {
                 window.location.href = res.redirect_url;
             });
-        });
-
-        $('#saas-apply-checkout-coupon').on('click', function() {
-            var coupon = $('#saas-checkout-coupon').val();
-            if (!coupon) return;
-            var $status = $('#coupon-status');
-            $status.text('Validating...').css('color', '#666');
-
-            saasFetch('saas_apply_coupon', { coupon: coupon }, $(this))
-                .done(function(msg) {
-                    $status.text('✓ ' + msg).css('color', 'var(--secondary)');
-                })
-                .fail(function(err) {
-                    $status.text('✗ ' + err.message).css('color', 'var(--danger)');
-                });
         });
 
         // Affiliate/Support Messaging
@@ -439,7 +325,7 @@
                 $form.find('textarea, input[type="text"]').val('');
                 if($form.closest('.saas-modal').length) {
                     $form.closest('.saas-modal').hide();
-
+                    $('body').css('overflow', 'auto');
                 }
             });
         });
@@ -465,14 +351,10 @@
         });
 
         // 7. Modal Control
-        $(document).on('click', '#saas-domain-guide-trigger', function() {
-            $('#saas-domain-modal').css('display', 'flex');
-        });
-
         $(document).on('click', '.close-modal, .saas-modal', function(e) {
             if (e.target !== this && !$(this).hasClass('close-modal')) return;
             $('.saas-modal').hide();
-
+            $('body').css('overflow', 'auto');
         });
 
         // 8. Advanced Toggle
@@ -518,10 +400,16 @@
             if ($(this).hasClass('pro-locked')) return;
             $('.picker-item').removeClass('active');
             $(this).addClass('active');
-            var type = $(this).attr('data-type');
-            $('#saas-block-type-hidden').val(type);
+            $('#saas-block-type-hidden').val($(this).attr('data-type'));
 
-            updateGuidance(type, false);
+            // Adjust form placeholders based on type
+            var type = $(this).attr('data-type');
+            var $extra = $('#saas-add-link-form [name="extra"]');
+            if (type === 'faq') $extra.attr('placeholder', 'FAQ Answer');
+            else if (type === 'testimonial') $extra.attr('placeholder', 'The Quote');
+            else if (type === 'pricing') $extra.attr('placeholder', 'Price (e.g. $99/mo) and Features (one per line)');
+            else if (type === 'social_icons') $extra.attr('placeholder', 'Platform:URL (e.g. twitter:https://...)');
+            else $extra.attr('placeholder', 'Extra content / Description');
         });
 
         $(document).on('click', '.check-integration', function() {
@@ -541,16 +429,13 @@
 
         // 10. Preview Controls
         $('#saas-preview-trigger').on('click', function() {
-            $('#saas-preview-inline').slideDown(400, function() {
-                $('html, body').animate({
-                    scrollTop: $(this).offset().top - 120
-                }, 500);
-            });
+            $('.saas-preview-pane').addClass('show').fadeIn();
+            $('body').css('overflow', 'hidden');
         });
 
-        $(document).on('click', '.close-inline', function() {
-            var target = $(this).data('target');
-            $('#' + target).slideUp();
+        $('#saas-close-preview').on('click', function() {
+            $('.saas-preview-pane').removeClass('show').fadeOut();
+            $('body').css('overflow', 'auto');
         });
 
         // Media Library Integration
@@ -558,52 +443,31 @@
             e.preventDefault();
             var $btn = $(this);
             var target = $btn.data('target');
-            var isGallery = (target === 'gallery-add' || target === 'gallery-edit');
             var custom_uploader = wp.media({
-                title: isGallery ? 'Select Gallery Images' : 'Select Image',
-                button: { text: isGallery ? 'Add to Gallery' : 'Use Image' },
-                multiple: isGallery
+                title: 'Select Image',
+                button: { text: 'Use Image' },
+                multiple: false
             }).on('select', function() {
-                if (isGallery) {
-                    var selection = custom_uploader.state().get('selection');
-                    var urls = [];
-                    var html = '';
-                    selection.map(function(attachment) {
-                        attachment = attachment.toJSON();
-                        urls.push(attachment.url);
-                        html += '<img src="' + attachment.url + '" style="width:100%; height:60px; object-fit:cover; border-radius:8px;">';
-                    });
-                    var targetPreviews = (target === 'gallery-add') ? '#saas-gallery-previews' : '#saas-edit-gallery-previews';
-                    var targetInput = (target === 'gallery-add') ? '#saas-add-extra-field' : '#edit-link-extra';
-                    $(targetPreviews).html(html);
-                    $(targetInput).val(urls.join('\n'));
-                } else {
-                    var attachment = custom_uploader.state().get('selection').first().toJSON();
-                    if (target === 'profile-image') {
-                        $('#profile-image-id').val(attachment.id);
-                        $('#profile-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
-                        updatePreview('profile_image_update', attachment.url);
-                    } else if (target === 'cover-image') {
-                        $('#cover-image-id').val(attachment.id);
-                        $('#cover-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
-                        updatePreview('cover_update', attachment.url);
-                    } else if (target === 'link-image') {
-                        $('#edit-link-image-id').val(attachment.id);
-                        $('#edit-link-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
-                    }
+                var attachment = custom_uploader.state().get('selection').first().toJSON();
+                if (target === 'profile-image') {
+                    $('#profile-image-id').val(attachment.id);
+                    $('#profile-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                } else if (target === 'cover-image') {
+                    $('#cover-image-id').val(attachment.id);
+                    $('#cover-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
+                } else if (target === 'link-image') {
+                    $('#edit-link-image-id').val(attachment.id);
+                    $('#edit-link-image-preview').html('<img src="' + attachment.url + '" style="width:100%; height:100%; object-fit:cover;">');
                 }
             }).open();
         });
 
         // 10.1 Marketing Material Copy
         $('.copy-html-btn').on('click', function() {
-            var refLink = $('#saas-ref-link').val();
-            var imgHtml = $(this).closest('div').find('img').prop('outerHTML');
-            var fullHtml = '<a href="' + refLink + '">' + imgHtml + '</a>';
-
+            var html = $(this).closest('div').find('img').prop('outerHTML');
             var $temp = $("<input>");
             $("body").append($temp);
-            $temp.val(fullHtml).select();
+            $temp.val(html).select();
             document.execCommand("copy");
             $temp.remove();
             var $btn = $(this);
@@ -672,8 +536,14 @@
         $(document).on('click', '.next-step', function() {
             if (currentStep === 1) {
                 var niche = $('#wizard-niche').val();
-                var suggestions = saas_dashboard_data.templates || {};
-
+                var suggestions = {
+                    'coach': { headline: 'Scaling Founders from 6 to 7 Figures 🚀', bio: 'Certified high-performance coach. I work with CEOs and founders to scale their impact.' },
+                    'freelancer': { headline: 'Visual Identity & Web Experience Design', bio: 'Helping DTC brands stand out through minimalist design and high-converting interfaces.' },
+                    'realtor': { headline: 'Bespoke Advisory for Elite Homeowners', bio: 'Specializing in off-market luxury listings. Member of the Top 0.1% Global Network.' },
+                    'tiktok': { headline: 'Shop My Top Tech & Setup Finds 🛍️', bio: 'Sharing the best tech deals and home office aesthetic finds. Check my links for exclusive discounts!' },
+                    'business': { headline: 'Operational Efficiency for Modern SaaS', bio: 'I help seed-stage startups optimize their unit economics and reduce churn.' },
+                    'luxury': { headline: 'Bespoke Private Advisory', bio: 'Curating exclusive opportunities for the discerning individual.' }
+                };
                 if (suggestions[niche]) {
                     $('#wizard-headline').val(suggestions[niche].headline);
                     $('#wizard-bio').val(suggestions[niche].bio);
@@ -713,31 +583,9 @@
             };
 
             saasFetch('saas_save_profile', data, $btn).done(function() {
-                // After saving info, apply the template for the selected niche, but skip headline/bio overwrite
-                saasFetch('saas_apply_template', { template: niche, profile_id: profileId, skip_meta: 1 }, $btn)
+                // After saving info, apply the template for the selected niche
+                saasFetch('saas_apply_template', { template: niche, profile_id: profileId }, $btn)
                     .done(function() { location.reload(); });
-            });
-        });
-
-        // 12b. Template Search
-        $('#tpl-search').on('keyup', function() {
-            var val = $(this).val().toLowerCase();
-            $('#templates-grid .template-card').each(function() {
-                var text = $(this).find('h4').text().toLowerCase();
-                var id = $(this).find('.apply-template-btn').data('template').toLowerCase();
-                if (text.includes(val) || id.includes(val)) {
-                    $(this).show();
-                    $(this).closest('.templates-category-header').show();
-                } else {
-                    $(this).hide();
-                }
-            });
-
-            // Hide empty category headers
-            $('.templates-category-header').each(function() {
-                var hasVisible = $(this).nextUntil('.templates-category-header', '.template-card:visible').length > 0;
-                if (!hasVisible) $(this).hide();
-                else $(this).show();
             });
         });
 

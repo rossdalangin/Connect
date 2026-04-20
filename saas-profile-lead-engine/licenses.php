@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class Saas_License_Manager {
     public function __construct() {
         add_action( 'wp_ajax_saas_generate_license', [ $this, 'ajax_generate_license' ] );
-        add_action( 'wp_ajax_saas_generate_bulk_licenses', [ $this, 'ajax_generate_bulk_licenses' ] );
         add_action( 'wp_ajax_saas_validate_license', [ $this, 'ajax_validate_license' ] );
     }
 
@@ -86,28 +85,6 @@ class Saas_License_Manager {
         update_post_meta( $license_id, '_saas_license_status', 'used' );
 
         wp_send_json_success( 'License activated! Your account is now ' . strtoupper($plan) );
-    }
-
-    public function ajax_generate_bulk_licenses() {
-        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
-        check_ajax_referer( 'saas_dashboard_nonce', 'security' );
-
-        $count = intval( $_POST['count'] );
-        $plan  = sanitize_text_field( $_POST['plan'] );
-        if ($count > 100) $count = 100;
-
-        for($i=0; $i<$count; $i++) {
-            $key = $this->generate_key();
-            $license_id = wp_insert_post([
-                'post_type'   => 'saas_license',
-                'post_title'  => $key,
-                'post_status' => 'publish',
-            ]);
-            update_post_meta( $license_id, '_saas_license_plan', $plan );
-            update_post_meta( $license_id, '_saas_license_status', 'active' );
-        }
-
-        wp_send_json_success( "$count licenses generated successfully!" );
     }
 }
 new Saas_License_Manager();

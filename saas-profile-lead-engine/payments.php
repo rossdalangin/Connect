@@ -35,20 +35,7 @@ class Saas_Payments {
         $plan = get_user_meta( $user_id, '_saas_subscription_plan', true );
         $expiry = get_user_meta( $user_id, '_saas_subscription_expiry', true );
 
-        if ( in_array($plan, ['pro', 'agency']) && ( ! $expiry || $expiry > time() ) ) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Check if user is on Agency tier
-     */
-    public function is_agency_user( $user_id ) {
-        $plan = get_user_meta( $user_id, '_saas_subscription_plan', true );
-        $expiry = get_user_meta( $user_id, '_saas_subscription_expiry', true );
-
-        if ( $plan === 'agency' && ( ! $expiry || $expiry > time() ) ) {
+        if ( $plan == 'pro' && ( ! $expiry || $expiry > time() ) ) {
             return true;
         }
         return false;
@@ -62,7 +49,6 @@ class Saas_Payments {
 
         $plan_id = sanitize_text_field( $_POST['plan_id'] );
         $gateway = sanitize_text_field( $_POST['gateway'] );
-        $coupon_code = isset($_POST['coupon']) ? strtoupper(sanitize_text_field($_POST['coupon'])) : '';
         $user_id = get_current_user_id();
         $block_id = isset($_POST['block_id']) ? intval($_POST['block_id']) : 0;
 
@@ -75,29 +61,6 @@ class Saas_Payments {
             if (!$amount) $amount = 99.00; // Fallback
         } elseif ($plan_id === 'agency') {
             $amount = 49.00;
-        }
-
-        // Apply Affiliate Coupon Discount
-        $discount_pct = 0;
-        $affiliate_id = 0;
-        if ($coupon_code) {
-            $coupons = get_option('saas_affiliate_coupons') ?: [];
-            foreach ($coupons as $c) {
-                if (strtoupper($c['code']) === $coupon_code) {
-                    $discount_pct = floatval($c['discount']);
-                    $affiliate_id = intval($c['user_id']);
-                    break;
-                }
-            }
-        }
-
-        if ($discount_pct > 0) {
-            $amount = $amount * (1 - ($discount_pct / 100));
-            // If a coupon is used, it sets/overrides the referrer
-            if ($affiliate_id) {
-                update_user_meta($user_id, '_saas_referred_by', $affiliate_id);
-                update_user_meta($user_id, '_saas_active_coupon', $coupon_code);
-            }
         }
 
         if ( $gateway === 'stripe' ) {
@@ -114,9 +77,6 @@ class Saas_Payments {
             ]);
             update_post_meta($order_id, '_saas_order_amount', $amount);
             update_post_meta($order_id, '_saas_order_status', 'pending');
-            update_post_meta($order_id, '_saas_order_plan', $plan_id);
-            update_post_meta($order_id, '_saas_gateway', 'stripe');
-            if($coupon_code) update_post_meta($order_id, '_saas_order_coupon', $coupon_code);
             if ($is_product) {
                 update_post_meta($order_id, '_saas_product_id', $block_id);
                 update_post_meta($order_id, '_saas_customer_id', $user_id);
@@ -126,20 +86,7 @@ class Saas_Payments {
             wp_send_json_success([ 'redirect_url' => $session['url'] . '?order_id=' . $order_id ]);
         } elseif ( $gateway === 'paypal' ) {
             $paypal_email = get_option('saas_paypal_email');
-
-            $order_id = wp_insert_post([
-                'post_type' => 'saas_order',
-                'post_title' => ($is_product ? 'Product Sale: ' : 'Plan Upgrade: ') . $plan_id,
-                'post_status' => 'publish',
-                'post_author' => $is_product ? get_post_field('post_author', $block_id) : $user_id
-            ]);
-            update_post_meta($order_id, '_saas_order_amount', $amount);
-            update_post_meta($order_id, '_saas_order_status', 'pending');
-            update_post_meta($order_id, '_saas_order_plan', $plan_id);
-            update_post_meta($order_id, '_saas_gateway', 'paypal');
-            if($coupon_code) update_post_meta($order_id, '_saas_order_coupon', $coupon_code);
-
-            $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id) . "&amount=" . urlencode($amount) . "&currency_code=USD&custom=" . $order_id . "&return=" . urlencode(home_url('/dashboard?payment=success')) . "&cancel_return=" . urlencode(home_url('/dashboard?payment=cancel'));
+            $paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=" . urlencode($paypal_email) . "&item_name=" . urlencode($plan_id);
             wp_send_json_success([ 'redirect_url' => $paypal_url ]);
         }
 
@@ -177,7 +124,7 @@ class Saas_Payments {
         $order_id = isset($data['order_id']) ? intval($data['order_id']) : 0;
 
         if ( $status === 'succeeded' ) {
-            $amount = ($plan === 'agency') ? 49.00 : 19.00;
+            $amount = 19.00;
             if ($order_id) {
                 update_post_meta($order_id, '_saas_order_status', 'completed');
                 $amount = get_post_meta($order_id, '_saas_order_amount', true) ?: 19.00;
@@ -191,7 +138,7 @@ class Saas_Payments {
                 $referrer_id = get_user_meta($user_id, '_saas_referred_by', true);
                 if ($referrer_id) {
                     $aff = new Saas_Affiliates();
-                    $aff->record_referral_sale($referrer_id, floatval($amount), $order_id);
+                    $aff->record_referral_sale($referrer_id, floatval($amount));
                 }
             }
 

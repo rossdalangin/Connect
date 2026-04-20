@@ -1,21 +1,38 @@
-# 🛠️ ADMIN STRATEGIC MANUAL
-*How to Run and Scale Your Elite SaaS Empire.*
+# Elite Admin Operational Manual 👑
 
-## 1. MISSION: THE HIGH-LEVEL VIEW
-You aren't running a software company. You're running an **Authority Accelerator.** Your job is to ensure every consultant on your platform looks like a world-class expert.
+## 1. Setting Up Your SaaS Empire
 
-## 2. FINANCIAL REVENUE OPERATIONS
-- **Monitor the Pulse:** Check **SaaS Settings > Finances** daily.
-- **Affiliate Obligations:** Payouts are the fuel for your growth. When an affiliate makes you money, pay them fast. It keeps them hungry and loyal.
-- **Net Revenue:** Focus on the gap between gross sales and affiliate payouts. That's your war chest for scaling.
+### Step 1: Core Configuration
+1. Go to **SaaS Settings**.
+2. Upload your brand logo and set the accent color.
+3. **Critical:** Enter your Stripe Secret Key to enable payments.
+4. Click **"Generate System Pages"**. This will create the Home, Login, Register, and Dashboard pages for you.
 
-## 3. THE "ELITE" CONTENT HUB
-- **Templates are Assets:** Don't just set them and forget them. Update the **Templates JSON** in the Content Hub whenever you see a new high-converting trend.
-- **Training is Retention:** Every video in the **Training Academy** reduces churn. If users know how to use the 'Smart Routing', they'll never leave.
-
-## 4. SYSTEM HEALTH & HYGIENE
-- **Run the Health Check:** Before any major promotion, verify the database and analytics tables are ready.
-- **License Strategy:** Use the **License Factory** to create "Golden Tickets." Give them to influencers in exchange for a shoutout. 10 ELITE keys to the right person can bring in 1,000 new users.
+### Step 2: The "Elite Pro" Touch
+1. Click **"Apply Pro Sales Copy"**. This will populate your homepage with world-class marketing copy designed to convert coaches.
+2. In the **Homepage Features** section, you can customize the icons and text of the features grid.
 
 ---
-*Lead with Vision. Manage with Data.*
+
+## 2. Managing Users & Finances
+
+### Financial Dashboard
+- **SaaS Settings > Finances**: This is your nerve center.
+- **Affiliate Payouts**: Review pending requests. Always verify you have paid the affiliate manually before clicking "Mark as PAID."
+- **Customer Orders**: Track your gross revenue and see who is upgrading to Elite Pro.
+
+### User Management
+- The standard **Users** screen has been enhanced with columns for "SaaS Plan" and "Earnings."
+- You can manually upgrade a user to Pro by editing their profile and changing the `_saas_subscription_plan` meta field.
+
+---
+
+## 3. The License Factory
+- **SaaS Settings > Licenses**: Use this to generate unique keys.
+- **Strategy:** Give these keys to influencers in exchange for a shoutout. When they activate the key in their dashboard, they get instant Pro access.
+
+---
+
+## 4. Growth Hacks for Admin
+1. **System Broadcasts:** Use the "System Broadcast" form in settings to send a message to every user's inbox. Use this for new feature announcements or limited-time upgrade offers.
+2. **Sample Data:** Use the "Generate Sample Profiles" button to populate your directory with beautiful examples of what the system can do.

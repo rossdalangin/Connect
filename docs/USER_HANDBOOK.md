@@ -1,25 +1,71 @@
-# 📚 THE ELITE USER HANDBOOK
-*From Zero to Digital Authority in 60 Seconds.*
+# Elite Documentation & Training Manual 📚
 
-## WELCOME TO THE ELITE.
-Most people use "link in bio" tools as digital graveyards. You’ve just secured an **Authority Engine.** This handbook will show you how to turn your traffic into leads and leads into clients.
+## 1. User Onboarding Handbook: "From Register to Results"
 
-## PHASE 1: THE 60-SECOND LAUNCH
-1. **Secure Your Real Estate:** Your URL (yourname) is your brand's digital home. Claim it before someone else does.
-2. **The Wizard's Secret:** Select your niche. Let the AI build your initial bio and headline. It’s designed by expert copywriters to convert, not just describe.
-3. **Template Magic:** Applying a niche template instantly populates your page with high-converting blocks.
+### Step 1: Claim Your Digital Identity
+- Visit `/register` and pick your unique URL.
+- **Pro Tip:** Keep it simple—your name or your brand name works best.
 
-## PHASE 2: CUSTOMIZING YOUR FUNNEL
-- **The "Featured" Pulse:** Use the 'Featured' style for your #1 offer. The subtle pulse draws the eye and increases clicks by up to 2x.
-- **Lead Capture is King:** Always have a Lead Form block. Capturing an email is 10x more valuable than a click to a website.
-- **Smart Routing (Pro):** Send iPhone users to the App Store and Android users to the Play Store automatically. It removes friction and boosts sales.
+### Step 2: The Magic Wizard 🧙‍♂️
+- Upon first login, the Setup Wizard will appear.
+- Select your niche (Coach, Realtor, etc.).
+- The system will automatically suggest a headline and bio that converts.
+- **Action:** Review and click "Finish" to auto-apply your niche template.
 
-## PHASE 3: THE VIBE (Branding)
-- **Luxury Mode:** If you sell high-ticket services, use the "Luxury" theme. It uses premium typography and radial gradients to build instant authority.
-- **Verified Badge:** Toggle the "Verified Checkmark" to build immediate trust with new visitors.
+### Step 3: Customizing Your Blocks
+- Go to the **Blocks** tab.
+- Drag and drop your links to reorder them.
+- Click the ✏️ icon on any block to add A/B testing variants or scheduled visibility.
 
-## PHASE 4: THE EARN TAB
-Don't just use the software—own a piece of the growth. Share your referral link. Earn **30% recurring commission** for life. Your software can pay for itself (and your car) just by helping your fellow consultants.
+### Step 4: Dialing in the Vibe 🎨
+- Use the **Vibe** tab to pick a theme.
+- **Consultant's Secret:** Use the "Luxury" theme if you sell high-ticket services ($2k+).
+
+### Step 5: Going Live
+- Click **Copy Link** and paste it into your Instagram, TikTok, and LinkedIn bios.
 
 ---
-*Stop Listing. Start Selling. Join the Elite.*
+
+## 2. Admin Operational Manual
+*For the SaaS Founder.*
+
+### Financial Oversight
+- Navigate to **SaaS Settings > Finances**.
+- Review "Customer Orders" to see your monthly recurring revenue (MRR).
+- In the "Payouts" tab, process affiliate requests once they hit the $50 threshold.
+
+### System Health & Branding
+- Use **Global Settings** to change the logo and main brand colors of the entire platform.
+- The **Homepage Content Editor** allows you to update the VSL script, testimonials, and FAQ without touching code.
+
+### License Management
+- Go to **SaaS Settings > Licenses**.
+- Generate "ELITE" keys to give to influencers or as bonuses during sales calls.
+
+---
+
+## 3. Video Tutorial Scripts (Detailed)
+
+### Tutorial 1: "The 60-Second Launch" (Fast-Paced)
+1. **Hook:** "Watch me build a high-converting consultant funnel in under 60 seconds."
+2. **Action:** Screen record the registration, the wizard selection, and then viewing the live profile.
+3. **Closing:** "Stop listing. Start selling. Claim your URL now."
+
+### Tutorial 2: "Deep Dive: Advanced Funnel Features" (8 Minutes)
+1. **Intro:** "Hey everyone, today I'm showing you how to use A/B testing and Smart Routing to optimize your traffic."
+2. **Walkthrough:**
+   - Setting up a Variant B for a "Book Now" button.
+   - Showing how Mobile users can see a different link than Desktop users.
+   - Explaining the "Hour Range" visibility for limited-time offers.
+3. **Closing:** "These are the features that separate the amateurs from the elite."
+
+---
+
+## 4. Technical Setup Instructions (For Developers)
+1. **Infrastructure:** Recommended LiteSpeed server with PHP 7.4+.
+2. **Activation:**
+   - Upload the plugin and theme.
+   - Activate the plugin first.
+   - Go to **SaaS Settings** and click **"Generate System Pages"**.
+   - Click **"Apply Pro Sales Copy"** to populate the homepage.
+3. **Payments:** Enter your Stripe Secret Key in the settings to enable checkouts.

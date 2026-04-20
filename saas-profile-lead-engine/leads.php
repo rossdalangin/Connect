@@ -94,47 +94,43 @@ function saas_ajax_submit_lead() {
             ]);
         }
 
-        // 4. Send Emails via Dynamic Templates
-        $templates = get_option('saas_email_templates');
-        $replacements = [
-            '{name}'          => $name,
-            '{email}'         => $email,
-            '{profile_title}' => get_the_title($profile_id),
-            '{dashboard_url}' => home_url('/dashboard'),
-            '{site_name}'     => get_bloginfo('name')
-        ];
+        // Email Notification
+        $owner_email = get_the_author_meta('user_email', $owner_id);
+        $subject = "🚀 New Lead Captured: $name";
 
         $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+        $body = "
+            <div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #eee; border-radius:12px;'>
+                <h2 style='color:#6c5ce7;'>You've got a new lead!</h2>
+                <p>A new visitor just submitted a form on your SaaS profile.</p>
+                <hr style='border:0; border-top:1px solid #eee;'>
+                <p><strong>Name:</strong> $name</p>
+                <p><strong>Email:</strong> <a href='mailto:$email'>$email</a></p>
+                <p><strong>Captured via:</strong> " . get_the_title($profile_id) . "</p>
+                <hr style='border:0; border-top:1px solid #eee;'>
+                <p><a href='" . home_url('/dashboard') . "' style='background:#6c5ce7; color:#fff; padding:10px 20px; text-decoration:none; border-radius:6px; display:inline-block;'>View in Dashboard</a></p>
+                <p style='font-size:0.8rem; color:#999; margin-top:30px;'>Sent automatically by your SaaS platform.</p>
+            </div>
+        ";
+        wp_mail($owner_email, $subject, $body, $headers);
 
-        // A. Admin/Owner Notification
-        $owner_email = get_the_author_meta('user_email', $owner_id);
-        $tpl_admin   = $templates['new_lead_admin'] ?? [
-            'subject' => '🚀 New Lead Captured: {name}',
-            'body'    => "<h2>You've got a new lead!</h2><p><strong>Name:</strong> {name}<br><strong>Email:</strong> {email}<br><strong>Source:</strong> {profile_title}</p><p><a href='{dashboard_url}'>View in Dashboard</a></p>"
-        ];
-
-        $admin_subject = str_replace(array_keys($replacements), array_values($replacements), $tpl_admin['subject']);
-        $admin_body    = str_replace(array_keys($replacements), array_values($replacements), $tpl_admin['body']);
-        wp_mail($owner_email, $admin_subject, $admin_body, $headers);
-
-        // B. Elite Pro Auto-responder to Lead
+        // Elite Pro Auto-responder to Lead
         $auto_respond = get_post_meta($profile_id, '_saas_lead_auto_respond', true);
         if ($auto_respond) {
-            $tpl_lead = $templates['lead_autoresponder'] ?? [
-                'subject' => 'Re: Your inquiry to {profile_title}',
-                'body'    => "Hi {name},<br><br>Thank you for reaching out! I've received your inquiry and will get back to you shortly.<br><br>Best,<br>{profile_title}"
-            ];
-
-            $lead_subject = str_replace(array_keys($replacements), array_values($replacements), $tpl_lead['subject']);
-            $lead_body    = str_replace(array_keys($replacements), array_values($replacements), $tpl_lead['body']);
-
-            // Allow per-profile custom auto-msg if set, otherwise use global template
-            $custom_msg = get_post_meta($profile_id, '_saas_lead_auto_msg', true);
-            if ($custom_msg) {
-                $lead_body = "Hi $name,<br><br>" . wpautop($custom_msg) . "<br><br>Best,<br>" . get_the_title($profile_id);
+            $auto_msg = get_post_meta($profile_id, '_saas_lead_auto_msg', true);
+            if ($auto_msg) {
+                $owner_name = get_the_title($profile_id);
+                $resp_subject = "RE: Your inquiry to $owner_name";
+                $resp_body = "
+                    <div style='font-family:sans-serif; max-width:600px; padding:20px; border-radius:12px; border:1px solid #eee;'>
+                        <p>Hi $name,</p>
+                        " . wpautop($auto_msg) . "
+                        <hr style='border:0; border-top:1px solid #eee; margin:20px 0;'>
+                        <p><small>Sent via $owner_name's digital profile.</small></p>
+                    </div>
+                ";
+                wp_mail($email, $resp_subject, $resp_body, $headers);
             }
-
-            wp_mail($email, $lead_subject, $lead_body, $headers);
         }
 
         // Lead Magnet Delivery (Simulated)

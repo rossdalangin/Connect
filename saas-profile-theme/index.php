@@ -46,7 +46,6 @@ $meta = saas_get_profile_meta( $profile_id );
 
 // Check Pro Status (Unified License Check)
 $is_pro = saas_is_profile_licensed($profile_id);
-$is_preview = isset($_GET['preview']) && $_GET['preview'] == '1';
 $bg_type = get_post_meta( $profile_id, '_saas_bg_type', true ) ?: 'flat';
 $bg_color = get_post_meta( $profile_id, '_saas_bg_color', true ) ?: '#f3f3f1';
 $gradient = get_post_meta( $profile_id, '_saas_bg_gradient', true );
@@ -88,12 +87,6 @@ include __DIR__ . '/header.php';
             else echo 'none';
         ?>;
     }
-    .btn-text-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; }
-    .btn-desc { font-size: 0.8rem; opacity: 0.8; margin-top: 4px; display: block; }
-    .testimonial-block { padding: 30px; background: #fff; border-radius: var(--btn-radius); box-shadow: var(--shadow-style); text-align: center; position: relative; transition: transform 0.3s; border: 1px solid rgba(0,0,0,0.05); }
-    .testimonial-block:hover { transform: translateY(-5px); }
-    .testimonial-link { display: inline-block; margin-top: 15px; color: var(--primary-color); font-weight: 700; text-decoration: none; font-size: 0.9rem; border-bottom: 2px solid transparent; transition: border-color 0.2s; }
-    .testimonial-link:hover { border-color: var(--primary-color); }
     <?php
     $custom_css = get_post_meta($profile_id, '_saas_custom_css', true);
     if ($is_pro && $custom_css) echo $custom_css;
@@ -150,9 +143,9 @@ include __DIR__ . '/header.php';
         <?php foreach ( $blocks as $index => $block ) :
             $type = get_post_meta( $block->ID, '_saas_block_type', true ) ?: 'button';
 
-            // Pro Gating Check - Relaxed for display to ensure consistency
-            // Gating is handled at the creation level
+            // Pro Gating Check
             $pro_blocks = ['image_gallery', 'newsletter', 'product', 'calendar'];
+            if (in_array($type, $pro_blocks) && !$is_pro) continue;
 
             $style = get_post_meta( $block->ID, '_saas_block_style', true ) ?: 'regular';
             $animation = get_post_meta($block->ID, '_saas_block_animation', true) ?: 'fadeinup';
@@ -164,22 +157,20 @@ include __DIR__ . '/header.php';
             if ($custom_bg) $block_style_attr .= "background-color: $custom_bg; ";
             if ($custom_text) $block_style_attr .= "color: $custom_text; ";
 
-            if (!$is_preview) {
-                // Scheduling Check
-                $start_date = get_post_meta($block->ID, '_saas_start_date', true);
-                $end_date = get_post_meta($block->ID, '_saas_end_date', true);
-                $now = time();
-                if ($start_date && strtotime($start_date) > $now) continue;
-                if ($end_date && strtotime($end_date) < $now) continue;
+            // Scheduling Check
+            $start_date = get_post_meta($block->ID, '_saas_start_date', true);
+            $end_date = get_post_meta($block->ID, '_saas_end_date', true);
+            $now = time();
+            if ($start_date && strtotime($start_date) > $now) continue;
+            if ($end_date && strtotime($end_date) < $now) continue;
 
-                // Hour-based scheduling
-                $hour_from = get_post_meta($block->ID, '_saas_hour_from', true);
-                $hour_to   = get_post_meta($block->ID, '_saas_hour_to', true);
-                if ($is_pro && ($hour_from !== '' || $hour_to !== '')) {
-                    $current_hour = (int) current_time('G');
-                    if ($hour_from !== '' && $current_hour < (int)$hour_from) continue;
-                    if ($hour_to !== '' && $current_hour > (int)$hour_to) continue;
-                }
+            // Hour-based scheduling
+            $hour_from = get_post_meta($block->ID, '_saas_hour_from', true);
+            $hour_to   = get_post_meta($block->ID, '_saas_hour_to', true);
+            if ($is_pro && ($hour_from !== '' || $hour_to !== '')) {
+                $current_hour = (int) current_time('G');
+                if ($hour_from !== '' && $current_hour < (int)$hour_from) continue;
+                if ($hour_to !== '' && $current_hour > (int)$hour_to) continue;
             }
             ?>
             <div class="saas-block block-<?php echo esc_attr($type); ?> style-<?php echo esc_attr($style); ?> animate-<?php echo esc_attr($animation); ?>" data-block-id="<?php echo $block->ID; ?>" style="animation-delay: <?php echo $index * 0.1; ?>s; <?php echo $block_style_attr; ?>">
@@ -217,14 +208,7 @@ include __DIR__ . '/header.php';
                         if ($thumb_id) : ?>
                             <img src="<?php echo esc_url(wp_get_attachment_thumb_url($thumb_id)); ?>" class="btn-thumb">
                         <?php endif; ?>
-                        <div class="btn-text-wrapper">
-                            <span class="btn-label"><?php echo esc_html( $block->post_title ); ?> <?php if($has_pass) echo '🔒'; ?></span>
-                            <?php
-                            $btn_desc = get_post_meta($block->ID, '_saas_link_desc', true);
-                            if ($btn_desc) : ?>
-                                <small class="btn-desc"><?php echo esc_html($btn_desc); ?></small>
-                            <?php endif; ?>
-                        </div>
+                        <span class="btn-label"><?php echo esc_html( $block->post_title ); ?> <?php if($has_pass) echo '🔒'; ?></span>
                     </a>
                 <?php elseif ($type === 'video') : ?>
                     <div class="video-embed">
@@ -232,11 +216,8 @@ include __DIR__ . '/header.php';
                     </div>
                 <?php elseif ($type === 'testimonial') : ?>
                     <div class="testimonial-block">
-                        <p class="quote" style="font-size: 1.15rem; line-height: 1.7; font-style: italic; color: #334155;">"<?php echo esc_html( get_post_meta($block->ID, '_saas_testimonial_text', true) ); ?>"</p>
-                        <cite style="display: block; margin-top: 20px; font-weight: 900; color: #0f172a; font-style: normal; font-size: 1.1rem;">— <?php echo esc_html( $block->post_title ); ?></cite>
-                        <?php if ($url && $url !== '#') : ?>
-                            <a href="<?php echo esc_url($url); ?>" class="testimonial-link" target="_blank">View Case Study ↗</a>
-                        <?php endif; ?>
+                        <p class="quote">"<?php echo esc_html( get_post_meta($block->ID, '_saas_testimonial_text', true) ); ?>"</p>
+                        <cite>- <?php echo esc_html( $block->post_title ); ?></cite>
                     </div>
                 <?php elseif ($type === 'faq') : ?>
                     <details class="faq-block">
@@ -357,10 +338,6 @@ include __DIR__ . '/header.php';
                             <?php endif; ?>
                             <button type="submit">Submit Request</button>
                         </form>
-                        <?php
-                        $footer = get_post_meta($block->ID, '_saas_link_desc', true);
-                        if ($footer) echo '<p class="field-hint" style="text-align:center; margin-top:15px; opacity:0.7;">' . esc_html($footer) . '</p>';
-                        ?>
                         <div class="lead-feedback"></div>
                     </section>
                 <?php endif; ?>
@@ -439,7 +416,7 @@ include __DIR__ . '/header.php';
     $hide_branding = get_post_meta($profile_id, '_saas_hide_branding', true);
     $footer_text   = get_post_meta($profile_id, '_saas_footer_text', true);
 
-    if ($is_pro) : ?>
+    if ($is_pro && $hide_branding) : ?>
         <div class="saas-growth-branding" style="margin-top:40px; padding-bottom:120px; opacity:0.6; font-size:0.8rem;">
             <?php echo esc_html($footer_text ?: ''); ?>
         </div>
@@ -661,23 +638,7 @@ window.addEventListener('message', function(event) {
     if (event.data.type === 'live_update') {
         const { key, value } = event.data;
         if (key === 'cover_update') {
-            const coverCont = document.querySelector('.profile-cover');
-            if (coverCont) {
-                const img = coverCont.querySelector('img');
-                if (img) img.src = value;
-                else coverCont.innerHTML = `<img src="${value}" style="width:100%; height:100%; object-fit:cover;">`;
-            } else {
-                const header = document.querySelector('.profile-header');
-                const newCover = document.createElement('div');
-                newCover.className = 'profile-cover';
-                newCover.innerHTML = `<img src="${value}" style="width:100%; height:100%; object-fit:cover;">`;
-                header.parentNode.insertBefore(newCover, header);
-                header.classList.add('has-cover');
-            }
-        }
-        if (key === 'profile_image_update') {
-            const img = document.querySelector('.profile-header img');
-            if (img) img.src = value;
+            location.reload(); // Hard refresh for new images in preview
         }
         if (key === 'headline') document.querySelector('.profile-header h1').innerText = value;
         if (key === 'bio') document.querySelector('.profile-header .bio').innerText = value;
