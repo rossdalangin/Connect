@@ -42,14 +42,21 @@ function saas_ajax_add_link() {
     $style = isset($_POST['block_style']) ? sanitize_text_field( $_POST['block_style'] ) : 'regular';
     $animation = isset($_POST['block_animation']) ? sanitize_text_field( $_POST['block_animation'] ) : 'fadeinup';
 
+    // Pro-tier Block Enforcement
+    $pro_only_blocks = ['image_gallery', 'newsletter', 'calendar', 'countdown', 'product'];
+    $payments = new Saas_Payments();
+    if (in_array($type, $pro_only_blocks) && !$payments->is_pro_user(get_current_user_id())) {
+        wp_send_json_error('This block type is reserved for Elite Pro or Agency users.');
+    }
+
     // Verify ownership of the target profile
     $profile = get_post($profile_id);
     if (!$profile || $profile->post_author != get_current_user_id()) {
         wp_send_json_error('Unauthorized profile access');
     }
 
-    if ( empty( $title ) || empty( $url ) ) {
-        wp_send_json_error( 'Missing fields' );
+    if ( empty( $title ) ) {
+        wp_send_json_error( 'Missing title' );
     }
 
     $link_id = wp_insert_post([
@@ -67,21 +74,26 @@ function saas_ajax_add_link() {
         update_post_meta( $link_id, '_saas_link_url', $url );
 
         // Extended meta for complex blocks
-        if ($type === 'testimonial' && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($_POST['extra']));
-        } elseif ($type === 'faq' && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($_POST['extra']));
-        } elseif (($type === 'pricing' || $type === 'product') && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_price', sanitize_text_field($_POST['extra']));
-            if ($type === 'pricing') {
-                update_post_meta($link_id, '_saas_features', ['Premium Support', 'Unlimited Links', 'No Branding']);
+        $extra = isset($_POST['extra']) ? $_POST['extra'] : '';
+        if ($type === 'button') {
+            update_post_meta($link_id, '_saas_link_desc', sanitize_textarea_field($extra));
+        } elseif ($type === 'testimonial') {
+            update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($extra));
+        } elseif ($type === 'faq') {
+            update_post_meta($link_id, '_saas_faq_answer', sanitize_textarea_field($extra));
+        } elseif ($type === 'pricing' || $type === 'product') {
+            $lines = array_filter(array_map('trim', explode("\n", $extra)));
+            if (!empty($lines)) {
+                update_post_meta($link_id, '_saas_price', $lines[0]);
+                if ($type === 'pricing') {
+                    update_post_meta($link_id, '_saas_features', array_slice($lines, 1));
+                }
             }
-        } elseif ($type === 'image_gallery' && isset($_POST['extra'])) {
-            $urls = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
+        } elseif ($type === 'image_gallery') {
+            $urls = array_filter(array_map('trim', explode("\n", $extra)));
             update_post_meta($link_id, '_saas_gallery_images', $urls);
-        } elseif ($type === 'social_icons' && isset($_POST['extra'])) {
-            // extra: platform:url newline separated
-            $lines = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
+        } elseif ($type === 'social_icons') {
+            $lines = array_filter(array_map('trim', explode("\n", $extra)));
             $data = [];
             foreach ($lines as $l) {
                 if (strpos($l, ':') !== false) {
@@ -90,11 +102,11 @@ function saas_ajax_add_link() {
                 }
             }
             update_post_meta($link_id, '_saas_social_data', $data);
-        } elseif ($type === 'countdown' && isset($_POST['extra'])) {
-            update_post_meta($link_id, '_saas_expiry', sanitize_text_field($_POST['extra']));
-        } elseif ($type === 'milestone' && isset($_POST['extra'])) {
-            if (strpos($_POST['extra'], ':') !== false) {
-                list($lbl, $per) = explode(':', $_POST['extra'], 2);
+        } elseif ($type === 'countdown') {
+            update_post_meta($link_id, '_saas_expiry', sanitize_text_field($extra));
+        } elseif ($type === 'milestone') {
+            if (strpos($extra, ':') !== false) {
+                list($lbl, $per) = explode(':', $extra, 2);
                 update_post_meta($link_id, '_saas_ms_label', sanitize_text_field($lbl));
                 update_post_meta($link_id, '_saas_ms_percent', intval($per));
             }
@@ -123,17 +135,27 @@ function saas_ajax_save_profile() {
 
     // IDENTITY & PROFILE CONTEXT
     if ($context === 'profile') {
+        $payments = new Saas_Payments();
+        $is_pro = $payments->is_pro_user($user_id);
+
         if (isset($_POST['headline'])) update_post_meta($profile_id, '_saas_headline', sanitize_text_field($_POST['headline']));
         if (isset($_POST['bio'])) update_post_meta($profile_id, '_saas_bio', sanitize_textarea_field($_POST['bio']));
         if (isset($_POST['niche'])) update_post_meta($profile_id, '_saas_niche', sanitize_text_field($_POST['niche']));
         if (isset($_POST['phone'])) update_post_meta($profile_id, '_saas_phone', sanitize_text_field($_POST['phone']));
         if (isset($_POST['company'])) update_post_meta($profile_id, '_saas_company', sanitize_text_field($_POST['company']));
-        if (isset($_POST['custom_domain'])) update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
+
+        if ($is_pro) {
+            if (isset($_POST['custom_domain'])) update_post_meta($profile_id, '_saas_custom_domain', sanitize_text_field($_POST['custom_domain']));
+            if (isset($_POST['profile_password'])) update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
+            update_post_meta($profile_id, '_saas_verified_badge', isset($_POST['verified_badge']) ? '1' : '0');
+        } else {
+            // Force disable pro-only fields for free users
+            update_post_meta($profile_id, '_saas_verified_badge', '0');
+            delete_post_meta($profile_id, '_saas_custom_domain');
+            delete_post_meta($profile_id, '_saas_profile_password');
+        }
 
         update_post_meta($profile_id, '_saas_show_in_directory', isset($_POST['show_in_directory']) ? '1' : '0');
-        update_post_meta($profile_id, '_saas_verified_badge', isset($_POST['verified_badge']) ? '1' : '0');
-
-        if (isset($_POST['profile_password'])) update_post_meta($profile_id, '_saas_profile_password', sanitize_text_field($_POST['profile_password']));
         if (isset($_POST['profile_image_id'])) set_post_thumbnail($profile_id, intval($_POST['profile_image_id']));
         if (isset($_POST['cover_image_id'])) update_post_meta($profile_id, '_saas_cover_id', intval($_POST['cover_image_id']));
 
@@ -149,23 +171,39 @@ function saas_ajax_save_profile() {
 
     // BRANDING CONTEXT
     if ($context === 'branding') {
+        $payments = new Saas_Payments();
+        $is_pro = $payments->is_pro_user($user_id);
+
         if (isset($_POST['theme_color'])) update_post_meta($profile_id, '_saas_theme_color', sanitize_hex_color($_POST['theme_color']));
         if (isset($_POST['profile_theme'])) update_post_meta($profile_id, '_saas_profile_theme', sanitize_text_field($_POST['profile_theme']));
         if (isset($_POST['font_family'])) update_post_meta($profile_id, '_saas_font_family', sanitize_text_field($_POST['font_family']));
         if (isset($_POST['container_shadow'])) update_post_meta($profile_id, '_saas_container_shadow', sanitize_text_field($_POST['container_shadow']));
         if (isset($_POST['btn_shape'])) update_post_meta($profile_id, '_saas_btn_shape', sanitize_text_field($_POST['btn_shape']));
-        if (isset($_POST['custom_css'])) update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
+
+        if ($is_pro) {
+            if (isset($_POST['custom_css'])) update_post_meta($profile_id, '_saas_custom_css', $_POST['custom_css']);
+            update_post_meta($profile_id, '_saas_hide_branding', isset($_POST['hide_branding']) ? '1' : '0');
+        } else {
+            // Force disable pro-only styles for free users
+            delete_post_meta($profile_id, '_saas_custom_css');
+            update_post_meta($profile_id, '_saas_hide_branding', '0');
+        }
 
         if (isset($_POST['bg_type'])) {
             $bg_type = sanitize_text_field( $_POST['bg_type'] );
             $bg_val  = sanitize_text_field( $_POST['bg_value'] );
+
+            // Premium background gating
+            if (!$is_pro && in_array($bg_type, ['mesh', 'particles'])) {
+                $bg_type = 'flat';
+            }
+
             update_post_meta($profile_id, '_saas_bg_type', $bg_type );
             if ($bg_type === 'gradient') update_post_meta($profile_id, '_saas_bg_gradient', $bg_val );
             else update_post_meta($profile_id, '_saas_bg_color', $bg_val );
         }
 
         update_post_meta($profile_id, '_saas_social_proof', isset($_POST['social_proof']) ? '1' : '0');
-        update_post_meta($profile_id, '_saas_hide_branding', isset($_POST['hide_branding']) ? '1' : '0');
     }
 
     // QR CONTEXT
@@ -175,9 +213,16 @@ function saas_ajax_save_profile() {
 
     // AUTOMATION CONTEXT
     if ($context === 'automation') {
+        $payments = new Saas_Payments();
         if (isset($_POST['lead_magnet_url'])) update_post_meta($profile_id, '_saas_lead_magnet_url', esc_url_raw($_POST['lead_magnet_url']));
         if (isset($_POST['lead_redirect'])) update_post_meta($profile_id, '_saas_lead_redirect', esc_url_raw($_POST['lead_redirect']));
-        if (isset($_POST['lead_webhook'])) update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
+
+        if ($payments->is_agency_user($user_id)) {
+            if (isset($_POST['lead_webhook'])) update_post_meta($profile_id, '_saas_lead_webhook', esc_url_raw($_POST['lead_webhook']));
+        } else {
+            delete_post_meta($profile_id, '_saas_lead_webhook');
+        }
+
         if (isset($_POST['lead_success_msg'])) update_post_meta($profile_id, '_saas_lead_success_msg', sanitize_text_field($_POST['lead_success_msg']));
 
         update_post_meta($profile_id, '_saas_form_phone', isset($_POST['form_field_phone']) ? '1' : '0');
@@ -201,9 +246,17 @@ function saas_ajax_save_profile() {
 
     // SEO CONTEXT
     if ($context === 'seo' || $context === 'all') {
+        $payments = new Saas_Payments();
+        $is_pro = $payments->is_pro_user($user_id);
+
         if (isset($_POST['meta_title'])) update_post_meta($profile_id, '_saas_seo_title', sanitize_text_field($_POST['meta_title']));
         if (isset($_POST['meta_desc'])) update_post_meta($profile_id, '_saas_seo_desc', sanitize_textarea_field($_POST['meta_desc']));
-        if (isset($_POST['favicon'])) update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
+
+        if ($is_pro) {
+            if (isset($_POST['favicon'])) update_post_meta($profile_id, '_saas_favicon', esc_url_raw($_POST['favicon']));
+        } else {
+            delete_post_meta($profile_id, '_saas_favicon');
+        }
     }
 
     // INTEGRATIONS CONTEXT
@@ -215,8 +268,14 @@ function saas_ajax_save_profile() {
 
     // TRACKING CONTEXT
     if ($context === 'tracking' || $context === 'all') {
-        if (isset($_POST['header_scripts'])) update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
-        if (isset($_POST['footer_scripts'])) update_post_meta($profile_id, '_saas_footer_scripts', $_POST['footer_scripts']);
+        $payments = new Saas_Payments();
+        if ($payments->is_pro_user($user_id)) {
+            if (isset($_POST['header_scripts'])) update_post_meta($profile_id, '_saas_header_scripts', $_POST['header_scripts']);
+            if (isset($_POST['footer_scripts'])) update_post_meta($profile_id, '_saas_footer_scripts', $_POST['footer_scripts']);
+        } else {
+            delete_post_meta($profile_id, '_saas_header_scripts');
+            delete_post_meta($profile_id, '_saas_footer_scripts');
+        }
     }
 
     wp_send_json_success( 'Data saved successfully!' );
@@ -294,27 +353,44 @@ function saas_ajax_save_link() {
     if (isset($_POST['custom_bg'])) update_post_meta($link_id, '_saas_custom_bg', sanitize_hex_color($_POST['custom_bg']));
     if (isset($_POST['custom_text'])) update_post_meta($link_id, '_saas_custom_text', sanitize_hex_color($_POST['custom_text']));
 
-    if (isset($_POST['url_mobile'])) update_post_meta($link_id, '_saas_url_mobile', esc_url_raw($_POST['url_mobile']));
-    if (isset($_POST['url_geo'])) update_post_meta($link_id, '_saas_url_geo', esc_url_raw($_POST['url_geo']));
-    if (isset($_POST['url_geo_country'])) update_post_meta($link_id, '_saas_url_geo_country', sanitize_text_field($_POST['url_geo_country']));
-    if (isset($_POST['link_password'])) update_post_meta($link_id, '_saas_link_password', sanitize_text_field($_POST['link_password']));
+    $payments = new Saas_Payments();
+    $is_pro = $payments->is_pro_user(get_current_user_id());
+
+    if ($is_pro) {
+        if (isset($_POST['url_mobile'])) update_post_meta($link_id, '_saas_url_mobile', esc_url_raw($_POST['url_mobile']));
+        if (isset($_POST['url_geo'])) update_post_meta($link_id, '_saas_url_geo', esc_url_raw($_POST['url_geo']));
+        if (isset($_POST['url_geo_country'])) update_post_meta($link_id, '_saas_url_geo_country', sanitize_text_field($_POST['url_geo_country']));
+        if (isset($_POST['link_password'])) update_post_meta($link_id, '_saas_link_password', sanitize_text_field($_POST['link_password']));
+        if (isset($_POST['ab_title_b'])) update_post_meta($link_id, '_saas_ab_title_b', sanitize_text_field($_POST['ab_title_b']));
+        if (isset($_POST['ab_url_b'])) update_post_meta($link_id, '_saas_ab_url_b', esc_url_raw($_POST['ab_url_b']));
+    } else {
+        // Clear pro meta if not pro
+        delete_post_meta($link_id, '_saas_url_mobile');
+        delete_post_meta($link_id, '_saas_url_geo');
+        delete_post_meta($link_id, '_saas_url_geo_country');
+        delete_post_meta($link_id, '_saas_link_password');
+        delete_post_meta($link_id, '_saas_ab_title_b');
+        delete_post_meta($link_id, '_saas_ab_url_b');
+    }
+
     if (isset($_POST['block_style'])) update_post_meta($link_id, '_saas_block_style', sanitize_text_field($_POST['block_style']));
     if (isset($_POST['block_animation'])) update_post_meta($link_id, '_saas_block_animation', sanitize_text_field($_POST['block_animation']));
     if (isset($_POST['link_image_id'])) update_post_meta($link_id, '_saas_link_image_id', intval($_POST['link_image_id']));
-    if (isset($_POST['ab_title_b'])) update_post_meta($link_id, '_saas_ab_title_b', sanitize_text_field($_POST['ab_title_b']));
-    if (isset($_POST['ab_url_b'])) update_post_meta($link_id, '_saas_ab_url_b', esc_url_raw($_POST['ab_url_b']));
     if (isset($_POST['hour_from'])) update_post_meta($link_id, '_saas_hour_from', sanitize_text_field($_POST['hour_from']));
     if (isset($_POST['hour_to'])) update_post_meta($link_id, '_saas_hour_to', sanitize_text_field($_POST['hour_to']));
 
     // Determine meta key based on type
     $type = get_post_meta( $link_id, '_saas_block_type', true );
-    if ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
+    if ($type === 'button' || $type === 'lead_form') update_post_meta($link_id, '_saas_link_desc', $extra);
+    elseif ($type === 'testimonial') update_post_meta($link_id, '_saas_testimonial_text', $extra);
     elseif ($type === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
     elseif ($type === 'pricing' || $type === 'product') {
-        update_post_meta($link_id, '_saas_price', $extra);
-        if ($type === 'pricing') {
-            $features = array_filter(array_map('trim', explode("\n", $_POST['extra'])));
-            update_post_meta($link_id, '_saas_features', $features);
+        $lines = array_filter(array_map('trim', explode("\n", $extra)));
+        if (!empty($lines)) {
+            update_post_meta($link_id, '_saas_price', $lines[0]);
+            if ($type === 'pricing') {
+                update_post_meta($link_id, '_saas_features', array_slice($lines, 1));
+            }
         }
     }
     elseif ($type === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
@@ -336,6 +412,10 @@ function saas_ajax_save_link() {
         }
         update_post_meta($link_id, '_saas_social_data', $data);
     }
+    elseif ($type === 'image_gallery') {
+        $urls = array_filter(array_map('trim', explode("\n", $extra)));
+        update_post_meta($link_id, '_saas_gallery_images', $urls);
+    }
 
     wp_send_json_success( 'Link updated' );
 }
@@ -348,6 +428,7 @@ function saas_ajax_apply_template() {
     $template = sanitize_text_field( $_POST['template'] );
     $user_id = get_current_user_id();
     $profile_id = isset($_POST['profile_id']) ? intval($_POST['profile_id']) : 0;
+    $skip_meta = isset($_POST['skip_meta']) && $_POST['skip_meta'] == '1';
 
     // Verify profile ownership
     if ($profile_id) {
@@ -369,131 +450,26 @@ function saas_ajax_apply_template() {
         foreach ($old_blocks as $ob) wp_delete_post($ob->ID, true);
     }
 
-    // 2. Define Template Sets
-    $sets = [
-        'coach' => [
-            'headline' => 'Helping you double your revenue in 90 days.',
-            'bio' => 'Certified high-performance coach. I work with CEOs and founders to scale their impact.',
-            'color' => '#6c5ce7',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => '👉 Free Strategy Session', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Watch Case Study', 'url' => 'https://youtube.com', 'type' => 'video'],
-                ['title' => 'Client Success', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Alex helped me double my revenue!'],
-            ]
-        ],
-        'freelancer' => [
-            'headline' => 'Design & Development for Modern Brands.',
-            'bio' => 'Independent creative helping startups launch beautiful products.',
-            'color' => '#00d1b2',
-            'theme' => 'light',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'My Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/300\nhttps://via.placeholder.com/301"],
-                ['title' => 'Hire Me', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
-            ]
-        ],
-        'realtor' => [
-            'headline' => 'Modern Homes for Modern Families.',
-            'bio' => 'Helping buyers find their dream home in the luxury market. Top 1% agent.',
-            'color' => '#2d3436',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['title' => 'Available Listings', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/300\nhttps://via.placeholder.com/301"],
-                ['title' => 'Book a Viewing', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Happy Homeowners', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Found our dream home in record time!'],
-                ['title' => 'Sales Target', 'url' => '#', 'type' => 'milestone', 'extra' => 'Closed:92']
-            ]
-        ],
-        'business' => [
-            'headline' => 'Innovative Solutions for Global Enterprise.',
-            'bio' => 'Streamlining operations and driving growth through technology.',
-            'color' => '#0073aa',
-            'theme' => 'light',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => "$99/hr\nFeature 1\nFeature 2"],
-                ['title' => 'Book a Consultation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Customer Feedback', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Professional and reliable service.'],
-                ['title' => 'Office Location', 'url' => 'https://maps.google.com', 'type' => 'button'],
-                ['title' => 'FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'We operate 24/7 across the globe.']
-            ]
-        ],
-        'politician' => [
-            'headline' => 'A Stronger Community for a Brighter Future.',
-            'bio' => 'Dedicated to transparency, progress, and public service.',
-            'color' => '#e84118',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Our Vision for 2024', 'url' => '#', 'type' => 'video'],
-                ['title' => 'Donate to the Campaign', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Join the Volunteer Team', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Endorsements', 'url' => '#', 'type' => 'testimonial', 'extra' => 'A true leader for our community.'],
-                ['title' => 'Fundraising Goal', 'url' => '#', 'type' => 'milestone', 'extra' => 'Goal:75']
-            ]
-        ],
-        'elite_card' => [
-            'headline' => 'John Doe | Executive Director',
-            'bio' => 'Strategic visionary with 15+ years experience in digital transformation.',
-            'color' => '#2c3e50',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['title' => 'Contact Info', 'url' => '#', 'type' => 'social_icons', 'extra' => "phone:tel:123456\nemail:mailto:me@site.com\nlinkedin:https://linkedin.com"],
-                ['title' => 'Save VCard', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
-                ['title' => 'My Website', 'url' => 'https://yoursite.com', 'type' => 'button']
-            ]
-        ],
-        'tiktok' => [
-            'headline' => 'Daily Tech & Setup Inspo ⚡️',
-            'bio' => 'Building the ultimate home office. Shop my setup below!',
-            'color' => '#ff0050',
-            'theme' => 'vibrant',
-            'shadow' => 'hard',
-            'links' => [
-                ['title' => 'My Amazon Storefront', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
-                ['title' => 'Flash Sale Ending Soon! ⏳', 'url' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+12 hours'))],
-                ['title' => 'Join My Discord', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
-                ['title' => 'Latest Setup Tour', 'url' => '#', 'type' => 'video']
-            ]
-        ],
-        'consultant' => [
-            'headline' => 'Operational Efficiency for Modern SaaS.',
-            'bio' => 'I help seed-stage startups optimize their unit economics and reduce churn.',
-            'color' => '#2c3e50',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['title' => 'Book an Audit', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['title' => 'Contact Details', 'url' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:consult@site.com\nlinkedin:https://linkedin.com"],
-                ['title' => 'Save to Contacts', 'url' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
-                ['title' => 'Q4 Availability', 'url' => '#', 'type' => 'milestone', 'extra' => 'Booked:85']
-            ]
-        ],
-        'luxury' => [
-            'headline' => 'Bespoke Private Advisory.',
-            'bio' => 'Curating exclusive opportunities for the discerning individual.',
-            'color' => '#d4af37',
-            'theme' => 'dark',
-            'shadow' => 'soft',
-            'links' => [
-                ['title' => 'Inquire Privately', 'url' => '#', 'type' => 'lead_form'],
-                ['title' => 'Exclusive Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Asset+1\nhttps://via.placeholder.com/800x600?text=Asset+2"],
-                ['title' => 'Secure Documentation', 'url' => '#', 'type' => 'button', 'style' => 'outline', 'extra' => 'Password Protected']
-            ]
-        ]
-    ];
+    // 2. Fetch Templates from DB (Merge defaults with customizations)
+    $defaults = saas_get_default_templates();
+    $customs  = get_option('saas_templates') ?: [];
+    $sets     = array_merge($defaults, $customs);
+
+    // Ensure template exists, fallback to business or coach if not
+    if (!isset($sets[$template])) {
+        if (isset($sets['business'])) $template = 'business';
+        elseif (isset($sets['coach'])) $template = 'coach';
+    }
 
     if ( isset($sets[$template]) ) {
         $set = $sets[$template];
 
         // Update profile meta too
         if ($profile_id) {
-            update_post_meta($profile_id, '_saas_headline', $set['headline']);
-            update_post_meta($profile_id, '_saas_bio', $set['bio']);
+            if (!$skip_meta) {
+                update_post_meta($profile_id, '_saas_headline', $set['headline']);
+                update_post_meta($profile_id, '_saas_bio', $set['bio']);
+            }
             update_post_meta($profile_id, '_saas_theme_color', $set['color']);
             update_post_meta($profile_id, '_saas_profile_theme', $set['theme']);
             update_post_meta($profile_id, '_saas_container_shadow', $set['shadow']);
@@ -514,6 +490,7 @@ function saas_ajax_apply_template() {
                     update_post_meta($link_id, '_saas_gallery_images', $urls);
                 }
                 if ($b['type'] === 'faq') update_post_meta($link_id, '_saas_faq_answer', $extra);
+                if ($b['type'] === 'countdown') update_post_meta($link_id, '_saas_expiry', $extra);
                 if ($b['type'] === 'pricing' || $b['type'] === 'product') {
                     $lines = explode("\n", $extra);
                     update_post_meta($link_id, '_saas_price', $lines[0]);
@@ -538,6 +515,9 @@ function saas_ajax_apply_template() {
                         }
                     }
                     update_post_meta($link_id, '_saas_social_data', $data);
+                }
+                if ($b['type'] === 'video') {
+                    // Title and URL already set globally, no extra meta needed for standard video
                 }
             }
         }
@@ -575,6 +555,41 @@ function saas_ajax_export_analytics() {
 
 // 5. AJAX: Export Leads CSV
 add_action( 'wp_ajax_saas_export_leads', 'saas_ajax_export_leads' );
+add_action( 'wp_ajax_saas_export_orders', 'saas_ajax_export_orders' );
+
+function saas_ajax_export_orders() {
+    if (!current_user_can('manage_options')) wp_die('Unauthorized');
+    check_ajax_referer('saas_export_nonce', 'security');
+
+    $orders = get_posts([
+        'post_type'   => 'saas_order',
+        'post_status' => 'any',
+        'numberposts' => -1,
+    ]);
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="orders.csv"');
+
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Order ID', 'Customer', 'Item', 'Amount', 'Status', 'Gateway', 'Coupon', 'Date']);
+
+    foreach ($orders as $o) {
+        $user = get_userdata($o->post_author);
+        fputcsv($output, [
+            $o->ID,
+            $user ? $user->display_name : 'Unknown',
+            $o->post_title,
+            get_post_meta($o->ID, '_saas_order_amount', true),
+            get_post_meta($o->ID, '_saas_order_status', true),
+            get_post_meta($o->ID, '_saas_gateway', true),
+            get_post_meta($o->ID, '_saas_order_coupon', true),
+            get_the_date('Y-m-d H:i', $o->ID)
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
 function saas_ajax_export_leads() {
     check_ajax_referer( 'saas_export_nonce', 'security' );
 
@@ -662,6 +677,20 @@ function saas_ajax_get_lead_details() {
             </div>
             <button type="submit" class="btn-primary" style="width:100%;">Update Status & Notes</button>
         </form>
+        <hr>
+        <h4>Activity History</h4>
+        <div class="lead-log" style="font-size:0.85rem; max-height:200px; overflow-y:auto; background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #eee;">
+            <?php if ($log) :
+                foreach (array_reverse($log) as $entry) : ?>
+                    <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed #ddd;">
+                        <span style="color:#94a3b8; font-size:0.75rem; display:block;"><?php echo $entry['time']; ?></span>
+                        <span style="color:#1e293b;"><?php echo esc_html($entry['msg']); ?></span>
+                    </div>
+                <?php endforeach;
+            else : ?>
+                <p style="color:#94a3b8; margin:0;">No activity recorded yet.</p>
+            <?php endif; ?>
+        </div>
     </div>
     <?php
     wp_send_json_success( ob_get_clean() );
@@ -794,91 +823,66 @@ function saas_ajax_generate_samples() {
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error('Unauthorized');
 
     $user_id = get_current_user_id();
-    $samples = [
-        [
-            'title' => 'Elite Business Coach',
-            'headline' => 'Scaling Founders from 6 to 7 Figures 🚀',
-            'bio' => 'Ex-Google Exec turned Strategic Coach. I help high-ticket service providers automate their acquisition and double their profit margins.',
-            'color' => '#6c5ce7',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['t' => '👉 Free Strategy Session', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['t' => 'Masterclass: Scaling Systems', 'u' => 'https://youtube.com', 'type' => 'video'],
-                ['t' => 'Client Success Stories', 'u' => '#', 'type' => 'testimonial', 'extra' => 'Working with Alex was the best decision for my agency. We hit $100k months in record time.'],
-                ['t' => 'Consulting Packages', 'u' => '#', 'type' => 'pricing', 'extra' => "$2,500/mo\nBi-weekly Calls\nSlack Support\nResource Library"],
+    // Ensure content hub options are populated with at least some data if empty
+    if (!get_option('saas_templates')) {
+        $default_tpls = [
+            'coach' => ['headline' => 'Scale Your Impact 🚀', 'bio' => 'Certified high-performance coach.', 'color' => '#6c5ce7', 'theme' => 'light', 'shadow' => 'soft', 'links' => [['title' => 'Book Strategy Session', 'url' => '#', 'type' => 'button', 'style' => 'featured']]],
+            'business' => ['headline' => 'Enterprise Solutions 🏢', 'bio' => 'Driving growth through tech.', 'color' => '#0073aa', 'theme' => 'light', 'shadow' => 'hard', 'links' => [['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => "$99/mo\nSupport\nUpdates"]]]
+        ];
+        update_option('saas_templates', $default_tpls);
+    }
+    if (!get_option('saas_training_academy')) {
+        update_option('saas_training_academy', [['title' => 'Platform Overview', 'desc' => 'Master the basics in 5 minutes.', 'video_id' => 'basics']]);
+    }
+    if (!get_option('saas_marketing_materials')) {
+        update_option('saas_marketing_materials', [['name' => 'Join Elite Banner', 'img' => 'https://via.placeholder.com/600x200', 'size' => '600x200']]);
+    }
+
+    // Fetch richer templates from DB
+    $all_templates = get_option('saas_templates');
+    $samples = [];
+
+    if ($all_templates) {
+        foreach($all_templates as $id => $tpl) {
+            $samples[] = [
+                'title' => 'Elite ' . ucfirst($id),
+                'headline' => $tpl['headline'],
+                'bio' => $tpl['bio'],
+                'color' => $tpl['color'],
+                'theme' => $tpl['theme'],
+                'shadow' => $tpl['shadow'],
+                'links' => array_map(function($l) {
+                    return ['t' => $l['title'], 'u' => $l['url'], 'type' => $l['type'], 'style' => $l['style'] ?? 'regular', 'extra' => $l['extra'] ?? ''];
+                }, $tpl['links'])
+            ];
+        }
+    } else {
+        // High-quality fallback defaults
+        $samples = [
+            [
+                'title' => 'Executive Performance Coach',
+                'headline' => 'Helping Founders Scale from 6 to 7 Figures 🚀',
+                'bio' => 'Ex-Google Exec turned Strategic Coach. I help high-ticket service providers automate their acquisition and double their profit margins.',
+                'color' => '#6c5ce7', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['t' => '👉 Free Strategy Session', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['t' => 'Masterclass: Scaling Systems', 'u' => 'https://youtube.com', 'type' => 'video'],
+                    ['t' => 'Consulting Packages', 'u' => '#', 'type' => 'pricing', 'extra' => "$2,500/mo\nBi-weekly Calls\nSlack Support\nResource Library"],
+                ]
+            ],
+            [
+                'title' => 'Bespoke Private Advisory',
+                'headline' => 'Own Your Future. Protect Your Legacy. ⚜️',
+                'bio' => 'Specializing in off-market acquisitions and private advisory for high-net-worth individuals. Excellence at every touchpoint.',
+                'color' => '#d4af37', 'theme' => 'luxury', 'shadow' => 'soft',
+                'links' => [
+                    ['t' => 'New Asset Portfolio', 'u' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Penthouse+A\nhttps://via.placeholder.com/800x600?text=Coastal+Villa"],
+                    ['t' => 'Inquire Privately', 'u' => '#', 'type' => 'lead_form'],
+                    ['t' => 'Save VCard to Phone', 'u' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
+                ]
             ]
-        ],
-        [
-            'title' => 'TikTok Affiliate Pro',
-            'headline' => 'Shop My Top Tech & Setup Finds 🛍️',
-            'bio' => 'Sharing the best tech deals and home office aesthetic finds. Check the links below for exclusive discounts!',
-            'color' => '#E1306C',
-            'theme' => 'vibrant',
-            'shadow' => 'hard',
-            'links' => [
-                ['t' => 'My Amazon Storefront', 'u' => 'https://amazon.com', 'type' => 'button', 'style' => 'rainbow'],
-                ['t' => 'Flash Sale Ending Soon! ⏳', 'u' => '#', 'type' => 'countdown', 'extra' => date('Y-m-d H:i', strtotime('+12 hours'))],
-                ['t' => 'Join Private Deals Telegram', 'u' => '#', 'type' => 'button', 'style' => 'glow'],
-                ['t' => 'Setup Tour', 'u' => 'https://tiktok.com', 'type' => 'video'],
-            ]
-        ],
-        [
-            'title' => 'Luxury Real Estate',
-            'headline' => 'Bespoke Advisory for Elite Homeowners.',
-            'bio' => 'Specializing in off-market luxury listings in the Tri-State area. Member of the Top 0.1% Global Network.',
-            'color' => '#2d3436',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['t' => 'New Off-Market Listings', 'u' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Penthouse+A\nhttps://via.placeholder.com/800x600?text=Coastal+Villa"],
-                ['t' => 'Request Private Showing', 'u' => '#', 'type' => 'lead_form'],
-                ['t' => 'Quarterly Market Report', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['t' => 'Q2 Sales Achievement', 'u' => '#', 'type' => 'milestone', 'extra' => 'Volume:$42M']
-            ]
-        ],
-        [
-            'title' => 'Creative Freelancer',
-            'headline' => 'Visual Identity & Web Experience Design.',
-            'bio' => 'Helping DTC brands stand out through minimalist design and high-converting interfaces.',
-            'color' => '#00d1b2',
-            'theme' => 'light',
-            'shadow' => 'hard',
-            'links' => [
-                ['t' => 'Recent Branding Work', 'u' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400\nhttps://via.placeholder.com/401\nhttps://via.placeholder.com/402"],
-                ['t' => 'Project Inquiry Form', 'u' => '#', 'type' => 'lead_form'],
-                ['t' => 'View Pricing Guide', 'u' => '#', 'type' => 'pricing', 'extra' => "$1,500+\nCustom Branding\nUI/UX Design\nWebflow Dev"],
-            ]
-        ],
-        [
-            'title' => 'Campaign HQ 2024',
-            'headline' => 'A New Vision for Our Community.',
-            'bio' => 'Join the movement for transparency, sustainable growth, and better schools. Every voice matters.',
-            'color' => '#e84118',
-            'theme' => 'light',
-            'shadow' => 'soft',
-            'links' => [
-                ['t' => 'Watch the Keynote Speech', 'u' => 'https://youtube.com', 'type' => 'video'],
-                ['t' => 'Donate to the Campaign', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-                ['t' => 'Volunteer Signup', 'u' => '#', 'type' => 'lead_form'],
-                ['t' => 'Endorsements', 'u' => '#', 'type' => 'testimonial', 'extra' => 'The only candidate with a clear plan for our future.'],
-                ['t' => 'Grassroots Funding Progress', 'u' => '#', 'type' => 'milestone', 'extra' => 'Goal:82']
-            ]
-        ],
-        [
-            'title' => 'John Doe Consulting',
-            'headline' => 'Operational Efficiency for Modern SaaS.',
-            'bio' => 'Ex-SaaS Founder helping seed-stage startups optimize their unit economics and reduce churn.',
-            'color' => '#2c3e50',
-            'theme' => 'dark',
-            'shadow' => 'none',
-            'links' => [
-                ['t' => 'Contact Details', 'u' => '#', 'type' => 'social_icons', 'extra' => "email:mailto:john@doe.com\nlinkedin:https://linkedin.com/in/johndoe\ntwitter:https://twitter.com/johndoe"],
-                ['t' => 'Save to Contacts', 'u' => home_url('/?saas_action=vcard'), 'type' => 'button', 'style' => 'rainbow'],
-                ['t' => 'Schedule Audit Call', 'u' => '#', 'type' => 'button', 'style' => 'featured'],
-            ]
-        ]
-    ];
+        ];
+    }
 
     foreach ($samples as $s) {
         $p_id = wp_insert_post(['post_type' => 'saas_profile', 'post_title' => $s['title'], 'post_status' => 'publish', 'post_author' => $user_id]);
@@ -906,15 +910,69 @@ function saas_ajax_generate_samples() {
                 if ($l['type'] === 'image_gallery') update_post_meta($l_id, '_saas_gallery_images', explode("\n", $l['extra']));
                 if ($l['type'] === 'countdown') update_post_meta($l_id, '_saas_expiry', $l['extra']);
                 if ($l['type'] === 'milestone') {
-                    list($lbl, $per) = explode(':', $l['extra']);
-                    update_post_meta($l_id, '_saas_ms_label', $lbl);
-                    update_post_meta($l_id, '_saas_ms_percent', intval($per));
+                    if (strpos($l['extra'], ':') !== false) {
+                        list($lbl, $per) = explode(':', $l['extra']);
+                        update_post_meta($l_id, '_saas_ms_label', $lbl);
+                        update_post_meta($l_id, '_saas_ms_percent', intval($per));
+                    }
                 }
             }
         }
     }
 
-    wp_send_json_success('Sample profiles created successfully!');
+    // 1. Generate Sample Leads
+    $lead_names = ['James Wilson', 'Sarah Parker', 'Michael Chen', 'Emma Davis', 'Chris Evans'];
+    foreach($lead_names as $name) {
+        $lead_id = wp_insert_post(['post_type' => 'saas_lead', 'post_title' => "Lead: $name", 'post_status' => 'publish', 'post_author' => $user_id]);
+        update_post_meta($lead_id, '_saas_lead_name', $name);
+        update_post_meta($lead_id, '_saas_lead_email', strtolower(str_replace(' ', '.', $name)) . '@example.com');
+        update_post_meta($lead_id, '_saas_lead_status', (rand(0,1) ? 'New' : 'Contacted'));
+    }
+
+    // 2. Generate Sample Orders
+    for($i=0; $i<5; $i++) {
+        $order_id = wp_insert_post(['post_type' => 'saas_order', 'post_title' => 'Sample Order #' . rand(1000, 9999), 'post_status' => 'publish', 'post_author' => $user_id]);
+        update_post_meta($order_id, '_saas_order_amount', rand(19, 99));
+        update_post_meta($order_id, '_saas_order_status', 'completed');
+    }
+
+    // 3. Generate Sample Licenses
+    for($i=0; $i<3; $i++) {
+        $key = 'ELITE-' . wp_generate_password(4, false) . '-' . wp_generate_password(4, false);
+        wp_insert_post(['post_type' => 'saas_license', 'post_title' => strtoupper($key), 'post_status' => 'publish', 'post_author' => $user_id, 'meta_input' => ['_saas_license_status' => 'active', '_saas_license_plan' => 'pro']]);
+    }
+
+    // 4. Generate Sample Payouts
+    for($i=0; $i<2; $i++) {
+        $payout_id = wp_insert_post(['post_type' => 'saas_payout', 'post_title' => 'Payout Request', 'post_status' => 'publish', 'post_author' => $user_id]);
+        update_post_meta($payout_id, '_amount', rand(50, 200));
+        update_post_meta($payout_id, '_status', (rand(0,1) ? 'pending' : 'paid'));
+        update_post_meta($payout_id, '_method', 'paypal');
+        update_post_meta($payout_id, '_method_email', 'affiliate@example.com');
+    }
+
+    // 5. Generate Sample Messages
+    for($i=0; $i<3; $i++) {
+        wp_insert_post(['post_type' => 'saas_message', 'post_title' => 'System Update ' . ($i+1), 'post_content' => 'This is a sample system notification for testing.', 'post_status' => 'publish', 'post_author' => 1, 'meta_input' => ['_saas_msg_recipient' => $user_id, '_saas_msg_status' => 'unread']]);
+    }
+
+    // 6. Populate Analytics Table
+    global $wpdb;
+    $table = $wpdb->prefix . 'saas_analytics';
+    $types = ['view', 'click', 'lead_conversion', 'nfc_tap'];
+    for($i=0; $i<500; $i++) {
+        $wpdb->insert($table, [
+            'user_id' => $user_id,
+            'event_type' => $types[array_rand($types)],
+            'target_id' => 0,
+            'ip_address' => rand(1,255).'.'.rand(1,255).'.'.rand(1,255).'.'.rand(1,255),
+            'user_agent' => (rand(0,1) ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'),
+            'referrer' => (rand(0,1) ? 'https://instagram.com' : 'https://linkedin.com'),
+            'created_at' => date('Y-m-d H:i:s', strtotime('-' . rand(0, 30) . ' days'))
+        ]);
+    }
+
+    wp_send_json_success('Comprehensive sample data generated across all modules! 🚀');
 }
 
 // 11. AJAX: Verify Link Password (Secure)
@@ -1041,7 +1099,16 @@ function saas_ajax_apply_coupon() {
     check_ajax_referer( 'saas_dashboard_nonce', 'security' );
     $code = strtoupper(sanitize_text_field($_POST['coupon']));
 
-    // Stub: In production, query a 'saas_coupon' CPT or options table
+    // Check Affiliate Coupons first
+    $aff_coupons = get_option('saas_affiliate_coupons') ?: [];
+    foreach ($aff_coupons as $c) {
+        if (strtoupper($c['code']) === $code) {
+            $discount = floatval($c['discount']);
+            wp_send_json_success("Affiliate coupon applied! You get $discount% off.");
+        }
+    }
+
+    // Standard coupons
     $valid_coupons = ['ELITE20' => 20, 'SAASLAUNCH' => 50];
 
     if (isset($valid_coupons[$code])) {
@@ -1098,6 +1165,83 @@ function saas_ajax_ai_assist() {
                 "Helping you reclaim 20+ hours a week while doubling your revenue. Certified high-performance coach for busy CEOs."
             ]
         ],
+        'servant' => [
+            'headline' => [
+                "Dedicated to Progress & Community Service 🏛️",
+                "Building a Brighter Future for Our District",
+                "Transparency. Integrity. Public Service."
+            ],
+            'bio' => [
+                "Serving as your advocate in public office. I am dedicated to sustainable growth, educational excellence, and fiscal responsibility for our community.",
+                "Advancing policies that empower local families and small businesses. Together, we are building a more resilient and inclusive city."
+            ]
+        ],
+        'speaker' => [
+            'headline' => [
+                "Inspiring Transformation through High-Impact Keynotes 🎙️",
+                "Empowering Teams to Lead with Purpose",
+                "Global Keynote Speaker & Thought Leader"
+            ],
+            'bio' => [
+                "Helping organizations navigate change and build resilient cultures. I share actionable insights on leadership, innovation, and peak performance.",
+                "Captivating audiences worldwide with stories of grit and growth. I help leaders bridge the gap between vision and execution."
+            ]
+        ],
+        'author' => [
+            'headline' => [
+                "Exploring the Intersection of Tech & Humanity ✍️",
+                "Bestselling Author of 'The Elite mindset'",
+                "Storyteller. Researcher. Writer."
+            ],
+            'bio' => [
+                "Writing at the frontiers of personal growth and digital culture. My work helps modern professionals build meaningful lives in an era of distraction.",
+                "Crafting narratives that challenge the status quo. Join me as I explore the deep questions that define our shared future."
+            ]
+        ],
+        'lawyer' => [
+            'headline' => [
+                "Strategic Legal Advocacy for Elite Clients ⚖️",
+                "Protecting Your Interests. Defending Your Future.",
+                "High-Stakes Litigation & Advisory"
+            ],
+            'bio' => [
+                "Providing expert legal counsel with a focus on results. I help businesses and individuals navigate complex legal landscapes with confidence and precision.",
+                "Dedicated to excellence in legal practice. My mission is to provide sophisticated representation that honors your unique goals."
+            ]
+        ],
+        'doctor' => [
+            'headline' => [
+                "Compassionate Care, Precision Medicine 🩺",
+                "Your Partner in Health & Longevity",
+                "Evidence-Based Wellness for Modern Lives"
+            ],
+            'bio' => [
+                "Leading with science and heart. I specialize in personalized healthcare strategies that empower you to thrive at every stage of life.",
+                "Advancing the future of medicine through innovation and patient-centered care. Dedicated to your well-being and peak vitality."
+            ]
+        ],
+        'artist' => [
+            'headline' => [
+                "Visual Storytelling through Digital Art 🎨",
+                "Capturing the Essence of Modern Brands",
+                "Design that Inspires. Art that Connects."
+            ],
+            'bio' => [
+                "Independent designer creating immersive visual experiences. I help forward-thinking brands stand out through artistic excellence and strategic design.",
+                "Exploring the boundaries of digital creativity. My work focuses on the intersection of aesthetic beauty and functional impact."
+            ]
+        ],
+        'agency' => [
+            'headline' => [
+                "Scaling Brands through Performance Marketing 🏢",
+                "Your Growth Partner for the Digital Era",
+                "Bespoke Agency Solutions for Global Leaders"
+            ],
+            'bio' => [
+                "We build high-performance funnels that drive revenue. Our agency specializes in turning cold traffic into loyal brand advocates for elite founders.",
+                "Mastering the art of digital acquisition. We provide the strategy and execution your brand needs to dominate its niche."
+            ]
+        ],
         'creator' => [
             'headline' => [
                 "Exclusive Insights & Behind-the-Scenes 🎥",
@@ -1129,6 +1273,50 @@ function saas_ajax_ai_assist() {
             'bio' => [
                 "Streamlining operations for modern enterprises. We provide the infrastructure you need to scale globally with confidence.",
                 "Innovation-first consultancy helping legacy brands transition to the digital-first economy. We build the future of commerce."
+            ]
+        ],
+        'consultant' => [
+            'headline' => [
+                "Strategic Advisory for High-Growth Startups 🧠",
+                "Operational Efficiency for Modern SaaS",
+                "Unlocking Growth through Data-Driven Strategy"
+            ],
+            'bio' => [
+                "Ex-SaaS Founder helping seed-stage startups optimize their unit economics and reduce churn through proven operational frameworks.",
+                "Helping leadership teams bridge the gap between vision and execution. I specialize in scaling impact for digital-first organizations."
+            ]
+        ],
+        'freelancer' => [
+            'headline' => [
+                "Visual Identity & Web Experience Design 🎨",
+                "Helping Brands Stand Out in the Digital Noise",
+                "Design that Converts. Code that Scales."
+            ],
+            'bio' => [
+                "Independent creative helping startups and DTC brands launch beautiful, high-converting products. I focus on minimalist design and intuitive user journeys.",
+                "Your partner for world-class design and development. I build the digital experiences that define modern industry leaders."
+            ]
+        ],
+        'tiktok' => [
+            'headline' => [
+                "Shop My Top Tech & Setup Finds 🛍️",
+                "Daily Tech Inspo & Productivity Hacks",
+                "Exclusive Deals on the Best Gear"
+            ],
+            'bio' => [
+                "Sharing the best tech deals and home office aesthetic finds. I hunt for the gear that makes your work life better (and cooler). Check my links for exclusive discounts!",
+                "Building the ultimate productivity setup. Follow along for setup tours, reviews, and the best deals in tech."
+            ]
+        ],
+        'luxury' => [
+            'headline' => [
+                "Bespoke Private Advisory ⚜️",
+                "Curating Excellence for the Discerning Individual",
+                "Access to the World's Most Exclusive Opportunities"
+            ],
+            'bio' => [
+                "Specializing in off-market acquisitions and private advisory for high-net-worth individuals. My mission is to protect and grow your legacy with absolute discretion.",
+                "Providing sophisticated solutions for complex global needs. I offer a bespoke approach to private interests, ensuring excellence at every touchpoint."
             ]
         ]
     ];

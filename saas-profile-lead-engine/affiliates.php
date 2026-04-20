@@ -21,11 +21,28 @@ class Saas_Affiliates {
     /**
      * Calculate recurring commissions
      */
-    public function record_referral_sale( $referrer_id, $order_amount ) {
+    public function record_referral_sale( $referrer_id, $order_amount, $order_id = 0 ) {
         $percentage = get_option('saas_affiliate_percentage') ?: 30;
-        $commission = $order_amount * ($percentage / 100);
-        $total_earned = get_user_meta( $referrer_id, '_saas_affiliate_earned', true ) ?: 0;
-        update_user_meta( $referrer_id, '_saas_affiliate_earned', $total_earned + $commission );
+
+        // Log the commission calculation for debugging
+        $commission = round($order_amount * ($percentage / 100), 2);
+
+        $total_earned = floatval(get_user_meta( $referrer_id, '_saas_affiliate_earned', true )) ?: 0;
+        update_user_meta( $referrer_id, '_saas_affiliate_earned', round($total_earned + $commission, 2) );
+
+        // Log as saas_commission post for dashboard history
+        wp_insert_post([
+            'post_type'   => 'saas_commission',
+            'post_title'  => 'Commission for Order #' . $order_id,
+            'post_status' => 'publish',
+            'post_author' => $referrer_id,
+            'meta_input'  => [
+                '_saas_commission_amount' => $commission,
+                '_saas_order_id'         => $order_id,
+                '_saas_order_amount'     => $order_amount,
+                '_saas_percentage'       => $percentage
+            ]
+        ]);
     }
 
     public function ajax_get_stats() {
@@ -79,8 +96,37 @@ class Saas_Affiliates {
         check_ajax_referer( 'saas_dashboard_nonce', 'security' );
 
         $payout_id = intval($_POST['payout_id']);
+        if (!$payout_id || get_post_type($payout_id) !== 'saas_payout') {
+            wp_send_json_error('Invalid payout ID');
+        }
+
+        $current_status = get_post_meta($payout_id, '_status', true);
+        if ($current_status === 'paid') {
+            wp_send_json_error('This payout has already been processed.');
+        }
+
         update_post_meta($payout_id, '_status', 'paid');
-        wp_send_json_success('Payout marked as paid.');
+        update_post_meta($payout_id, '_paid_at', current_time('mysql'));
+
+        // Log the event as a commission record with negative value or just as a transaction log?
+        // For this system, we'll log it as a saas_commission entry with a negative amount to keep balances accurate in logs
+        $payout = get_post($payout_id);
+        $amount = get_post_meta($payout_id, '_amount', true);
+
+        wp_insert_post([
+            'post_type'   => 'saas_commission',
+            'post_title'  => 'Payout Processed - Request #' . $payout_id,
+            'post_status' => 'publish',
+            'post_author' => $payout->post_author,
+            'meta_input'  => [
+                '_saas_commission_amount' => -$amount,
+                '_saas_payout_id'        => $payout_id,
+                '_saas_order_amount'     => 0,
+                '_saas_percentage'       => 0
+            ]
+        ]);
+
+        wp_send_json_success('Payout marked as paid successfully!');
     }
 
     public function add_admin_meta_boxes() {

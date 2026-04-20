@@ -147,29 +147,31 @@ class Saas_Analytics {
     }
 
     /**
-     * Get Global Analytics Summary (for Admin Dashboard)
+     * Get Global Analytics Summary (for Admin Dashboard - Current Month)
      */
     public function get_global_summary() {
         global $wpdb;
-        $total_views  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'view'" );
-        $total_clicks = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'click'" );
-        $total_leads  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'lead_conversion'" );
+        $views  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'view' AND created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')" );
+        $clicks = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'click' AND created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')" );
+        $leads  = $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name} WHERE event_type = 'lead_conversion' AND created_at >= DATE_FORMAT(NOW() ,'%Y-%m-01')" );
 
         return [
-            'views'  => $total_views ?: 0,
-            'clicks' => $total_clicks ?: 0,
-            'leads'  => $total_leads ?: 0,
+            'views'  => $views ?: 0,
+            'clicks' => $clicks ?: 0,
+            'leads'  => $leads ?: 0,
         ];
     }
 
     public function get_growth_data() {
         global $wpdb;
         $results = $wpdb->get_results( "
-            SELECT DATE_FORMAT(post_date, '%b') as month, COUNT(*) as count
+            SELECT DATE_FORMAT(post_date, '%b %Y') as month, COUNT(*) as count
             FROM {$wpdb->posts}
-            WHERE post_type = 'saas_profile' AND post_status = 'publish'
+            WHERE post_type = 'saas_profile'
+              AND post_status = 'publish'
+              AND post_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
             GROUP BY month
-            ORDER BY post_date ASC LIMIT 6
+            ORDER BY MIN(post_date) ASC
         " );
         return $results ?: [];
     }
