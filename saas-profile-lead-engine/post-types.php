@@ -121,14 +121,10 @@ function saas_enforce_data_isolation( $query ) {
     if ( is_admin() && ! current_user_can( 'manage_options' ) && $query->is_main_query() ) {
         $post_types = ['saas_profile', 'saas_link', 'saas_lead', 'saas_order', 'saas_payout', 'saas_message', 'saas_license', 'saas_commission'];
         if ( in_array( $query->get( 'post_type' ), $post_types ) ) {
-            // For messages, we also need to consider recipient meta
+            // For messages, we only show those received by the current user in the admin list
             if ($query->get('post_type') === 'saas_message') {
-                $meta_query = $query->get('meta_query') ?: [];
-                $meta_query[] = [
-                    'key' => '_saas_msg_recipient',
-                    'value' => get_current_user_id()
-                ];
-                $query->set('meta_query', $meta_query);
+                $query->set('meta_key', '_saas_msg_recipient');
+                $query->set('meta_value', get_current_user_id());
             } else {
                 $query->set( 'author', get_current_user_id() );
             }

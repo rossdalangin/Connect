@@ -1309,33 +1309,164 @@ class Saas_Admin_Settings {
                 ]
             ],
             'startup' => [
-                'headline' => 'Shipping the Future of SaaS. 🤖',
-                'bio' => 'Hyper-growth team focused on building intuitive tools for elite professionals.',
-                'color' => '#6c5ce7', 'theme' => 'dark', 'shadow' => 'hard',
+                'headline' => 'Disrupting the Status Quo with Elite Innovation. 🚀',
+                'bio' => 'We build scalable solutions for the modern world. Backed by top-tier VCs.',
+                'color' => '#6c5ce7', 'theme' => 'dark', 'shadow' => 'soft',
                 'links' => [
-                    ['title' => 'Join the Waitlist', 'url' => '#', 'type' => 'lead_form'],
-                    ['title' => 'Watch Product Demo', 'url' => 'https://youtube.com', 'type' => 'video'],
-                    ['title' => 'Public Roadmap', 'url' => '#', 'type' => 'milestone', 'extra' => 'Alpha:85'],
+                    ['title' => 'Join our Beta', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Watch Pitch Deck', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Product Roadmap', 'url' => '#', 'type' => 'milestone', 'extra' => 'Progress:65%'],
                 ]
             ],
             'wellness' => [
-                'headline' => 'Find Your Inner Calm. 🧘‍♀️',
-                'bio' => 'Yoga and Mindfulness Coach. Helping high-performers find balance in a chaotic world.',
-                'color' => '#10b981', 'theme' => 'light', 'shadow' => 'soft',
+                'headline' => 'Holistic Wellness for the Modern Professional. 🌿',
+                'bio' => 'Mind, body, and spirit alignment. Certified wellness coach and nutritionist.',
+                'color' => '#00b894', 'theme' => 'light', 'shadow' => 'soft',
                 'links' => [
-                    ['title' => 'Book Private Session', 'url' => '#', 'type' => 'calendar'],
-                    ['title' => 'Free Meditation Video', 'url' => 'https://youtube.com', 'type' => 'video'],
-                    ['title' => 'Join our Retreat', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Free Meditation Session', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                    ['title' => 'Wellness Retreats', 'url' => '#', 'type' => 'pricing', 'extra' => "$1,500+\n3 Days / 2 Nights\nAll Inclusive\nPersonalized Plan"],
+                    ['title' => 'Client Success Story', 'url' => '#', 'type' => 'testimonial', 'extra' => 'I feel more balanced and energized than ever!'],
                 ]
             ],
             'photography' => [
-                'headline' => 'Capturing the Essence of Life. 📸',
-                'bio' => 'Professional Portrait & Lifestyle Photographer. Elite visual storytelling for brands and individuals.',
-                'color' => '#2d3436', 'theme' => 'light', 'shadow' => 'none',
+                'headline' => 'Capturing Moments, Telling Stories. 📸',
+                'bio' => 'Award-winning lifestyle and commercial photographer based in NYC.',
+                'color' => '#2d3436', 'theme' => 'light', 'shadow' => 'hard',
                 'links' => [
-                    ['title' => 'Portfolio Highlights', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/600x400?text=Portrait+1\nhttps://via.placeholder.com/600x400?text=Nature+1\nhttps://via.placeholder.com/600x400?text=Event+1"],
-                    ['title' => 'Book a Photoshoot', 'url' => '#', 'type' => 'lead_form'],
-                    ['title' => 'Latest Gear Review', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'View Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Wedding\nhttps://via.placeholder.com/400?text=Nature"],
+                    ['title' => 'Book a Shoot', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Print Store', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                ]
+            ],
+            'restaurant' => [
+                'headline' => 'A Culinary Journey Awaits. 🍴',
+                'bio' => 'Farm-to-table dining experience featuring seasonal ingredients and artisan flavors.',
+                'color' => '#e67e22', 'theme' => 'vibrant', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'View Our Menu', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Steak\nhttps://via.placeholder.com/400?text=Pasta"],
+                    ['title' => 'Reserve a Table', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Join Our Supper Club', 'url' => '#', 'type' => 'newsletter'],
+                ]
+            ],
+            'event_planner' => [
+                'headline' => 'Crafting Unforgettable Experiences. ✨',
+                'bio' => 'From luxury weddings to corporate galas, we bring your vision to life.',
+                'color' => '#fd79a8', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Free Event Consultation', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Recent Events Gallery', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Gala\nhttps://via.placeholder.com/400?text=Wedding"],
+                    ['title' => 'Planning Packages', 'url' => '#', 'type' => 'pricing', 'extra' => "Full Planning\nDay-of Coordination\nPartial Planning"],
+                ]
+            ],
+            'therapist' => [
+                'headline' => 'Your Journey to Healing Starts Here. 🧠',
+                'bio' => 'Specialized in cognitive behavioral therapy and emotional resilience.',
+                'color' => '#74b9ff', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Book a Session', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Helpful Resources FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'I offer both in-person and remote sessions.'],
+                    ['title' => 'Listen to My Podcast', 'url' => 'https://spotify.com', 'type' => 'video'],
+                ]
+            ],
+            'trainer' => [
+                'headline' => 'Elite Performance Coaching. 🏋️‍♀️',
+                'bio' => 'Building resilient bodies and minds. 10+ years experience in professional athletics.',
+                'color' => '#f0932b', 'theme' => 'vibrant', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Start Your Transformation', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'Training Programs', 'url' => '#', 'type' => 'pricing', 'extra' => "Custom Workout\nMeal Plan\nWeekly Check-ins"],
+                    ['title' => 'Client Results', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=BeforeAfter1\nhttps://via.placeholder.com/400?text=BeforeAfter2"],
+                ]
+            ],
+            'interior_design' => [
+                'headline' => 'Elevating Your Living Space. 🛋️',
+                'bio' => 'Bespoke interior design for modern homes. Creating functional beauty.',
+                'color' => '#7ed6df', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'View Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=LivingRoom\nhttps://via.placeholder.com/400?text=Kitchen"],
+                    ['title' => 'Book a Consultation', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Design Packages', 'url' => '#', 'type' => 'pricing', 'extra' => "Room Refresh\nFull Home Design\nVirtual Consult"],
+                ]
+            ],
+            'yoga' => [
+                'headline' => 'Find Your Inner Balance. 🧘',
+                'bio' => 'Vinyasa and Yin yoga for all levels. Join me on the mat.',
+                'color' => '#be2edd', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Join My Next Class', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Watch Guided Flow', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Yoga For Beginners Guide', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                ]
+            ],
+            'coffee_shop' => [
+                'headline' => 'Crafting the Perfect Brew. ☕',
+                'bio' => 'Locally roasted beans, artisan pastries, and a warm community vibe.',
+                'color' => '#6d4c41', 'theme' => 'light', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Our Menu', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=LatteArt\nhttps://via.placeholder.com/400?text=Pastries"],
+                    ['title' => 'Order for Pickup', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Join Our Loyalty Club', 'url' => '#', 'type' => 'newsletter'],
+                ]
+            ],
+            'non_profit' => [
+                'headline' => 'Powering Change, Together. 🤝',
+                'bio' => 'Working towards a sustainable future through community-led initiatives.',
+                'color' => '#27ae60', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Support Our Cause', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Our Impact Report', 'url' => '#', 'type' => 'milestone', 'extra' => 'Donated:$500k+'],
+                    ['title' => 'Volunteer Opportunities', 'url' => '#', 'type' => 'lead_form'],
+                ]
+            ],
+            'travel' => [
+                'headline' => 'Exploring the World, One City at a Time. ✈️',
+                'bio' => 'Full-time traveler and content creator. Sharing the best hidden gems and travel tips.',
+                'color' => '#f9ca24', 'theme' => 'vibrant', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'My Travel Guides', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Latest Vlog: Bali', 'url' => 'https://youtube.com', 'type' => 'video'],
+                    ['title' => 'Where I Stayed (Gallery)', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Resort1\nhttps://via.placeholder.com/400?text=Resort2"],
+                    ['title' => 'Book Your Trip', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                ]
+            ],
+            'chef' => [
+                'headline' => 'Private Dining & Culinary Excellence. 👨‍🍳',
+                'bio' => 'Bespoke culinary experiences for your home. Seasonal, local, and delicious.',
+                'color' => '#eb4d4b', 'theme' => 'light', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Inquire for Private Event', 'url' => '#', 'type' => 'lead_form'],
+                    ['title' => 'My Signature Dishes', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Dish1\nhttps://via.placeholder.com/400?text=Dish2"],
+                    ['title' => 'Weekly Meal Prep', 'url' => '#', 'type' => 'pricing', 'extra' => "5 Meals/Week\n10 Meals/Week\nCustom Macro Plan"],
+                ]
+            ],
+            'makeup' => [
+                'headline' => 'Enhancing Your Natural Beauty. 💄',
+                'bio' => 'Professional makeup artist for weddings, events, and editorials.',
+                'color' => '#ff9ff3', 'theme' => 'light', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'Book Makeup Service', 'url' => '#', 'type' => 'calendar'],
+                    ['title' => 'Portfolio Gallery', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=Bridal\mohttps://via.placeholder.com/400?text=Editorial"],
+                    ['title' => 'My Holy Grail Products', 'url' => '#', 'type' => 'button', 'style' => 'rainbow'],
+                ]
+            ],
+            'web3' => [
+                'headline' => 'Building the Future of the Web. 🌐',
+                'bio' => 'NFT Collector, DeFi enthusiast, and Web3 developer. Exploring the decentralized world.',
+                'color' => '#4834d4', 'theme' => 'dark', 'shadow' => 'soft',
+                'links' => [
+                    ['title' => 'View My NFT Collection', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                    ['title' => 'Join the DAO Discord', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                    ['title' => 'Web3 Consulting', 'url' => '#', 'type' => 'pricing', 'extra' => "Project Audit\nStrategy Design\nDev Support"],
+                ]
+            ],
+            'gaming' => [
+                'headline' => 'Level Up Your Gameplay. 🎮',
+                'bio' => 'Pro gamer and streamer. Building an elite community of competitive players.',
+                'color' => '#6ab04c', 'theme' => 'dark', 'shadow' => 'hard',
+                'links' => [
+                    ['title' => 'Watch Me Live on Twitch', 'url' => '#', 'type' => 'button', 'style' => 'glow'],
+                    ['title' => 'My Gaming Setup', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/400?text=PC\nhttps://via.placeholder.com/400?text=Peripherals"],
+                    ['title' => 'Join the Squad (Discord)', 'url' => '#', 'type' => 'button'],
                 ]
             ]
         ];

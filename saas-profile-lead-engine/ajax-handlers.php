@@ -75,7 +75,7 @@ function saas_ajax_add_link() {
 
         // Extended meta for complex blocks
         $extra = isset($_POST['extra']) ? $_POST['extra'] : '';
-        if ($type === 'button' || $type === 'lead_form') {
+        if ($type === 'button') {
             update_post_meta($link_id, '_saas_link_desc', sanitize_textarea_field($extra));
         } elseif ($type === 'testimonial') {
             update_post_meta($link_id, '_saas_testimonial_text', sanitize_textarea_field($extra));

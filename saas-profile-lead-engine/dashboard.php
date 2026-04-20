@@ -1470,13 +1470,16 @@ class Saas_Dashboard {
                                 'realtor' => '🏡', 'politician' => '🏛️', 'tiktok' => '📱', 'consultant' => '🧠',
                                 'author' => '📘', 'lawyer' => '⚖️', 'doctor' => '🩺', 'influencer' => '📸', 'servant' => '🏛️', 'artist' => '🎨',
                                 'podcast' => '🎙️', 'course' => '🎓', 'shop' => '🛒', 'charity' => '❤️',
-                                'saas' => '💻', 'fitness' => '🏋️', 'medical' => '🏥', 'startup' => '🚀', 'wellness' => '🧘', 'photography' => '📸'
+                                'saas' => '💻', 'fitness' => '🏋️', 'medical' => '🏥', 'startup' => '🚀',
+                                'wellness' => '🌿', 'photography' => '📷', 'restaurant' => '🍴', 'event_planner' => '✨', 'therapist' => '🧠',
+                                'trainer' => '🏋️‍♀️', 'interior_design' => '🛋️', 'yoga' => '🧘', 'coffee_shop' => '☕', 'non_profit' => '🤝',
+                                'travel' => '✈️', 'chef' => '👨‍🍳', 'makeup' => '💄', 'web3' => '🌐', 'gaming' => '🎮'
                             ];
 
                             $categories = [
-                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course', 'saas', 'startup'],
-                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'shop', 'fitness', 'wellness', 'photography'],
-                                'Public & Professional' => ['servant', 'politician', 'doctor', 'speaker', 'luxury', 'charity', 'medical']
+                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course', 'saas', 'startup', 'interior_design', 'web3'],
+                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'shop', 'fitness', 'photography', 'trainer', 'yoga', 'coffee_shop', 'travel', 'chef', 'makeup', 'gaming'],
+                                'Public & Professional' => ['servant', 'politician', 'doctor', 'speaker', 'luxury', 'charity', 'medical', 'wellness', 'restaurant', 'event_planner', 'therapist', 'non_profit']
                             ];
 
                             foreach ($categories as $cat_title => $tpl_ids) : ?>
@@ -1487,10 +1490,10 @@ class Saas_Dashboard {
                                     if (!isset($all_tpls[$id])) continue;
                                     $icon = $tpl_icons[$id] ?? '✨';
                                 ?>
-                                    <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s; background:#fff;">
+                                    <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s; background:#fff; cursor:pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.05)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                                         <div style="font-size:2.5rem; margin-bottom:10px;"><?php echo $icon; ?></div>
                                         <h4 style="margin:0 0 15px; font-size: 1rem;"><?php echo esc_html(ucfirst(str_replace('_', ' ', $id))); ?></h4>
-                                        <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none;">Apply Template</button>
+                                        <button class="button apply-template-btn" data-template="<?php echo $id; ?>" style="width:100%; background:var(--primary); color:#fff; border:none; border-radius:8px; padding:10px; font-weight:bold; cursor:pointer; transition: opacity 0.2s;">Apply Template</button>
                                     </div>
                                 <?php endforeach; ?>
                             <?php endforeach; ?>
