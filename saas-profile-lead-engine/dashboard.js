@@ -367,7 +367,12 @@
                 glassy: { theme: 'light', bg_type: 'gradient', bg_value: 'linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%)', accent: '#4f46e5', shadow: 'soft', font: "'Inter', sans-serif" },
                 vibrant: { theme: 'vibrant', bg_type: 'gradient', bg_value: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', accent: '#ffffff', shadow: 'hard', font: "'Montserrat', sans-serif" },
                 minimal: { theme: 'light', bg_type: 'flat', bg_value: '#ffffff', accent: '#000000', shadow: 'none', font: "'Inter', sans-serif" },
-                luxury: { theme: 'luxury', bg_type: 'flat', bg_value: '#000000', accent: '#d4af37', shadow: 'soft', font: "'Playfair Display', serif" }
+                luxury: { theme: 'luxury', bg_type: 'flat', bg_value: '#000000', accent: '#d4af37', shadow: 'soft', font: "'Playfair Display', serif" },
+                cyberpunk: { theme: 'cyberpunk', bg_type: 'flat', bg_value: '#0d0221', accent: '#00ff41', shadow: 'hard', font: "'Courier New', Courier, monospace" },
+                ocean: { theme: 'ocean', bg_type: 'gradient', bg_value: 'linear-gradient(180deg, #2193b0 0%, #6dd5ed 100%)', accent: '#0077b6', shadow: 'soft', font: "'Inter', sans-serif" },
+                sunset: { theme: 'sunset', bg_type: 'gradient', bg_value: 'linear-gradient(135deg, #42275a 0%, #734b6d 100%)', accent: '#ff5e62', shadow: 'soft', font: "'Inter', sans-serif" },
+                forest: { theme: 'forest', bg_type: 'flat', bg_value: '#1b262c', accent: '#3282b8', shadow: 'soft', font: "'Inter', sans-serif" },
+                rose: { theme: 'rose', bg_type: 'flat', bg_value: '#fff5f5', accent: '#f687b3', shadow: 'soft', font: "'Inter', sans-serif" }
             };
 
             var data = presets[p];
@@ -542,7 +547,12 @@
                     'realtor': { headline: 'Bespoke Advisory for Elite Homeowners', bio: 'Specializing in off-market luxury listings. Member of the Top 0.1% Global Network.' },
                     'tiktok': { headline: 'Shop My Top Tech & Setup Finds 🛍️', bio: 'Sharing the best tech deals and home office aesthetic finds. Check my links for exclusive discounts!' },
                     'business': { headline: 'Operational Efficiency for Modern SaaS', bio: 'I help seed-stage startups optimize their unit economics and reduce churn.' },
-                    'luxury': { headline: 'Bespoke Private Advisory', bio: 'Curating exclusive opportunities for the discerning individual.' }
+                    'luxury': { headline: 'Bespoke Private Advisory', bio: 'Curating exclusive opportunities for the discerning individual.' },
+                    'podcast': { headline: 'Voice of the Modern Professional 🎙️', bio: 'In-depth conversations with the world\'s leading experts on technology, business, and lifestyle.' },
+                    'medical': { headline: 'Advanced Care for Your Health 🏥', bio: 'Providing world-class medical services and health advice to help you live your best life.' },
+                    'lawyer': { headline: 'Expert Legal Advice & Representation ⚖️', bio: 'Protecting your rights and interests with strategic legal solutions and dedicated advocacy.' },
+                    'photography': { headline: 'Capturing Your Most Precious Moments 📸', bio: 'Professional photography services for weddings, events, and commercial branding.' },
+                    'fitness': { headline: 'Transform Your Body, Transform Your Life 💪', bio: 'Personalized training and nutrition plans designed to help you reach your peak physical performance.' }
                 };
                 if (suggestions[niche]) {
                     $('#wizard-headline').val(suggestions[niche].headline);

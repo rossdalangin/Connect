@@ -484,6 +484,67 @@ function saas_ajax_apply_template() {
                 ['title' => 'Exclusive Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Asset+1\nhttps://via.placeholder.com/800x600?text=Asset+2"],
                 ['title' => 'Secure Documentation', 'url' => '#', 'type' => 'button', 'style' => 'outline', 'extra' => 'Password Protected']
             ]
+        ],
+        'podcast' => [
+            'headline' => 'Voice of the Modern Professional 🎙️',
+            'bio' => 'In-depth conversations with the world\'s leading experts on technology, business, and lifestyle.',
+            'color' => '#ff5e62',
+            'theme' => 'sunset',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Listen on Spotify', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['title' => 'Latest Episode', 'url' => '#', 'type' => 'video'],
+                ['title' => 'Become a Guest', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'Listener Feedback', 'url' => '#', 'type' => 'testimonial', 'extra' => 'The best podcast for professional growth.']
+            ]
+        ],
+        'medical' => [
+            'headline' => 'Advanced Care for Your Health 🏥',
+            'bio' => 'Providing world-class medical services and health advice to help you live your best life.',
+            'color' => '#0077b6',
+            'theme' => 'ocean',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'Book Appointment', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => "Consultation:$150\nGeneral Checkup\nSpecialist Referral"],
+                ['title' => 'Patient Reviews', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Excellent care and very professional staff.']
+            ]
+        ],
+        'lawyer' => [
+            'headline' => 'Expert Legal Advice & Representation ⚖️',
+            'bio' => 'Protecting your rights and interests with strategic legal solutions and dedicated advocacy.',
+            'color' => '#2d3436',
+            'theme' => 'dark',
+            'shadow' => 'hard',
+            'links' => [
+                ['title' => 'Free Consultation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['title' => 'Practice Areas', 'url' => '#', 'type' => 'faq', 'extra' => 'We specialize in Corporate, Family, and Criminal law.'],
+                ['title' => 'Client Success', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Highly recommended for any legal needs.']
+            ]
+        ],
+        'photography' => [
+            'headline' => 'Capturing Your Most Precious Moments 📸',
+            'bio' => 'Professional photography services for weddings, events, and commercial branding.',
+            'color' => '#f687b3',
+            'theme' => 'rose',
+            'shadow' => 'soft',
+            'links' => [
+                ['title' => 'View Portfolio', 'url' => '#', 'type' => 'image_gallery', 'extra' => "https://via.placeholder.com/800x600?text=Wedding\nhttps://via.placeholder.com/800x600?text=Commercial"],
+                ['title' => 'Book a Session', 'url' => '#', 'type' => 'lead_form'],
+                ['title' => 'Photography Packages', 'url' => '#', 'type' => 'pricing', 'extra' => "Starter:$500\n2 Hour Session\n20 Edited Photos"]
+            ]
+        ],
+        'fitness' => [
+            'headline' => 'Transform Your Body, Transform Your Life 💪',
+            'bio' => 'Personalized training and nutrition plans designed to help you reach your peak physical performance.',
+            'color' => '#00ff41',
+            'theme' => 'cyberpunk',
+            'shadow' => 'hard',
+            'links' => [
+                ['title' => 'Start Your Transformation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
+                ['title' => 'Training Progress', 'url' => '#', 'type' => 'milestone', 'extra' => 'Completed:75'],
+                ['title' => 'Success Story', 'url' => '#', 'type' => 'testimonial', 'extra' => 'I\'ve never felt better in my life!']
+            ]
         ]
     ];
 
