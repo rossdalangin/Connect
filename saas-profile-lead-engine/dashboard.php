@@ -426,6 +426,11 @@ class Saas_Dashboard {
                                     <option value="dark" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'dark'); ?>>Dark Mode (Modern & Bold)</option>
                                     <option value="vibrant" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'vibrant'); ?>>Vibrant (Creative & Energetic)</option>
                                     <option value="luxury" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'luxury'); ?>>Luxury (Elite & Premium)</option>
+                                    <option value="cyberpunk" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'cyberpunk'); ?>>Cyberpunk (High Tech)</option>
+                                    <option value="ocean" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'ocean'); ?>>Ocean (Calm & Blue)</option>
+                                    <option value="sunset" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'sunset'); ?>>Sunset (Warm & Moody)</option>
+                                    <option value="forest" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'forest'); ?>>Forest (Deep & Natural)</option>
+                                    <option value="rose" <?php selected(get_post_meta($profile_id, '_saas_profile_theme', true), 'rose'); ?>>Rose (Soft & Elegant)</option>
                                 </select>
                                 <p class="field-hint"><strong>Recommendation:</strong> Use "Luxury" if you sell high-ticket services ($2,000+).</p>
                             </div>
@@ -494,6 +499,11 @@ class Saas_Dashboard {
                                     <button type="button" class="preset-btn button" data-preset="vibrant">🌈 Vibrant</button>
                                     <button type="button" class="preset-btn button" data-preset="minimal">⚪ Minimal</button>
                                     <button type="button" class="preset-btn button" data-preset="luxury">⚜️ Luxury</button>
+                                    <button type="button" class="preset-btn button" data-preset="cyberpunk">👾 Cyber</button>
+                                    <button type="button" class="preset-btn button" data-preset="ocean">🌊 Ocean</button>
+                                    <button type="button" class="preset-btn button" data-preset="sunset">🌇 Sunset</button>
+                                    <button type="button" class="preset-btn button" data-preset="forest">🌲 Forest</button>
+                                    <button type="button" class="preset-btn button" data-preset="rose">🌹 Rose</button>
                                 </div>
                             </div>
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
@@ -1131,7 +1141,12 @@ class Saas_Dashboard {
                                 'elite_card' => ['name' => 'Digital Card Pro', 'icon' => '💳'],
                                 'tiktok' => ['name' => 'Viral Influencer', 'icon' => '📱'],
                                 'consultant' => ['name' => 'Strategy Expert', 'icon' => '🧠'],
-                                'luxury' => ['name' => 'Luxury Private', 'icon' => '⚜️']
+                                'luxury' => ['name' => 'Luxury Private', 'icon' => '⚜️'],
+                                'podcast' => ['name' => 'Podcast Host', 'icon' => '🎙️'],
+                                'medical' => ['name' => 'Medical Clinic', 'icon' => '🏥'],
+                                'lawyer' => ['name' => 'Legal Practice', 'icon' => '⚖️'],
+                                'photography' => ['name' => 'Photography', 'icon' => '📸'],
+                                'fitness' => ['name' => 'Elite Fitness', 'icon' => '💪']
                             ];
                             foreach($tpls as $id => $t) : ?>
                                 <div class="template-card" style="border:1px solid var(--border); padding:20px; border-radius:15px; text-align:center; transition:all 0.3s;">
@@ -1283,6 +1298,11 @@ class Saas_Dashboard {
                         <option value="business">🏢 Corporate Entity</option>
                         <option value="tiktok">📱 Social Influencer</option>
                         <option value="luxury">⚜️ Luxury Private Advisory</option>
+                        <option value="podcast">🎙️ Podcast Host</option>
+                        <option value="medical">🏥 Medical Professional</option>
+                        <option value="lawyer">⚖️ Legal Expert</option>
+                        <option value="photography">📸 Professional Photographer</option>
+                        <option value="fitness">💪 Fitness Trainer</option>
                     </select>
                     <button class="btn-primary next-step" style="width:100%;">Next Step</button>
                 </div>
@@ -1368,6 +1388,8 @@ class Saas_Dashboard {
                                     <option value="none">No Animation</option>
                                     <option value="fadeinup">Fade In Up</option>
                                     <option value="bouncein">Bounce In</option>
+                                    <option value="slideinleft">Slide In Left</option>
+                                    <option value="slideinright">Slide In Right</option>
                                 </select>
                             </div>
                         </div>

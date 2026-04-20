@@ -94,6 +94,53 @@ body.theme-luxury .saas-link-btn:hover {
     background: #d4af37;
     color: #000;
 }
+
+body.theme-cyberpunk {
+    --bg-color: #0d0221;
+    --primary-color: #00ff41;
+    --accent-color: #ff00ff;
+    --text-color: #00ff41;
+    --text-light: #008f11;
+    --glass-bg: rgba(13, 2, 33, 0.8);
+    --link-bg: #1a1a2e;
+    --font-family: 'Courier New', Courier, monospace;
+}
+body.theme-cyberpunk .saas-link-btn { border: 1px solid #ff00ff; color: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
+body.theme-cyberpunk .saas-link-btn:hover { background: #ff00ff; color: #0d0221; box-shadow: 0 0 30px #ff00ff; }
+
+body.theme-ocean {
+    background: linear-gradient(180deg, #2193b0 0%, #6dd5ed 100%) fixed;
+    --primary-color: #0077b6;
+    --text-color: #ffffff;
+    --text-light: rgba(255,255,255,0.8);
+    --glass-bg: rgba(255, 255, 255, 0.2);
+}
+
+body.theme-sunset {
+    background: linear-gradient(135deg, #42275a 0%, #734b6d 100%) fixed;
+    --primary-color: #ff5e62;
+    --text-color: #ffffff;
+    --text-light: rgba(255,255,255,0.7);
+    --glass-bg: rgba(0, 0, 0, 0.3);
+}
+
+body.theme-forest {
+    background: #1b262c fixed;
+    background-image: radial-gradient(circle at 50% 50%, #0f4c75 0%, #1b262c 100%);
+    --primary-color: #3282b8;
+    --text-color: #bbe1fa;
+    --text-light: #6497b1;
+    --glass-bg: rgba(27, 38, 44, 0.8);
+}
+
+body.theme-rose {
+    background: #fff5f5 fixed;
+    --primary-color: #f687b3;
+    --text-color: #702459;
+    --text-light: #b83280;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+}
+
 p { line-height: 1.6; color: var(--text-light); }
 
 body {
@@ -212,6 +259,10 @@ body {
     background: #fff;
 }
 
+.saas-link-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
 /* Modular Link Overrides */
 .saas-block.block-button .saas-link-btn:hover {
     background-color: #1e2329;
@@ -243,6 +294,8 @@ body {
 /* Block Animations */
 .animate-fadeinup { animation: fadeInUp 0.6s ease both; }
 .animate-bouncein { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) both; }
+.animate-slideinleft { animation: slideInLeft 0.6s ease both; }
+.animate-slideinright { animation: slideInRight 0.6s ease both; }
 
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -254,6 +307,16 @@ body {
     50% { opacity: 1; transform: scale(1.05); }
     70% { transform: scale(0.9); }
     100% { transform: scale(1); }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 .block-button.style-outline .saas-link-btn {
