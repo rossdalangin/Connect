@@ -594,9 +594,19 @@ class Saas_Dashboard {
                                 </div>
                             </div>
                             <div class="field <?php echo $is_pro ? '' : 'pro-gated-inline'; ?>">
-                                <label>Custom Domain / Subdomain (Pro)</label>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                    <label style="margin:0;">Custom Domain / Subdomain (Pro)</label>
+                                    <button type="button" id="saas-domain-guide-trigger" class="button" style="font-size:0.7rem; padding:4px 10px; background:var(--primary-soft); color:var(--primary); border:1px solid var(--primary);">❓ How to setup?</button>
+                                </div>
                                 <input type="text" name="custom_domain" value="<?php echo esc_attr(get_post_meta($profile_id, '_saas_custom_domain', true)); ?>" placeholder="profile.yourdomain.com">
-                                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:5px;">Point your CNAME record to our server to use your own domain.</p>
+                                <div style="background:rgba(0,0,0,0.02); border-left:3px solid var(--primary); padding:12px; border-radius:8px; margin-top:10px; font-size:0.8rem; line-height:1.5;">
+                                    <strong>🚀 Quick Start:</strong>
+                                    <ol style="margin:8px 0 0 18px; padding:0;">
+                                        <li>Login to your domain provider (e.g. GoDaddy, Namecheap).</li>
+                                        <li>Add a <strong>CNAME</strong> record pointing your subdomain (e.g. <em>bio</em>) to <code><?php echo parse_url(home_url(), PHP_URL_HOST); ?></code></li>
+                                        <li>Enter your full domain above and click Update Profile.</li>
+                                    </ol>
+                                </div>
                             </div>
 
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
@@ -1700,6 +1710,63 @@ class Saas_Dashboard {
                 <span class="close-modal">&times;</span>
                 <h3>Lead Details</h3>
                 <div id="lead-details-content" style="line-height:1.8;"></div>
+            </div>
+        </div>
+
+        <div id="saas-domain-modal" class="saas-modal">
+            <div class="saas-modal-content" style="max-width:700px;">
+                <span class="close-modal">&times;</span>
+                <div style="text-align:center; margin-bottom:30px;">
+                    <div style="font-size:3rem; margin-bottom:10px;">🌐</div>
+                    <h2 style="margin:0;">Custom Domain Setup Guide</h2>
+                    <p style="color:var(--text-muted);">Transform your profile into a professional branded asset.</p>
+                </div>
+
+                <div class="domain-guide-steps" style="display:grid; gap:25px;">
+                    <div style="display:flex; gap:20px; align-items:start;">
+                        <div style="width:40px; height:40px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">1</div>
+                        <div>
+                            <h4 style="margin:0 0 5px;">Choose Your Subdomain</h4>
+                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Decide what you want your link to be. Most elite creators use something like <code>link.yourdomain.com</code>, <code>bio.yourdomain.com</code>, or just <code>connect.yourdomain.com</code>.</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:20px; align-items:start;">
+                        <div style="width:40px; height:40px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">2</div>
+                        <div>
+                            <h4 style="margin:0 0 5px;">Configure DNS (CNAME)</h4>
+                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Login to where you bought your domain (GoDaddy, Namecheap, Cloudflare, etc.). Find the <strong>DNS Settings</strong> or <strong>Manage DNS</strong> section.</p>
+                            <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:10px; border:1px solid #e2e8f0; font-size:0.85rem;">
+                                <div style="margin-bottom:10px;"><strong>Type:</strong> CNAME</div>
+                                <div style="margin-bottom:10px;"><strong>Host/Name:</strong> (your subdomain, e.g. <code>bio</code>)</div>
+                                <div><strong>Value/Target:</strong> <code><?php echo parse_url(home_url(), PHP_URL_HOST); ?></code></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:20px; align-items:start;">
+                        <div style="width:40px; height:40px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">3</div>
+                        <div>
+                            <h4 style="margin:0 0 5px;">Link Your Profile</h4>
+                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Once you've saved the DNS record, come back here and enter your full domain (e.g. <code>bio.yourdomain.com</code>) into the box below and click <strong>Update Profile</strong>.</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:20px; align-items:start;">
+                        <div style="width:40px; height:40px; background:var(--secondary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:bold;">✓</div>
+                        <div>
+                            <h4 style="margin:0 0 5px;">Verification & SSL</h4>
+                            <p style="margin:0; font-size:0.9rem; color:var(--text-dark);">Our system will automatically detect the connection and provision a secure SSL certificate within 24-48 hours.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:40px; padding:20px; background:var(--primary-soft); border-radius:15px; border:1px solid var(--primary);">
+                    <p style="margin:0; font-size:0.85rem; font-weight:bold; color:var(--primary);">💡 Pro Tip: Need a naked domain (yourdomain.com)?</p>
+                    <p style="margin:5px 0 0; font-size:0.8rem; color:var(--text-dark);">Add an <strong>A Record</strong> pointing to our server IP: <code>(Contact Support for IP)</code> and set up a redirect from WWW to non-WWW.</p>
+                </div>
+
+                <button class="button" onclick="this.closest('.saas-modal').style.display='none'" style="width:100%; margin-top:30px; background:var(--primary); color:#fff; border:none; padding:15px;">Got it, thanks!</button>
             </div>
         </div>
 

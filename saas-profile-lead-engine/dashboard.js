@@ -465,6 +465,10 @@
         });
 
         // 7. Modal Control
+        $(document).on('click', '#saas-domain-guide-trigger', function() {
+            $('#saas-domain-modal').css('display', 'flex');
+        });
+
         $(document).on('click', '.close-modal, .saas-modal', function(e) {
             if (e.target !== this && !$(this).hasClass('close-modal')) return;
             $('.saas-modal').hide();
