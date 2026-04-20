@@ -715,6 +715,28 @@
             });
         });
 
+        // 12b. Template Search
+        $('#tpl-search').on('keyup', function() {
+            var val = $(this).val().toLowerCase();
+            $('#templates-grid .template-card').each(function() {
+                var text = $(this).find('h4').text().toLowerCase();
+                var id = $(this).find('.apply-template-btn').data('template').toLowerCase();
+                if (text.includes(val) || id.includes(val)) {
+                    $(this).show();
+                    $(this).closest('.templates-category-header').show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            // Hide empty category headers
+            $('.templates-category-header').each(function() {
+                var hasVisible = $(this).nextUntil('.templates-category-header', '.template-card:visible').length > 0;
+                if (!hasVisible) $(this).hide();
+                else $(this).show();
+            });
+        });
+
         // 13. Sortable Initializer
         if ($('#saas-links-list').length && typeof Sortable !== 'undefined') {
             new Sortable(document.getElementById('saas-links-list'), {

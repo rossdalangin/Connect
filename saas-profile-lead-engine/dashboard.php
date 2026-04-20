@@ -1459,12 +1459,15 @@ class Saas_Dashboard {
 
                 <div id="tab-templates" class="saas-tab-content">
                     <div class="dashboard-card">
-                        <h3>Template Library</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
+                            <h3 style="margin:0;">Template Library</h3>
+                            <input type="text" id="tpl-search" placeholder="🔍 Search niches (e.g. coach, gym)..." style="max-width:300px; background:#fff; border-radius:12px; border:1px solid var(--border); padding:10px 15px;">
+                        </div>
                         <p style="margin-bottom:20px; color:var(--text-muted);">Choose a high-converting template to jumpstart your profile. ⚠️ Warning: Applying a template will replace your current blocks.</p>
 
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                        <div id="templates-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
                             <?php
-                            $all_tpls = get_option('saas_templates') ?: [];
+                            $all_tpls = array_merge(saas_get_default_templates(), get_option('saas_templates') ?: []);
                             $tpl_icons = [
                                 'coach' => '🚀', 'business' => '🏢', 'luxury' => '⚜️', 'freelancer' => '🎨',
                                 'realtor' => '🏡', 'politician' => '🏛️', 'tiktok' => '📱', 'consultant' => '🧠',
@@ -1473,17 +1476,20 @@ class Saas_Dashboard {
                                 'saas' => '💻', 'fitness' => '🏋️', 'medical' => '🏥', 'startup' => '🚀',
                                 'wellness' => '🌿', 'photography' => '📷', 'restaurant' => '🍴', 'event_planner' => '✨', 'therapist' => '🧠',
                                 'trainer' => '🏋️‍♀️', 'interior_design' => '🛋️', 'yoga' => '🧘', 'coffee_shop' => '☕', 'non_profit' => '🤝',
-                                'travel' => '✈️', 'chef' => '👨‍🍳', 'makeup' => '💄', 'web3' => '🌐', 'gaming' => '🎮'
+                                'travel' => '✈️', 'chef' => '👨‍🍳', 'makeup' => '💄', 'web3' => '🌐', 'gaming' => '🎮',
+                                'personal' => '✨', 'mobile_app' => '📱', 'webinar' => '🎤', 'musician' => '🎵',
+                                'model' => '👗', 'dentist' => '🦷', 'gym' => '💪', 'architecture' => '📐'
                             ];
 
                             $categories = [
-                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course', 'saas', 'startup', 'interior_design', 'web3'],
-                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'shop', 'fitness', 'photography', 'trainer', 'yoga', 'coffee_shop', 'travel', 'chef', 'makeup', 'gaming'],
-                                'Public & Professional' => ['servant', 'politician', 'doctor', 'speaker', 'luxury', 'charity', 'medical', 'wellness', 'restaurant', 'event_planner', 'therapist', 'non_profit']
+                                'Business & Strategy' => ['coach', 'business', 'consultant', 'agency', 'lawyer', 'realtor', 'course', 'saas', 'startup', 'web3', 'architecture'],
+                                'Creative & Social'   => ['influencer', 'tiktok', 'artist', 'freelancer', 'author', 'podcast', 'musician', 'model', 'gaming', 'personal'],
+                                'Lifestyle & Wellness' => ['fitness', 'trainer', 'yoga', 'wellness', 'gym', 'chef', 'makeup', 'travel', 'photography', 'interior_design'],
+                                'Public & Professional' => ['servant', 'politician', 'doctor', 'dentist', 'therapist', 'speaker', 'luxury', 'charity', 'medical', 'non_profit', 'restaurant', 'coffee_shop', 'event_planner', 'mobile_app', 'webinar']
                             ];
 
                             foreach ($categories as $cat_title => $tpl_ids) : ?>
-                                <div style="grid-column: 1 / -1; margin-top: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                                <div class="templates-category-header" style="grid-column: 1 / -1; margin-top: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
                                     <h4 style="margin:0; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-size: 0.8rem;"><?php echo $cat_title; ?></h4>
                                 </div>
                                 <?php foreach($tpl_ids as $id) :

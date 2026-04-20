@@ -450,36 +450,10 @@ function saas_ajax_apply_template() {
         foreach ($old_blocks as $ob) wp_delete_post($ob->ID, true);
     }
 
-    // 2. Fetch Templates from DB
-    $sets = get_option('saas_templates');
-    if (!$sets) {
-        $sets = [
-            'coach' => [
-                'headline' => 'Helping you double your revenue in 90 days.',
-                'bio' => 'Certified high-performance coach. I work with CEOs and founders to scale their impact.',
-                'color' => '#6c5ce7',
-                'theme' => 'light',
-                'shadow' => 'soft',
-                'links' => [
-                    ['title' => '👉 Free Strategy Session', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                    ['title' => 'Watch Case Study', 'url' => 'https://youtube.com', 'type' => 'video'],
-                    ['title' => 'Client Success', 'url' => '#', 'type' => 'testimonial', 'extra' => 'Alex helped me double my revenue!'],
-                ]
-            ],
-            'business' => [
-                'headline' => 'Innovative Solutions for Global Enterprise.',
-                'bio' => 'Streamlining operations and driving growth through technology.',
-                'color' => '#0073aa',
-                'theme' => 'light',
-                'shadow' => 'hard',
-                'links' => [
-                    ['title' => 'Our Services', 'url' => '#', 'type' => 'pricing', 'extra' => "$99/hr\nFeature 1\nFeature 2"],
-                    ['title' => 'Book a Consultation', 'url' => '#', 'type' => 'button', 'style' => 'featured'],
-                    ['title' => 'FAQ', 'url' => '#', 'type' => 'faq', 'extra' => 'We operate 24/7 across the globe.']
-                ]
-            ]
-        ];
-    }
+    // 2. Fetch Templates from DB (Merge defaults with customizations)
+    $defaults = saas_get_default_templates();
+    $customs  = get_option('saas_templates') ?: [];
+    $sets     = array_merge($defaults, $customs);
 
     // Ensure template exists, fallback to business or coach if not
     if (!isset($sets[$template])) {
