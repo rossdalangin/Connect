@@ -316,7 +316,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    .profile-bottom-nav { display: flex; }
+    .profile-bottom-nav { display: inline-block; }
     .sticky-cta { bottom: 90px; }
     .social-proof-bubble { bottom: 160px; }
 }
